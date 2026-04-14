@@ -1,0 +1,33 @@
+// Inspired from https://oblique.bit.admin.ch/foundations/spacing/examples
+
+@use "@oblique/oblique/styles/scss/core/variables";
+
+.sw-padding {
+  &-xs {
+    padding: variables.$ob-spacing-xs;
+  }
+
+  &-sm {
+    padding: variables.$ob-spacing-sm;
+  }
+
+  &-md {
+    padding: variables.$ob-spacing-md;
+  }
+
+  &-default {
+    padding: variables.$ob-spacing-default;
+  }
+
+  &-lg {
+    padding: variables.$ob-spacing-lg;
+  }
+
+  &-xl {
+    padding: variables.$ob-spacing-xl;
+  }
+
+  &-xxl {
+    padding: variables.$ob-spacing-xxl;
+  }
+}

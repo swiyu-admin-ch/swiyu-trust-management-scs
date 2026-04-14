@@ -1,0 +1,161 @@
+server:
+  port: 8080
+  compression:
+    enabled: true
+
+spring:
+  application:
+    name: swiyu-trust-management-scs
+  http:
+    client:
+      connect-timeout: 10000 # 10 seconds
+      read-timeout: 30000 # 30 seconds
+      factory: jdk
+  mvc:
+    contentnegotiation:
+      default-content-type: application/json
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        default_schema: data
+        hbm2ddl.auto: validate
+  datasource:
+    management-db:
+      type: com.zaxxer.hikari.HikariDataSource
+      driver-class-name: org.postgresql.Driver
+      url: ${spring.datasource.url} # default config  is taken for management database
+      username: ${spring.datasource.username}
+      password: ${spring.datasource.password}
+    registry-db:
+      type: com.zaxxer.hikari.HikariDataSource
+      driver-class-name: org.postgresql.Driver
+      url: ${TRUST_REGISTRY_DB_URL}
+      username: ${TRUST_REGISTRY_DB_USERNAME}
+      password: ${TRUST_REGISTRY_DB_PASSWORD}
+    hikari:
+      schema: ${spring.jpa.properties.hibernate.default_schema}
+  flyway:
+    enabled: true # paths are configured in *PersistenceConfig classes since we have multiple datasources
+  security:
+    oauth2:
+      client:
+        registration:
+          core-business-service:
+            provider: swiyu-keycloak-realm-ecosystem
+            client-id: ${spring.application.name}
+            client-secret: ${AUTH_CORE_BUSINESS_SERVICE_CLIENT_SECRET:}
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          swiyu-keycloak-realm-ecosystem:
+            issuer-uri: ${AUTH_SWIYU_KEYCLOAK_REALM_ECOSYSTEM_ISSUER_URI:}
+            jwk-set-uri: ${AUTH_SWIYU_KEYCLOAK_REALM_ECOSYSTEM_JWK_SET_URI:}
+jeap:
+  health:
+    metric:
+      contributor-metrics:
+        enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        log:
+          authentication-failure:
+            enabled: true
+          access-denied:
+            enabled: true
+            debug: true
+        resource-id: ${AUTH_RESOURCE_ID:BJ-swiyu-tms}
+        authorization-server:
+          issuer: ${AUTH_ISSUER_URI:}
+          jwk-set-uri: ${AUTH_JWK_SET_URI:}
+          claim-set-converter-name: eiamClaimSetConverter
+        # system-name: # DO NOT SET, as this would enable semantic roles, which are not compatible with AuthorizationServers/EIAM (see: https://confluence.bit.admin.ch/x/PxAaGg)
+  swagger:
+    status: open
+    # enable ant paths to also allow for yaml extraction of api-docs
+    antPathPatters:
+      - /swagger-ui.html
+      - /api-docs*/**
+      - /swagger-ui/**
+      - /webjars/swagger-ui/**
+
+  web:
+    headers:
+      content-security-policy: "
+        default-src 'self' localhost:* *.admin.ch data:; 
+        script-src 'self' 'unsafe-inline' *.admin.ch; style-src 'self' 'unsafe-inline';
+        frame-src 'self' localhost:* *.admin.ch;
+        frame-ancestors 'self' https://*.admin.ch;
+        "
+  monitor:
+    prometheus:
+      user: "${PROMETHEUS_USER}"
+      password: "{noop}${PROMETHEUS_PASSWORD}"
+
+  rest:
+    tracing:
+      uri-filter-pattern: .*/actuator/.*
+
+  messaging:
+    kafka:
+      systemName: swiyu-trust-business
+      serviceName: ${spring.application.name}
+      errorTopicName: ti-messageprocessing-failed
+      securityProtocol: SASL_SSL
+      username: swiyu-kafka-system-user
+      schemaRegistryUsername: producer
+
+springdoc:
+  swagger-ui:
+    oauth:
+      client-id: ${jeap.security.oauth2.resourceserver.resource-id}
+      scopes:
+        - openid
+    operations-sorter: alpha # sort methods within an API in swagger ui by paths
+    tags-sorter: alpha
+  default-produces-media-type: application/json
+  show-actuator: false
+
+database-migration: # see https://confluence.bit.admin.ch/display/JEAP/RHOS+PostgreSQL
+  expected-count-of-flyway-migrations: 2
+  startup-migrate-mode-enabled: false
+  init-container: ${IS_INIT_CONTAINER_EXECUTION} # is set by bit application helm chart if run in init container
+
+logging:
+  level:
+    ch.admin.bit.jeap: INFO
+    ch.admin.bj.swiyu: DEBUG
+    ch.admin.bit.jeap.log.RestRequestTracer: DEBUG
+
+issuer:
+  status-list-uri: ${ISSUER_STATUS_LIST_URI:} # only 1 for now until we have management service with overflow-handling
+  management-api-url: ${ISSUER_MANAGEMENT_URL:}
+  oid4vci-api-url: ${ISSUER_OID4VCI_URL:}
+  signing:
+    jwt-signing-key: ${JWT_SIGNING_KEY:}
+    jwt-signing-key-id: ${JWT_SIGNING_KEY_ID:}
+
+registry:
+  trust-registry-data-uri: ${TRUST_REGISTRY_DATA_URL:}
+  trust-registry-vc-schema-endpoint: ${TRUST_REGISTRY_VC_SCHEMA_ENDPOINT:/api/v1/vc-schema}
+
+core-business:
+  core-business-service-base-url: ${CORE_BUSINESS_SERVICE_BASE_URL:}
+
+http:
+  max-redirects: 5
+
+app:
+  frontend:
+    auth:
+      useSilentRefresh: true
+      issuer: ${jeap.security.oauth2.resourceserver.authorization-server.issuer:}
+      clientId: ${springdoc.swagger-ui.oauth.client-id}
+      scope: "openid profile"
+      response-type: code
+      require-https: true
+    environment: ${ENVIRONMENT:}
+  functionality:
+    automatic-approval-enabled: ${FUNCTIONALITY_AUTOMATIC_APPROVAL_ENABLED:}

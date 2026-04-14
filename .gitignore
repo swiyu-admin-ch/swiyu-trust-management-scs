@@ -1,0 +1,33 @@
+# Created by .ignore support plugin (hsz.mobi)
+target/
+**/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+*.iws
+*.iml
+*.ipr
+.idea/*
+!.idea/runConfigurations/
+
+# START MODULE object-storage
+### Localstack ###
+/docker/.localstack
+/docker/localstack_data
+# END MODULE object-storage
+
+*.versionsBackup
+/swiyu-trust-management-ui/src/app/api/generated/.gitignore
+/swiyu-trust-management-ui/src/app/api/generated/.openapi-generator-ignore
+/swiyu-trust-management-ui/src/app/api/generated/.openapi-generator/
+/swiyu-trust-management-ui/src/app/api/generated/git_push.sh
+/swiyu-trust-management-ui/src/app/api/generated/README.md

@@ -1,0 +1,19 @@
+#
+# This profile is for starting the application locally so it works with other SWIYU components when
+# they are started with the shared profile. E.g. that the trust-data-service is using the DB from the trust
+# management service
+#
+
+# no custom settings yet since, trust data service is using the database from local profile
+
+app:
+  frontend:
+    environment: "local-shared"
+#jeap:
+#  security:
+#    oauth2:
+#      resourceserver:
+#        # local mock server
+#        authorization-server:
+#          issuer: http://localhost:8480
+#          jwk-set-uri: http://localhost:8480/.well-known/jwks.json

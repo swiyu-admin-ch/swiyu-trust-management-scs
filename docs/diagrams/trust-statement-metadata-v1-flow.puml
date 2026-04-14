@@ -1,0 +1,55 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+title TS MetadataV1 issuance
+
+actor "Gov. Employee" as EMP
+database "Trust business service\n DB" as TDB
+entity "Trust business service" as TBS
+entity "Gov trust issuer" as ISS
+entity "Trust Registry (Data)" as REGD
+
+
+EMP -> TBS: Create TS Metadata V1\nData: DID, VALID_From, VALID_To, other TS data
+activate TBS
+    TBS <<-> TDB: Create TS
+    opt  if property auto_confirm is enabled
+        TBS <<-> TDB: Set TS status to IN_PROGRESS
+        TBS <<-> TDB: Get all TS with\n identifier = DID\nAND\n status != PREPARATION\nAND\n type=TSMetadataV1\nAND\n no overlapping validFrom/To
+        TBS -> TBS: Check that there is no TS with\n identifier = DID\nAND\nregistryStatus = ACTIVE\nAND\nissuerStatus = ISSUED\nAND\n type=TSMetadataV1\nAND\n no overlapping validFrom/To
+        alt if  no competing TS found
+            alt if TS has no issuerId set
+               TBS <<-> ISS: Create TS offer
+               activate ISS
+               TBS -> TDB: Save issuer offer id
+               note over ISS: We pull the VC as the \nTrust Business service has both\nthe issuer and holder role.
+               TBS <<-> ISS: Get VC
+               deactivate ISS
+               TBS -> TDB: Save VC on TS
+           end
+           alt if TS has no registryId set
+               TBS <<-> TBS: Write TS to registry
+               TBS -> TDB: Update TS with registry data
+           end
+
+           TBS <<-> ISS: Update TS issuer status data
+           TBS <<-> TBS: Update TS trust registry status data
+           TBS -> TBS: Evaluate TS status data
+           TBS -> TDB: set TS status either ACTIVE or ERROR
+        else if competing TS exists
+            TBS -> TDB: Set TS status to ERROR
+        end
+    end
+   TBS --> EMP: Return details of TS
+
+deactivate TBS
+
+
+legend right
+    TS = Trust Statement
+    VC = Verifiable Credential
+endlegend
+
+@enduml

@@ -1,0 +1,14 @@
+hr {
+  margin: 1.5rem 0;
+}
+
+section {
+  margin-top: 3rem;
+}
+
+.contact-list {
+  flex-wrap: wrap;
+  mat-card {
+    min-width: 400px;
+  }
+}

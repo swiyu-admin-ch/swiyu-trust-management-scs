@@ -1,0 +1,27 @@
+<mat-chip-set>
+  @switch (status()) {
+    @case (TrustOnboardingTaskStatus.Accepted) {
+      <mat-chip class="sw-status-badge state-accepted">{{
+        "app.trust-onboarding-task.task.state.ACCEPTED" | translate
+      }}</mat-chip>
+    }
+    @case (TrustOnboardingTaskStatus.Rejected) {
+      <mat-chip class="sw-status-badge state-rejected">{{
+        "app.trust-onboarding-task.task.state.REJECTED" | translate
+      }}</mat-chip>
+    }
+    @case (TrustOnboardingTaskStatus.Opened) {
+      <mat-chip class="sw-status-badge state-opened">{{
+        "app.trust-onboarding-task.task.state.OPENED" | translate
+      }}</mat-chip>
+    }
+    @case (TrustOnboardingTaskStatus.InformationRequested) {
+      <mat-chip class="sw-status-badge state-information-requested">{{
+        "app.trust-onboarding-task.task.state.INFORMATION_REQUESTED" | translate
+      }}</mat-chip>
+    }
+    @default {
+      <mat-chip disabled>{{ status() }}</mat-chip>
+    }
+  }
+</mat-chip-set>

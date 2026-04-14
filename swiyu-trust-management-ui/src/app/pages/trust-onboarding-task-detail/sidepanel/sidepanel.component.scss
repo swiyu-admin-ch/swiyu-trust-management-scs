@@ -1,0 +1,31 @@
+@use "@oblique/oblique/styles/scss/core/variables";
+
+.sidepanel {
+  display: flex;
+  padding: 16px;
+  flex-direction: column;
+  gap: 40px;
+  align-items: flex-end;
+}
+
+.sidepanel-container {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  gap: 12px;
+  align-items: stretch; /* changed from flex-start */
+  width: 100%;
+}
+
+.sidepanel-container > * {
+  width: 100%;
+}
+
+.declaration-error {
+  margin-top: 0.8em;
+  color: variables.$ob-error;
+}
+
+form {
+  width: 100%;
+}

@@ -1,0 +1,7 @@
+@use "@oblique/oblique/styles/scss/core/variables";
+@use "./sw-status-badge";
+@use "./sw-flex";
+@use "./sw-padding";
+@use "./sw-layout";
+
+// this file should contain only imports. Rules should be grouped by features and placed into the corresponding file

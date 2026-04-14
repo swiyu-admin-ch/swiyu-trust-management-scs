@@ -1,0 +1,125 @@
+<div class="ob-flex ob-top-right">
+  <form #form="ngForm" (ngSubmit)="submit(form)">
+    <div class="sidepanel">
+      <div class="sidepanel-container">
+        @if (panelData()?.action === TrustOnboardingTaskAction.Approve) {
+          <div>
+            <h6>{{ "app.trust-onboarding-task.sidepanel.message" | translate }}</h6>
+            <mat-form-field>
+              <mat-label>{{ "app.trust-onboarding-task.sidepanel.message.body" | translate }}</mat-label>
+              <textarea
+                matInput
+                name="partnerMessageBody"
+                [(ngModel)]="formData().partnerMessageBody"
+                placeholder="{{ 'app.trust-onboarding-task.sidepanel.message.body' | translate }}"
+                data-cy="approvedPartnerMsgBody"
+              ></textarea>
+              <mat-hint>{{ correspondenceLanguageKey() | translate }}</mat-hint>
+            </mat-form-field>
+          </div>
+        }
+        @if (panelData()?.action === TrustOnboardingTaskAction.Reject) {
+          <div>
+            <h6>{{ "app.trust-onboarding-task.sidepanel.message" | translate }}</h6>
+            <mat-form-field>
+              <mat-label>{{ "app.trust-onboarding-task.sidepanel.reject-reason" | translate }}</mat-label>
+              <mat-select
+                name="rejectReason"
+                required
+                [(ngModel)]="formData().rejectReason"
+                data-cy="selectRejectReason"
+              >
+                @for (reason of rejectReasons; track reason) {
+                  <mat-option [value]="reason">
+                    {{ "app.trust-onboarding-task.sidepanel.reject-reason.type." + reason | translate }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{ "app.trust-onboarding-task.sidepanel.message.reject.body" | translate }}</mat-label>
+              <textarea
+                matInput
+                name="parnterMessageBody"
+                [(ngModel)]="formData().partnerMessageBody"
+                placeholder="{{ 'app.trust-onboarding-task.sidepanel.message.reject.body' | translate }}"
+                data-cy="rejectMsgBody"
+              ></textarea>
+              <mat-hint>{{ correspondenceLanguageKey() | translate }}</mat-hint>
+            </mat-form-field>
+          </div>
+        }
+        @if (panelData()?.action === TrustOnboardingTaskAction.RequestMoreInformation) {
+          <div>
+            <h6>{{ "app.trust-onboarding-task.sidepanel.message" | translate }}</h6>
+            <mat-form-field>
+              <mat-label>{{ "app.trust-onboarding-task.sidepanel.reject-reason" | translate }}</mat-label>
+              <mat-select
+                name="declineReason"
+                required
+                [(ngModel)]="formData().declineReason"
+                data-cy="selectMoreInfoReason"
+              >
+                @for (reason of declineReasons; track reason) {
+                  <mat-option [value]="reason">
+                    {{ "app.trust-onboarding-task.sidepanel.decline-reason.type." + reason | translate }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{ "app.trust-onboarding-task.sidepanel.message.reject.body" | translate }}</mat-label>
+              <textarea
+                matInput
+                name="partnerMessageBody"
+                [(ngModel)]="formData().partnerMessageBody"
+                placeholder="{{ 'app.trust-onboarding-task.sidepanel.message.reject.body' | translate }}"
+                data-cy="moreInfoMsgBody"
+              ></textarea>
+              <mat-hint>{{ correspondenceLanguageKey() | translate }}</mat-hint>
+            </mat-form-field>
+          </div>
+        }
+        <div>
+          <h6>{{ "app.trust-onboarding-task.sidepanel.internal" | translate }}</h6>
+          <mat-form-field>
+            <mat-label>{{ "app.trust-onboarding-task.sidepanel.internal.body" | translate }}</mat-label>
+            <textarea
+              matInput
+              name="internalMsgBody"
+              [(ngModel)]="formData().internalMessageBody"
+              placeholder="{{ 'app.trust-onboarding-task.sidepanel.internal.body' | translate }}"
+              data-cy="internalMsgBody"
+            ></textarea>
+          </mat-form-field>
+        </div>
+        @if (declarationCheckVisible()) {
+          <div>
+            <h6>{{ "app.trust-onboarding-task.sidepanel.declaration.title" | translate }}</h6>
+            <mat-checkbox
+              #declarationAccepted="ngModel"
+              name="declarationAccepted"
+              (change)="declarationError.set(!formData().declarationAccepted)"
+              [(ngModel)]="formData().declarationAccepted"
+              data-cy="checkBoxVerificationOk"
+            >
+              <span>
+                {{ "app.trust-onboarding-task.sidepanel.declaration.description" | translate }}
+              </span>
+            </mat-checkbox>
+            @if (declarationError()) {
+              <div class="declaration-error">
+                {{ "app.trust-onboarding-task.sidepanel.declaration.error" | translate }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div>
+        <button mat-button obButton="primary" type="submit" data-cy="submitTaskResult">
+          {{ submitLabelKey() | translate }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

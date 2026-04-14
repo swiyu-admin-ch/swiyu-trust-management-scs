@@ -1,0 +1,70 @@
+@startuml
+
+class HistoryEntry {
+   details: String
+   trustStatementId: UUID
+   id: UUID
+   auditMetadata: AuditMetadata
+   severity: HistoryEntrySeverity
+}
+enum HistoryEntrySeverity << enumeration >>
+class IdentityV1Details {
+   entityName: Map<Language, String>
+   registryIds: List<RegistryId>
+   isStateActor: Boolean
+}
+class IssuanceV1Details {
+   canIssue: String
+}
+class MetadataV1Details {
+   preferredLanguage: Language
+   logoUri: Map<Language, String>
+   orgName: Map<Language, String>
+}
+class TSMetadataV1 {
+   orgNameFrCh: String
+   orgNameDeCh: String
+   preferredLanguage: String
+   orgNameRmCh: String
+   logoUriEn: String
+   orgNameEn: String
+   logoUriDeCh: String
+   logoUriFrCh: String
+   logoUriRmCh: String
+   orgNameItCh: String
+   logoUriItCh: String
+}
+class TrustStatementDetails {
+   type: TrustStatementType
+}
+class TrustStatementPartnerLink {
+   type: TrustStatementType
+   validUntil: Instant
+   new: boolean
+   status: TrustStatementPartnerLinkStatus
+   id: UUID
+   metadataCredentialSupportedIds: List<String>
+   validFrom: Instant
+   details: TrustStatementDetails
+   trustRegistryEntryId: UUID
+   audit: AuditMetadata
+   vct: String
+   trustIssuerCredentialId: UUID
+   subject: String
+}
+enum TrustStatementPartnerLinkStatus << enumeration >>
+enum TrustStatementType << enumeration >> {
+   metadataCredentialSupportedIds: List<String>
+   vct: String
+}
+class VerificationV1Details {
+   canVerify: String
+}
+
+DefaultIssuerClient                 -[#008200,dashed]-^  IssuerClient                       
+IdentityV1Details                   -[#000082,plain]-^  TrustStatementDetails              
+IssuanceV1Details                   -[#000082,plain]-^  TrustStatementDetails              
+MetadataV1Details                   -[#000082,plain]-^  TrustStatementDetails              
+TSMetadataV1                        -[#000082,plain]-^  TrustStatementPartnerLink
+VerificationV1Details               -[#000082,plain]-^  TrustStatementDetails              
+@enduml

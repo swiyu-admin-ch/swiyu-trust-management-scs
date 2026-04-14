@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>token refresh</title>
+  </head>
+  <body>
+    <script>
+      (window.opener || window.parent).postMessage(location.hash || "#" + location.search, location.origin);
+    </script>
+    <p>this is silent-refresh.html</p>
+  </body>
+</html>

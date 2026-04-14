@@ -1,0 +1,53 @@
+@if (notFoundError()) {
+  <div class="sw-flex-center">
+    <ob-alert type="error">
+      {{ "app.trust-add-did-task.alert.resource-not-found" | translate: { taskId: taskId() } }}
+    </ob-alert>
+  </div>
+} @else if (task().id) {
+  <div class="sw-flex-space-between">
+    <h1>{{ task().partnerName | multiLanguageText }}</h1>
+  </div>
+  <div class="sw-flex-left">
+    <app-task-status-chip [status]="task().state"></app-task-status-chip>
+  </div>
+  <hr />
+  <div class="ob-flex">
+    <div>
+      <small>{{ "app.trust-add-did-task.fields.assignee.label" | translate }}</small
+      ><br />
+      <span>{{ task().assignee ? task().assignee : "-" }}</span>
+    </div>
+    <div></div>
+  </div>
+
+  <hr />
+  <section>
+    <div class="ob-flex">
+      <div>
+        <small>{{ "app.trust-add-did-task.fields.submittedAt.label" | translate }}</small
+        ><br />
+        <span>{{ task().submittedAt | date: "dd.MM.yyyy HH:mm" }}</span>
+      </div>
+      <div>
+        <small>{{ "app.trust-add-did-task.fields.dueAt.label" | translate }}</small
+        ><br />
+        <span>{{ task().dueAt | date: "dd.MM.yyyy HH:mm" }}</span>
+      </div>
+    </div>
+
+    <hr />
+    <div class="ob-flex">
+      <div>
+        <small>{{ "app.trust-add-did-task.fields.permissionDid.label" | translate }}</small
+        ><br />
+        <span>{{ task().permissionDid }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>{{ "app.trust-add-did-task.history" | translate }}</h2>
+    <app-domain-event-list [trustOnboardingTaskId]="taskId()"></app-domain-event-list>
+  </section>
+}

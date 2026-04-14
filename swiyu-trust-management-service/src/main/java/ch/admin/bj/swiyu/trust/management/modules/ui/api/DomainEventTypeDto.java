@@ -1,0 +1,18 @@
+package ch.admin.bj.swiyu.trust.management.modules.ui.api;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "DomainEventType", enumAsRef = true)
+public enum DomainEventTypeDto {
+    TRUST_ONBOARDING_SUBMISSION_RECEIVED,
+    TRUST_ONBOARDING_SUCCEEDED,
+    TRUST_ONBOARDING_REJECTED,
+    TRUST_ONBOARDING_MORE_INFORMATION_REQUESTED,
+    TRUST_ONBOARDING_TASK_NOTE_ADDED,
+    TRUST_ONBOARDING_TASK_ASSIGNED,
+    TRUST_ADD_DID_SUBMISSION_RECEIVED,
+    TRUST_ADD_DID_SUCCEEDED,
+    TRUST_ADD_DID_REJECTED,
+    NON_COMPLIANT_ACTOR_ADDED,
+    NON_COMPLIANT_ACTOR_REMOVED,
+}

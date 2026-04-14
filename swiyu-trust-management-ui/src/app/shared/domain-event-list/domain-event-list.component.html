@@ -1,0 +1,59 @@
+<div class="task-table-container mat-elevation-z8">
+  <table [dataSource]="dataSource" class="ob-table" mat-table>
+    <!-- Date Time Column -->
+    <ng-container matColumnDef="triggeredAt">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "domain-event-log.table.header.triggeredAt" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        {{ task.triggeredAt | date: "dd.MM.yyyy HH:mm" }}
+      </td>
+    </ng-container>
+
+    <!-- Triggered by Column -->
+    <ng-container matColumnDef="triggeredBy">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "domain-event-log.table.header.triggeredBy" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        {{ task.triggeredBy }}
+      </td>
+    </ng-container>
+
+    <!-- Event Column -->
+    <ng-container matColumnDef="eventType">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "domain-event-log.table.header.eventType" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        {{ task.eventType }}
+      </td>
+    </ng-container>
+
+    <!-- Note Column -->
+    <ng-container matColumnDef="partnerNote">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "domain-event-log.table.header.partnerNote" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        {{ task.partnerNote }}
+      </td>
+    </ng-container>
+
+    <!-- Note Column -->
+    <ng-container matColumnDef="internalNote">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "domain-event-log.table.header.internalNote" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        {{ task.internalNote }}
+      </td>
+    </ng-container>
+
+    <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+    <tr *matRowDef="let row; columns: displayedColumns" mat-row></tr>
+  </table>
+
+  <mat-paginator [length]="totalItems" [pageSizeOptions]="[10, 25, 50]" [pageSize]="10" showFirstLastButtons>
+  </mat-paginator>
+</div>

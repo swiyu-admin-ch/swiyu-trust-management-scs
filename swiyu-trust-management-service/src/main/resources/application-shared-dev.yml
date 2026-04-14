@@ -1,0 +1,51 @@
+#
+# This profile is for starting the application locally so it is connected to services that run on the
+# DEV stage.
+#
+jeap:
+  security:
+    oauth2:
+      resourceserver:
+        # dev mock server
+        authorization-server:
+          issuer: https://swiyu-oauth-mock-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch
+          jwk-set-uri: https://swiyu-oauth-mock-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch/.well-known/jwks.json
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          core-business-service:
+            provider: swiyu-keycloak-realm-ecosystem
+            client-id: ${spring.application.name}
+            # client secret can be viewed at https://auth-d.trust-infra.swiyu.admin.ch/realms/master/protocol/openid-connect/auth?client_id=security-admin-console&redirect_uri=https%3A%2F%2Fswiyu-oauth-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch%2Fadmin%2Fmaster%2Fconsole%2F%23%2Fbj-swiyu-ecosystem%2Fclients%2Fd5f40bae-72ce-4f95-a02e-610f43e4141a%2Fcredentials&state=bebcf242-cd41-4f19-82df-a78fb200e586&response_mode=query&response_type=code&scope=openid&nonce=d3bb94b9-c94f-4c58-9adc-fae38a48ae66&code_challenge=6kRlG1p2aRwibXXb6AUeTn8Jf9PSMdZx3cWPCMLcsRc&code_challenge_method=S256
+            client-secret: "TjNBfy7Bi3OgDNKihWMXDQwoWOa6voBJ"
+  docker:
+    compose:
+      enabled: true
+      file: docker-compose.yml
+issuer:
+  # only 1 for now until we have management service with overflow-handling
+  # Note: local setup is not yet implemented, this is just a dummy url so the app starts
+  status-list-uri: "https://status-reg-d.trust-infra.swiyu.admin.ch/api/v1/statuslist/0075c371-c9b4-4182-b07c-3007568afc4c.jwt"
+  management-api-url: "https://swiyu-gov-issuer-mgmt-service-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch"
+  oid4vci-api-url: "https://swiyu-gov-issuer-oid4vci-service-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch"
+  signing:
+    # keys work with the services configured in compose.yml when starting up via local profile
+    jwt-signing-key: |
+      -----BEGIN EC PRIVATE KEY-----
+      MHcCAQEEIE1MxJ+Xc2KgstKchZOCjSiCMLohqb6KbUHJIfd03KtWoAoGCCqGSM49
+      AwEHoUQDQgAEjHuOx66k57F3lC7JTLASpR5BosEs0PEPL2JiD0JfdIgtljkddgvN
+      nMjA6AP2hKm1kEFjgygEgnEMvmBddMPHUA==
+      -----END EC PRIVATE KEY-----
+    jwt-signing-key-id: "trust-business-1738008051047"
+
+app:
+  frontend:
+    auth:
+      require-https: true
+      use-silent-refresh: true
+
+core-business:
+  core-business-service-base-url: https://swiyu-core-business-service-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch

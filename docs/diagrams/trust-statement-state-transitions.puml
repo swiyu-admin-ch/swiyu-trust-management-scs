@@ -1,0 +1,22 @@
+@startuml
+'https://plantuml.com/state-diagram
+
+title TrustStatement status flow
+
+state CONFIRMED: TS is ready to be published by the system.\nIt cannot be altered anymore.
+state ACTIVE: TS is known to the world and valid
+state INACTIVE: TS was known to the world but no longer valid
+
+[*] --> CONFIRMED
+CONFIRMED --> ACTIVE: TS is issued  \nAND\n published to trust registry
+ACTIVE --> INACTIVE: TS is no longer valid (revoked, expired,...) \nOR\n TS is no longer ACTIVE in trust registry
+INACTIVE --> ACTIVE: TS is valid \nAND\n TS is ACTIVE in trust registry
+INACTIVE --> [*]
+
+
+
+legend right
+    TS = Trust Statement
+endlegend
+
+@enduml

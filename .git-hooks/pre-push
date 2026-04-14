@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+
+# ANSI escape codes for red and bold text
+RED_BOLD='\033[1;31m'
+NO_COLOR='\033[0m'
+
+# Run Maven lint check
+(
+  echo "Running Maven Spotless Check..."
+  if ! mvn spotless:check; then
+    mvn spotless:apply
+    echo -e "${RED_BOLD}Linting errors found by Spotless. Fixes are applied. Please commit them!${NO_COLOR}"
+    exit 1
+  fi
+)
+
+# Run npm lint check
+(
+  echo "Running npm lint..."
+  cd ./swiyu-trust-management-ui
+  if ! npm run lint; then
+    npm run format
+    echo -e "${RED_BOLD}Linting errors found by npm. Fixes are applied. Please commit them!${NO_COLOR}"
+    exit 2
+  fi
+)
