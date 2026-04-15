@@ -1,7 +1,20 @@
-
 # SWIYU Trust Managament SCS
 
-The service contains the business logic to do the onboardings to the trust registry.
+![github-banner](https://github.com/swiyu-admin-ch/swiyu-admin-ch.github.io/blob/main/assets/images/github-banner.jpg)
+
+
+<br>
+<br>
+
+**Please note: This information currently applies to internal government users and will be updated as soon as possible**
+<br>
+<br>
+
+
+
+
+
+The service contains the business logic to do the onboardings to the swiyu Trust Registry.
 
 ## Getting Started
 
