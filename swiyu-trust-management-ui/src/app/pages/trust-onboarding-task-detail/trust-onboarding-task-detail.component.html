@@ -1,0 +1,313 @@
+@if (notFoundError()) {
+  <div class="sw-flex-center">
+    <ob-alert type="error">
+      {{ "app.trust-onboarding-task.alert.resource-not-found" | translate: { taskId: taskId } }}
+    </ob-alert>
+  </div>
+} @else if (task().id) {
+  <div class="sw-flex-space-between">
+    <h1>{{ task().entityNameDefault }}</h1>
+    <button [matMenuTriggerFor]="menu" data-cy="btnTaskDetailMore" mat-icon-button obButton="secondary">
+      <mat-icon svgIcon="show-more_vertical"></mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button (click)="shareLink()" data-cy="btnTaskDetailMoreShare" mat-menu-item>
+        <mat-icon svgIcon="share"></mat-icon>
+        <span>{{ "app.trust-onboarding-task.actions.share-link" | translate }}</span>
+      </button>
+      @if (isActionAllowed(TrustOnboardingTaskAction.AddInternalNote)) {
+        <button (click)="sidepanelService.addNote(task())" data-cy="btnTaskDetailMoreAddNote" mat-menu-item>
+          <mat-icon svgIcon="file"></mat-icon>
+          <span>{{ "app.trust-onboarding-task.actions.add-internal-note" | translate }}</span>
+        </button>
+      }
+      @if (isActionAllowed(TrustOnboardingTaskAction.AssignSelf)) {
+        <button (click)="assignSelf(task())" data-cy="btnTaskDetailMoreAssignToMe" mat-menu-item>
+          <mat-icon svgIcon="person"></mat-icon>
+          <span>{{ "app.trust-onboarding-task.actions.assign-self" | translate }}</span>
+        </button>
+      }
+    </mat-menu>
+  </div>
+  <div class="sw-flex-left">
+    <app-task-status-chip [status]="task().state"></app-task-status-chip>
+    <button
+      (click)="sidepanelService.approve(task())"
+      [disabled]="!isActionAllowed(TrustOnboardingTaskAction.Approve)"
+      data-cy="btnTaskApprove"
+      mat-button
+      obButton="primary"
+      type="button"
+    >
+      <mat-icon svgIcon="checkmark" />
+      {{ "app.trust-onboarding-task.actions.approve" | translate }}
+    </button>
+    <button
+      (click)="sidepanelService.reject(task())"
+      [disabled]="!isActionAllowed(TrustOnboardingTaskAction.Reject)"
+      data-cy="btnTaskReject"
+      mat-button
+      obButton="secondary"
+      type="button"
+    >
+      <mat-icon svgIcon="xmark" />
+      {{ "app.trust-onboarding-task.actions.reject" | translate }}
+    </button>
+    <button
+      (click)="sidepanelService.requestMoreInformation(task())"
+      [disabled]="!isActionAllowed(TrustOnboardingTaskAction.RequestMoreInformation)"
+      data-cy="btnTaskAskMoreInfo"
+      mat-button
+      obButton="tertiary"
+      type="button"
+    >
+      <mat-icon svgIcon="message" />
+      {{ "app.trust-onboarding-task.actions.request-more-info" | translate }}
+    </button>
+  </div>
+  <hr />
+  <div class="ob-flex">
+    <div>
+      <small>{{ "app.trust-onboarding-task.actions.set-assignee.select.label" | translate }}</small
+      ><br />
+      <span>{{ task().assignee ? task().assignee : "-" }}</span>
+    </div>
+    <div></div>
+  </div>
+
+  <hr />
+  <section>
+    <div class="ob-flex">
+      <div>
+        <small>{{ "app.trust-onboarding-task.fields.submissionDat.label" | translate }}</small
+        ><br />
+        <span data-cy="submittedAt">{{ task().submittedAt | date: "dd.MM.yyyy HH:mm" }}</span>
+      </div>
+      <div>
+        <small>{{ "app.trust-onboarding-task.fields.dueAt.label" | translate }}</small
+        ><br />
+        <span data-cy="dueAt">{{ task().dueAt | date: "dd.MM.yyyy HH:mm" }}</span>
+      </div>
+    </div>
+
+    <hr />
+    <div class="ob-flex">
+      <div>
+        <small>{{ "app.trust-onboarding-task.fields.uid.label" | translate }}</small
+        ><br />
+        <span data-cy="uid">{{ task().uid || "-" }}</span>
+      </div>
+      <div>
+        <small>{{ "app.trust-onboarding-task.fields.partnerType.label" | translate }}</small
+        ><br />
+        <span data-cy="partnerType">{{
+          task().partnerType | concatI18nKey: "app.trust-onboarding-task.fields.partnerType.value" | translate
+        }}</span>
+      </div>
+    </div>
+    @if (task().partnerType === "BUSINESS") {
+      <div class="ob-flex" data-cy="inCommercialRegisterBlock">
+        <div>
+          <small>{{ "app.trust-onboarding-task.fields.isRegisteredInCommercialRegister.label" | translate }}</small
+          ><br />
+          <span>{{
+            task().isRegisteredInCommercialRegister
+              | concatI18nKey: "app.trust-onboarding-task.fields.isRegisteredInCommercialRegister.value"
+              | translate
+          }}</span>
+        </div>
+      </div>
+    }
+    <hr />
+    <div class="ob-flex">
+      <div>
+        <div class="sw-padding-sm">
+          <small>{{ "app.trust-onboarding-task.fields.name_default.label" | translate }}</small
+          ><br />
+          <span data-cy="partnerDefaultName">{{ task().entityNameDefault }}</span>
+        </div>
+        @for (nameLanguage of Language | keyvalue; track nameLanguage) {
+          <div class="sw-padding-sm">
+            <small>{{ "app.trust-onboarding-task.fields.name." + nameLanguage.value + ".label" | translate }}</small
+            ><br />
+            <span [attr.data-cy]="'partnerName' + nameLanguage.value">{{
+              task().entityName[nameLanguage.value] || "-"
+            }}</span>
+            <!--							<span>{{ task().entityName[nameLanguage.value] || "-" }}</span>-->
+          </div>
+        }
+      </div>
+      <div>
+        <div class="sw-padding-sm">
+          <small>{{ "app.trust-onboarding-task.fields.address.label" | translate }}</small
+          ><br />
+          <span data-cy="partnerAddress">{{ task().address || "-" }}</span>
+        </div>
+        <div class="sw-padding-sm">
+          <small>{{ "app.trust-onboarding-task.fields.zip_code_city.label" | translate }}</small
+          ><br />
+          <span data-cy="partnerZipCode">{{ task().zipCodeCity || "-" }}</span>
+        </div>
+        <div class="sw-padding-sm">
+          <small>{{ "app.trust-onboarding-task.fields.country.label" | translate }}</small
+          ><br />
+          <span data-cy="partnerCountry">{{ task().country || "-" }}</span>
+        </div>
+        <div class="sw-padding-sm">
+          <small>{{ "app.trust-onboarding-task.fields.email.label" | translate }}</small
+          ><br />
+          <span data-cy="partnerEmail">{{ task().email || "-" }}</span>
+        </div>
+        <div class="sw-padding-sm">
+          <small>{{ "app.trust-onboarding-task.fields.correspondance_language.label" | translate }}</small
+          ><br />
+          <span data-cy="partnerLanguage">{{
+            "app.trust-onboarding-task.fields.correspondance_language.value." + task().correspondenceLanguage
+              | translate
+          }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2>{{ "app.trust-onboarding-task.contact" | translate }}</h2>
+    <div class="ob-grid">
+      <div class="ob-full sw-flex-left contact-list">
+        @for (contact of task().contacts; track contact) {
+          <mat-card [attr.data-cy]="'contact' + contact.name.split(' ').join('')">
+            <mat-card-header>
+              <mat-card-title data-cy="contactName">{{ contact.name }}</mat-card-title>
+              <mat-card-subtitle data-cy="contactSubtitle"
+                >{{ "app.trust-onboarding-task.actions.contacts.type." + contact.type + ".value" | translate }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content data-cy="contactContent">
+              @if (contact.phone) {
+                {{ contact.phone }}<br />
+              }
+              {{ contact.email }}
+            </mat-card-content>
+            <mat-card-actions>
+              @if (contact.email) {
+                <a
+                  data-cy="btnContactEmail"
+                  href="email:{{ contact.email }}"
+                  mat-button
+                  obButton="secondary"
+                  type="button"
+                >
+                  {{ "app.trust-onboarding-task.actions.contacts.email.button" | translate }}
+                </a>
+              }
+              @if (contact.phone) {
+                <a
+                  data-cy="btnContactPhone"
+                  href="tel:{{ contact.phone | removeWhitespace }}"
+                  mat-button
+                  obButton="secondary"
+                  type="button"
+                >
+                  {{ "app.trust-onboarding-task.actions.contacts.call.button" | translate }}
+                </a>
+              }
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="sw-flex-space-between">
+      <h2>{{ "app.trust-onboarding-task.documents" | translate }}</h2>
+      <a data-cy="btnDownloadAll" mat-button obButton="secondary" type="button">
+        <mat-icon svgIcon="download"></mat-icon>
+        {{ "app.trust-onboarding-task.actions.documents.download-all" | translate }}
+      </a>
+    </div>
+
+    <table [dataSource]="documents" class="ob-table ob-table-plain" data-cy="tableDocument" mat-table>
+      <ng-container matColumnDef="name">
+        <th *matHeaderCellDef mat-header-cell scope="col">
+          {{ "app.trust-onboarding-task.documents.fields.name.column-title" | translate }}
+        </th>
+        <td *matCellDef="let document" mat-cell>{{ document.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="submittedAt">
+        <th *matHeaderCellDef mat-header-cell scope="col">
+          {{ "app.trust-onboarding-task.documents.fields.submittedAt.column-title" | translate }}
+        </th>
+        <td *matCellDef="let document" mat-cell>
+          {{ document.submittedAt | date: "dd.MM.yyyy HH:mm" }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="download-link">
+        <th *matHeaderCellDef mat-header-cell scope="col"></th>
+        <td *matCellDef="let document" mat-cell>
+          <a
+            (click)="downloadDocument(document)"
+            (keydown)="downloadDocument(document)"
+            data-cy="btnDownload"
+            mat-button
+            obButton="tertiary"
+            tabindex="0"
+            type="button"
+          >
+            <mat-icon svgIcon="download" />
+          </a>
+        </td>
+      </ng-container>
+
+      <tr *matHeaderRowDef="documentDisplayedColumns" mat-header-row></tr>
+      <tr *matRowDef="let row; columns: documentDisplayedColumns" mat-row></tr>
+    </table>
+    <mat-paginator
+      #documentsPaginator
+      (page)="reloadDocuments($event)"
+      [length]="documentsPageable().totalElements"
+      [pageIndex]="documentsPageable().number"
+      [pageSizeOptions]="[5, 10, 25]"
+      [pageSize]="documentsPageable().size"
+      [showFirstLastButtons]="true"
+    ></mat-paginator>
+  </section>
+
+  <section>
+    <h2>{{ "app.trust-onboarding-task.dids" | translate }}</h2>
+    <table [dataSource]="task().dids" class="ob-table ob-table-plain" data-cy="tableDid" mat-table>
+      <ng-container matColumnDef="did">
+        <th *matHeaderCellDef mat-header-cell scope="col">
+          {{ "app.trust-onboarding-task.dids.fields.did.column-title" | translate }}
+        </th>
+        <td *matCellDef="let did" mat-cell>{{ did.did }}</td>
+      </ng-container>
+      <ng-container matColumnDef="proofOfPossessionDate">
+        <th *matHeaderCellDef mat-header-cell scope="col">
+          {{ "app.trust-onboarding-task.dids.fields.proofOfPossessionDate.column-title" | translate }}
+        </th>
+        <td *matCellDef="let did" mat-cell>{{ did.proofOfPossessionDate | date: "dd.MM.yyyy HH:mm" }}</td>
+      </ng-container>
+
+      @let didDisplayedColumns = ["did", "proofOfPossessionDate"];
+      <tr *matHeaderRowDef="didDisplayedColumns" mat-header-row></tr>
+      <tr *matRowDef="let row; columns: didDisplayedColumns" [attr.data-cy]="'did-' + row.did" mat-row></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="sw-flex-space-between">
+      <h2>{{ "app.trust-onboarding-task.history" | translate }}</h2>
+      <button
+        (click)="sidepanelService.addNote(task())"
+        data-cy="btnAddNote"
+        mat-button
+        obButton="secondary"
+        type="button"
+      >
+        <mat-icon svgIcon="file"></mat-icon>
+        {{ "app.trust-onboarding-task.actions.add-internal-note" | translate }}
+      </button>
+    </div>
+    <app-domain-event-list [trustOnboardingTaskId]="taskId()"></app-domain-event-list>
+  </section>
+}

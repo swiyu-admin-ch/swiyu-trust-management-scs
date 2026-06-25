@@ -1,0 +1,3025 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Internal API",
+    "description": "IF-009 - Internal API",
+    "version": "3.25.0-SNAPSHOT"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8200",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "bearer-jwt": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Business Partner",
+      "description": "Business Partner API. Note: /api/v1/management/business-entities is deprecated and is replaced by /api/v1/internal/management/business-partners"
+    },
+    {
+      "name": "VcSchemaSubmission",
+      "description": "VcSchemaSubmission API"
+    },
+    {
+      "name": "Identifier",
+      "description": "Identifier API"
+    },
+    {
+      "name": "TrustOnboardingSubmission",
+      "description": "TrustOnboardingSubmission API"
+    },
+    {
+      "name": "VqpsSubmission Internal",
+      "description": "VqpsSubmission Internal API"
+    },
+    {
+      "name": "TrustAddDidsSubmission Internal",
+      "description": "TrustAddDidsSubmission Internal API"
+    },
+    {
+      "name": "Business Partner V2",
+      "description": "Business Partner API"
+    }
+  ],
+  "paths": {
+    "/api/v1/internal/trust/trust-onboarding-submission/{id}": {
+      "get": {
+        "tags": [
+          "TrustOnboardingSubmission"
+        ],
+        "summary": "Get specific TrustOnboardingSubmission by ID",
+        "operationId": "getTrustOnboardingSubmission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustOnboardingSubmission"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "TrustOnboardingSubmission"
+        ],
+        "summary": "Update",
+        "operationId": "updateTrustOnboardingSubmission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrustOnboardingSubmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Business validation failed. Possible error codes: DATA_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustOnboardingSubmission"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized. Possible error codes: RESOURCE_FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Submission not found. Possible error codes: RESOURCE_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/management/business-entities/{businessEntityId}": {
+      "put": {
+        "tags": [
+          "Business Partner"
+        ],
+        "summary": "Updates the business entity to the defined specifications.",
+        "operationId": "updateBusinessEntity",
+        "parameters": [
+          {
+            "name": "businessEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBusinessEntity"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Business validation failed. Possible error codes: DATA_INVALID, BUSINESS_DATA_INTEGRITY_VIOLATION.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized. Possible error codes: RESOURCE_FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Possible error codes: RESOURCE_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
+      "delete": {
+        "tags": [
+          "Business Partner"
+        ],
+        "summary": "Delete a new business entity controlled by the signed in user.",
+        "operationId": "deleteBusinessEntity",
+        "parameters": [
+          {
+            "name": "businessEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "No Authentication token provided"
+          },
+          "403": {
+            "description": "Nor Authorized to perform delete on specified entity"
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/internal/management/business-partners/{businessEntityId}": {
+      "put": {
+        "tags": [
+          "Business Partner"
+        ],
+        "summary": "Updates the business entity to the defined specifications.",
+        "operationId": "updateBusinessEntity_1",
+        "parameters": [
+          {
+            "name": "businessEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBusinessEntity"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Business validation failed. Possible error codes: DATA_INVALID, BUSINESS_DATA_INTEGRITY_VIOLATION.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized. Possible error codes: RESOURCE_FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Possible error codes: RESOURCE_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
+      "delete": {
+        "tags": [
+          "Business Partner"
+        ],
+        "summary": "Delete a new business entity controlled by the signed in user.",
+        "operationId": "deleteBusinessEntity_1",
+        "parameters": [
+          {
+            "name": "businessEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "No Authentication token provided"
+          },
+          "403": {
+            "description": "Nor Authorized to perform delete on specified entity"
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/internal/management/business-partners/": {
+      "get": {
+        "tags": [
+          "Business Partner V2"
+        ],
+        "summary": "Gets all entities associated with the user.",
+        "description": "Uses the bproles of the bearer token to identify owned roles",
+        "operationId": "getBusinessPartners",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelBusinessPartnerListItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authorization token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelBusinessPartnerListItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Business Partner V2"
+        ],
+        "summary": "Create a new business entity controlled by the signed in user. Only one business entity is allowed per user.",
+        "operationId": "createBusinessPartner",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePartner"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Business validation failed. Possible error codes: DATA_INVALID, BUSINESS_DATA_INTEGRITY_VIOLATION, OBJECT_COUNT_LIMIT_REACHED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPartner"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No Authentication token provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPartner"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized. Possible error codes: RESOURCE_FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/internal/trust/trust-onboarding-submission": {
+      "get": {
+        "tags": [
+          "TrustOnboardingSubmission"
+        ],
+        "summary": "Get all TrustOnboardingSubmissions for partner.",
+        "operationId": "getTrustOnboardings",
+        "parameters": [
+          {
+            "name": "businessPartnerIds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelTrustOnboardingSubmissionListItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "TrustOnboardingSubmission"
+        ],
+        "operationId": "createOnboardingSubmission",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrustOnboardingSubmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Business validation failed. Possible error codes: DATA_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustOnboardingSubmission"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized. Possible error codes: RESOURCE_FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/internal/trust/trust-onboarding-submission/{trustOnboardingSubmissionId}/document": {
+      "get": {
+        "tags": [
+          "TrustOnboardingSubmission"
+        ],
+        "summary": "List all documents for a TrustOnboardingSubmission",
+        "operationId": "listAllDocumentsForTrustOnboarding",
+        "parameters": [
+          {
+            "name": "trustOnboardingSubmissionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "8369160f-697c-4b12-80d3-91abff1a29ee"
+            },
+            "example": "8369160f-697c-4b12-80d3-91abff1a29ee"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelTrustOnboardingSubmissionDocumentListItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "TrustOnboardingSubmission"
+        ],
+        "summary": "Upload a document",
+        "operationId": "uploadTrustOnboardingSubmissionDocument",
+        "parameters": [
+          {
+            "name": "trustOnboardingSubmissionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "46ada91a-84ce-422b-b9b5-e0d2e3e8c46d"
+            },
+            "example": "46ada91a-84ce-422b-b9b5-e0d2e3e8c46d"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/TrustOnboardingSubmissionDocumentUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustOnboardingSubmissionDocumentListItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/internal/trust/trust-onboarding-submission/{id}/submit": {
+      "post": {
+        "tags": [
+          "TrustOnboardingSubmission"
+        ],
+        "operationId": "submit",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrustOnboardingSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Business validation failed. Possible error codes: DATA_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Not authorized. Possible error codes: RESOURCE_FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Submission not found. Possible error codes: RESOURCE_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Concurrent update detected. Possible error codes: DATA_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/management/business-entities/": {
+      "get": {
+        "tags": [
+          "Business Partner"
+        ],
+        "summary": "Gets all entities associated with the user.",
+        "description": "Uses the bproles of the bearer token to identify owned roles",
+        "operationId": "getBusinessEntities",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelBusinessEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authorization token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelBusinessEntity"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
+      "post": {
+        "tags": [
+          "Business Partner"
+        ],
+        "summary": "Create a new business entity controlled by the signed in user. Only one business entity is allowed per user.",
+        "operationId": "createBusinessEntity",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBusinessEntity"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Business validation failed. Possible error codes: DATA_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No Authentication token provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized. Possible error codes: RESOURCE_FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/internal/management/business-partners/": {
+      "get": {
+        "tags": [
+          "Business Partner"
+        ],
+        "summary": "Gets all entities associated with the user.",
+        "description": "Uses the bproles of the bearer token to identify owned roles",
+        "operationId": "getBusinessEntities_1",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelBusinessEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authorization token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelBusinessEntity"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
+      "post": {
+        "tags": [
+          "Business Partner"
+        ],
+        "summary": "Create a new business entity controlled by the signed in user. Only one business entity is allowed per user.",
+        "operationId": "createBusinessEntity_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBusinessEntity"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Business validation failed. Possible error codes: DATA_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No Authentication token provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized. Possible error codes: RESOURCE_FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/internal/identifier/{partnerId}/identifier/{identifierId}/description": {
+      "post": {
+        "tags": [
+          "Identifier"
+        ],
+        "summary": "Update description of a specific identifier entry of partner",
+        "operationId": "updateIdentifierDescription",
+        "parameters": [
+          {
+            "name": "partnerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "identifierId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentifierUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v2/internal/management/business-partners/{id}": {
+      "get": {
+        "tags": [
+          "Business Partner V2"
+        ],
+        "summary": "Get a business partner by ID that's associated with the user.",
+        "description": "Uses the bproles of the bearer token to identify owned roles",
+        "operationId": "getBusinessPartner",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPartner"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authorization token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPartner"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/internal/trust/vqps-submissions/{id}": {
+      "get": {
+        "tags": [
+          "VqpsSubmission Internal"
+        ],
+        "summary": "Get a VqpsSubmission with full submission data",
+        "operationId": "getVqpsSubmission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VqpsSubmissionInternal"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/internal/trust/vc-schema-submissions/{id}": {
+      "get": {
+        "tags": [
+          "VcSchemaSubmission"
+        ],
+        "operationId": "getVcSchemaSubmission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VcSchemaSubmission"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/internal/trust/trust-onboarding-submission/{trustOnboardingSubmissionId}/document/{documentId}": {
+      "get": {
+        "tags": [
+          "TrustOnboardingSubmission"
+        ],
+        "summary": "Get specific document for TrustOnboardingSubmission by ID",
+        "operationId": "getDocumentForTrustOnboarding",
+        "parameters": [
+          {
+            "name": "trustOnboardingSubmissionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "8369160f-697c-4b12-80d3-91abff1a29ee"
+            },
+            "example": "8369160f-697c-4b12-80d3-91abff1a29ee"
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustOnboardingSubmissionDocument"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/internal/submissions/trust-add-dids-submissions/{trustAddDidsSubmissionId}": {
+      "get": {
+        "tags": [
+          "TrustAddDidsSubmission Internal"
+        ],
+        "summary": "Get submission with proof of possession status",
+        "operationId": "getSubmission",
+        "parameters": [
+          {
+            "name": "trustAddDidsSubmissionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustAdditionalDidsSubmissionInternalDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/internal/management/business-partners/{id}": {
+      "get": {
+        "tags": [
+          "Business Partner"
+        ],
+        "operationId": "getBusinessPartner_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEntity"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/management/business-entities/{id}": {
+      "get": {
+        "tags": [
+          "Business Partner"
+        ],
+        "operationId": "getBusinessPartner_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEntity"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/internal/identifier/business-entities/{partnerId}/identifier/{identifierId}": {
+      "get": {
+        "tags": [
+          "Identifier"
+        ],
+        "summary": "Get all entries for the identifier registry.",
+        "operationId": "getIdentifierEntry",
+        "parameters": [
+          {
+            "name": "partnerId",
+            "in": "path",
+            "description": "The business partner id provided by the self service api.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "8432e1f3-8119-4fb9-a879-190ab2cb9deb"
+          },
+          {
+            "name": "identifierId",
+            "in": "path",
+            "description": "The identifier entry id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentifierEntry"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/internal/identifier/business-entities/{partnerId}/identifier/": {
+      "get": {
+        "tags": [
+          "Identifier"
+        ],
+        "summary": "Get all entries for the identifier registry.",
+        "operationId": "getAllIdentifierEntries",
+        "parameters": [
+          {
+            "name": "partnerId",
+            "in": "path",
+            "description": "The business partner id provided by the self service api.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "8432e1f3-8119-4fb9-a879-190ab2cb9deb"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad request. Possible error codes: DATA_INVALID, INVALID_PAGINATION.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelIdentifierEntry"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized. Possible error codes: RESOURCE_FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "$ref": "#/components/schemas/ApiErrorCode"
+          },
+          "message": {
+            "type": "string"
+          },
+          "additionalDetails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiErrorCode": {
+        "type": "string",
+        "description": "       | Value                                       | Description                                                                           |\n       | ------------------------------------------- | ------------------------------------------------------------------------------------- |\n       | data_invalid                                | Indicates that the given data was invalid in syntax or semantic.                      |\n       | data_invalid_virus_detected                 | Indicates that the given data contains a virus.                                       |\n       | resource_not_found                          | Indicates that the requested data was not found in the given context.                 |\n       | resource_forbidden                          | Indicates that the requested data is not available with the permissions used.         |\n       | action_forbidden                            | Indicates that the requested action could not be processed with the permissions used. |\n       | partner_is_not_governmental                 | Indicates that the partner is not governmental.                                       |\n       | business_data_integrity_violation           | Indicates that a business data integrity violation occurred.                          |\n       | crypto_integrity_validation_failed          | Indicates that the crypto integrity validation failed.                                |\n       | did_resolve_failed                          | Indicates that the DID resolution failed.                                             |\n       | document_not_found                          | Indicates that the document was not found.                                            |\n       | identifier_validation_failed                | Indicates that the identifier validation failed.                                      |\n       | invalid_pagination                          | Indicates that the pagination parameters are invalid.                                 |\n       | max_size_exceeded                           | Indicates that the maximum size was exceeded.                                         |\n       | object_count_limit_reached                  | Indicates that the object count limit was reached.                                    |\n       | status_list_validation_failed               | Indicates that the status list validation failed.                                     |\n       | trust_onboarding_document_validation_failed | Indicates that the trust onboarding document validation failed.                       |\n       | vc_schema_submission_not_found              | Indicates that the VC schema submission was not found.                                |\n       | vc_type_metadata_validation_failed          | Indicates that the VC type metadata validation failed.                                |\n",
+        "enum": [
+          "data_invalid",
+          "data_invalid_virus_detected",
+          "resource_not_found",
+          "resource_forbidden",
+          "action_forbidden",
+          "partner_is_not_governmental",
+          "business_data_integrity_violation",
+          "crypto_integrity_validation_failed",
+          "did_resolve_failed",
+          "document_not_found",
+          "identifier_validation_failed",
+          "invalid_pagination",
+          "max_size_exceeded",
+          "object_count_limit_reached",
+          "status_list_validation_failed",
+          "trust_onboarding_document_validation_failed",
+          "vc_schema_submission_not_found",
+          "vc_type_metadata_validation_failed",
+          "vqps_publication_failed",
+          "vqps_publication_wait_timeout"
+        ]
+      },
+      "VqpsPublicationFailureReason": {
+        "type": "string",
+        "enum": [
+          "UNKNOWN"
+        ]
+      },
+      "VqpsSubmissionStatus": {
+        "type": "string",
+        "enum": [
+          "ACCEPTED",
+          "PUBLICATION_SUCCEEDED",
+          "PUBLICATION_FAILED"
+        ]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string",
+            "minLength": 1
+          },
+          "postalCode": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[1-9]\\d{3}$"
+          },
+          "country": {
+            "type": "string",
+            "minLength": 1
+          },
+          "region": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "country",
+          "postalCode"
+        ]
+      },
+      "BusinessPartnerType": {
+        "type": "string",
+        "description": "| Value                        | Description                                                   |\n| ---------------------------- | ------------------------------------------------------------- |\n| GOVERNMENTAL_INSTITUTION     | Governmental institutions like JPD or ASTRA                   |\n| BUSINESS                     | Business entities and corporations                            |\n| INDIVIDUAL                   | Individual persons                                            |\n| UNKNOWN                      | Unknown type (legacy partners, will be classified)            |\n",
+        "enum": [
+          "GOVERNMENTAL_INSTITUTION",
+          "BUSINESS",
+          "INDIVIDUAL",
+          "UNKNOWN"
+        ]
+      },
+      "Contact": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 1
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        "required": [
+          "email",
+          "firstName",
+          "lastName",
+          "phone"
+        ]
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "EN",
+          "DE",
+          "FR",
+          "IT",
+          "RM"
+        ]
+      },
+      "MultiLanguageText": {
+        "type": "object",
+        "properties": {
+          "de": {
+            "type": "string"
+          },
+          "fr": {
+            "type": "string"
+          },
+          "it": {
+            "type": "string"
+          },
+          "en": {
+            "type": "string"
+          },
+          "rm": {
+            "type": "string"
+          }
+        }
+      },
+      "Signatory": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+          }
+        },
+        "required": [
+          "email",
+          "firstName",
+          "lastName",
+          "phone"
+        ]
+      },
+      "SigningRule": {
+        "type": "string",
+        "enum": [
+          "SINGLE_SIGNATURE",
+          "JOINT_SIGNATURE_TWO",
+          "JOINT_SIGNATURE_THREE"
+        ]
+      },
+      "TrustOnboardingSubmissionRequest": {
+        "type": "object",
+        "description": "A request to onboard a new trust entity.",
+        "properties": {
+          "partnerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the business partner.",
+            "example": "deadbeef-0000-dead-beef-000000000000"
+          },
+          "entityName": {
+            "$ref": "#/components/schemas/MultiLanguageText",
+            "description": "The official name of the entity.",
+            "example": {
+              "de": "Schweizerische Eidgenossenschaft",
+              "fr": "Confédération suisse",
+              "it": "Confederazione Svizzera",
+              "en": "Swiss Confederation",
+              "rm": "Confederaziun svizra"
+            }
+          },
+          "entityAddress": {
+            "$ref": "#/components/schemas/Address",
+            "description": "The official address of the entity.",
+            "example": {
+              "street": "Musterstrasse",
+              "houseNumber": "1",
+              "postalCode": "3000",
+              "city": "Bern",
+              "country": "CH"
+            }
+          },
+          "entityEmail": {
+            "type": "string",
+            "description": "The official email address of the entity.",
+            "example": "info@company.com"
+          },
+          "contactPerson": {
+            "$ref": "#/components/schemas/Contact",
+            "description": "The contact person for the entity.",
+            "example": {
+              "firstName": "John",
+              "lastName": "Doe",
+              "email": "john.doe@company.com",
+              "phone": "+41 12 345 67 89"
+            }
+          },
+          "signingRule": {
+            "$ref": "#/components/schemas/SigningRule",
+            "description": "The rule how it can be signed, null for INDIVIDUAL business partner type",
+            "example": "SINGLE_SIGNATURE"
+          },
+          "signatories": {
+            "type": "array",
+            "description": "The required signatories, null or empty for INDIVIDUAL business partner type",
+            "example": {
+              "firstName": "John",
+              "lastName": "Doe",
+              "email": "john.doe@company.com",
+              "phone": "+41 12 345 67 89"
+            },
+            "items": {
+              "$ref": "#/components/schemas/Signatory"
+            }
+          },
+          "registryIds": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "A map of registry identifiers for the entity. The key is the registry name (e.g., 'UID') and the value is the identifier.",
+            "example": {
+              "UID": "CHE-123.456.789"
+            }
+          },
+          "isRegisteredInCommercialRegister": {
+            "type": "boolean",
+            "description": "Whether or not the entity is registered in the commercial register",
+            "example": false
+          },
+          "correspondingLanguage": {
+            "$ref": "#/components/schemas/Language",
+            "description": "The preferred language for correspondence.",
+            "example": "DE"
+          },
+          "dids": {
+            "type": "array",
+            "description": "Selected DIDs to be onboarded initially",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requestedPartnerType": {
+            "$ref": "#/components/schemas/BusinessPartnerType",
+            "description": "The requested partner type. Can be different than the current partner type of the business partner."
+          }
+        }
+      },
+      "ProofOfPossession": {
+        "type": "object",
+        "properties": {
+          "did": {
+            "type": "string",
+            "minLength": 1
+          },
+          "nonce": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProofOfPossessionStatus"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "did",
+          "nonce",
+          "status"
+        ]
+      },
+      "ProofOfPossessionStatus": {
+        "type": "string",
+        "enum": [
+          "VALID",
+          "NOT_SUPPLIED"
+        ]
+      },
+      "TrustOnboardingSubmission": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partnerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityName": {
+            "$ref": "#/components/schemas/MultiLanguageText"
+          },
+          "entityEmail": {
+            "type": "string"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "contactPerson": {
+            "$ref": "#/components/schemas/Contact"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TrustOnboardingSubmissionStatus"
+          },
+          "proofOfPossessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProofOfPossession"
+            }
+          },
+          "businessPartnerType": {
+            "$ref": "#/components/schemas/BusinessPartnerType",
+            "description": "Type of business partner"
+          },
+          "signingRule": {
+            "$ref": "#/components/schemas/SigningRule",
+            "description": "The rule how it can be signed, null for INDIVIDUAL business partner type"
+          },
+          "signatories": {
+            "type": "array",
+            "description": "The required signatories, null or empty for INDIVIDUAL business partner type",
+            "items": {
+              "$ref": "#/components/schemas/Signatory"
+            }
+          },
+          "registryIds": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "isRegisteredInCommercialRegister": {
+            "type": "boolean",
+            "description": "Whether or not the entity is registered in the commercial register"
+          },
+          "rejectionReason": {
+            "type": "string"
+          },
+          "declineReason": {
+            "type": "string"
+          },
+          "partnerNote": {
+            "type": "string"
+          },
+          "correspondingLanguage": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "initiatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          }
+        },
+        "required": [
+          "address",
+          "contactPerson",
+          "createdAt",
+          "entityEmail",
+          "entityName",
+          "id",
+          "partnerId",
+          "proofOfPossessions",
+          "registryIds",
+          "status",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "TrustOnboardingSubmissionStatus": {
+        "type": "string",
+        "enum": [
+          "UNSUBMITTED",
+          "SUBMITTED",
+          "SUCCEEDED",
+          "REJECTED",
+          "INFORMATION_REQUESTED"
+        ]
+      },
+      "UpdateBusinessEntity": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique name of the entity to be created. Can not be changed once created. Allowed are letters, digits, spaces, and most special characters.",
+            "example": "John Doe",
+            "maxLength": 45,
+            "minLength": 0,
+            "pattern": "[^\\x00-\\x1F\\x7F]*"
+          },
+          "contactEmailAddress": {
+            "type": "string",
+            "description": "Email address how the controller of the entity can be reached. Ideally a shared mailbox.",
+            "example": "example@example.com",
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+          }
+        },
+        "required": [
+          "contactEmailAddress",
+          "name"
+        ]
+      },
+      "BusinessEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Key of the entity under which it is registered with ePortal",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Unique name of the entity",
+            "minLength": 1
+          },
+          "contactEmailAddress": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "$ref": "#/components/schemas/BusinessPartnerType",
+            "description": "Type of the entity"
+          },
+          "limitInfos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectLimits"
+            }
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Was there a successful trust onboarding"
+          },
+          "payedForTrustVerification": {
+            "type": "boolean",
+            "description": "User payed for trust onboarding"
+          },
+          "payedForDIDSlots": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of DID slots the user payed for already"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          }
+        },
+        "required": [
+          "contactEmailAddress",
+          "createdAt",
+          "id",
+          "name",
+          "updatedAt"
+        ]
+      },
+      "ObjectLimits": {
+        "type": "object",
+        "description": "This shows the limits which are enacted for a given object category.\n",
+        "properties": {
+          "relatesTo": {
+            "type": "string",
+            "enum": [
+              "trust_onboarding_submission_partner_document",
+              "identifier_entries",
+              "statuslist_entries"
+            ]
+          },
+          "currentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CreatePartner": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique name of the partner to be created. Can not be changed once created. Allowed are letters, digits, spaces, and most special characters.",
+            "example": "John Doe",
+            "maxLength": 45,
+            "minLength": 0,
+            "pattern": "[^\\x00-\\x1F\\x7F]*"
+          },
+          "partnerType": {
+            "$ref": "#/components/schemas/BusinessPartnerType",
+            "description": "Type of the business partner.",
+            "example": "GOVERNMENTAL_INSTITUTION"
+          },
+          "uid": {
+            "type": "string",
+            "description": "Swiss UID of the partner (e.g. CHE-123.456.789). Optional, validated when present.",
+            "example": "CHE-123.456.789",
+            "pattern": "^CHE(?:-?\\d{3}\\.\\d{3}\\.\\d{3}|\\d{9})$"
+          },
+          "addressStreet": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "addressZipCode": {
+            "type": "string",
+            "description": "Swiss postal code (4 digits, 1000–9999).",
+            "example": 3000,
+            "minLength": 1,
+            "pattern": "^[1-9]\\d{3}$"
+          },
+          "addressCity": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "addressCountry": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "addressRegion": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "contactPhone": {
+            "type": "string",
+            "description": "Phone number under which the controller of the partner can be reached.",
+            "example": "+41791234567",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "contactEmail": {
+            "type": "string",
+            "description": "Email address how the controller of the partner can be reached. Ideally a shared mailbox.",
+            "example": "example@example.com",
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+          }
+        },
+        "required": [
+          "addressCity",
+          "addressZipCode",
+          "contactEmail",
+          "contactPhone",
+          "name",
+          "partnerType"
+        ]
+      },
+      "BusinessPartner": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Key of the partner under which it is registered with ePortal",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Unique name of the partner",
+            "minLength": 1
+          },
+          "contactEmailAddress": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "$ref": "#/components/schemas/BusinessPartnerType",
+            "description": "Type of the partner"
+          },
+          "limitInfos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectLimits"
+            }
+          },
+          "payedForTrustVerification": {
+            "type": "boolean",
+            "description": "User paid for trust onboarding"
+          },
+          "payedForDIDSlots": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of DID slots the user paid for already"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "uid": {
+            "type": "string",
+            "description": "Enterprise identification number of the partner"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address",
+            "description": "Address of the partner"
+          },
+          "contactPhone": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trustVerificationStatus": {
+            "$ref": "#/components/schemas/BusinessPartnerTrustStatus",
+            "description": "Aggregated state of the trust process for this business partner"
+          },
+          "maxDateForTrustVerificationStatus": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time limit, if necessary, of the current aggregated state of the trust process"
+          }
+        },
+        "required": [
+          "contactEmailAddress",
+          "contactPhone",
+          "id",
+          "name",
+          "type"
+        ]
+      },
+      "BusinessPartnerTrustStatus": {
+        "type": "string",
+        "description": "Defines the current aggregated state of the trust process.\n    @startuml\n    [*] --> NOT_VERIFIED\n\n    NOT_VERIFIED -[#green]-> VERIFICATION_STARTED\n\n    VERIFICATION_STARTED -[#green]-> VERIFICATION_IN_PROGRESS\n\n    VERIFICATION_IN_PROGRESS -[#orange]-> INFORMATION_REQUESTED\n    VERIFICATION_IN_PROGRESS -[#green]-> VERIFIED\n    VERIFICATION_IN_PROGRESS -[#red]-> NOT_VERIFIED\n\n    INFORMATION_REQUESTED -[#green]-> VERIFIED\n    INFORMATION_REQUESTED -[#red]-> NOT_VERIFIED\n\n    VERIFIED -[#green]-> RE_VERIFICATION_STARTED\n\n    RE_VERIFICATION_STARTED -[#green]-> RE_VERIFICATION_IN_PROGRESS\n\n    RE_VERIFICATION_IN_PROGRESS -[#orange]-> INFORMATION_REQUESTED\n    RE_VERIFICATION_IN_PROGRESS -[#green]-> VERIFIED\n    RE_VERIFICATION_IN_PROGRESS -[#red]-> NOT_VERIFIED\n    @enduml\n",
+        "enum": [
+          "NOT_VERIFIED",
+          "VERIFICATION_STARTED",
+          "VERIFICATION_IN_PROGRESS",
+          "INFORMATION_REQUESTED",
+          "VERIFIED",
+          "RE_VERIFICATION_STARTED",
+          "RE_VERIFICATION_IN_PROGRESS"
+        ]
+      },
+      "TrustOnboardingSubmissionDocumentType": {
+        "type": "string",
+        "enum": [
+          "TRUST_ONBOARDING_OTHER",
+          "TRUST_ONBOARDING_DECLARATION_OF_INTENT"
+        ]
+      },
+      "TrustOnboardingSubmissionDocumentUploadRequest": {
+        "type": "object",
+        "description": "A request to upload a document to a trust registry submission",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TrustOnboardingSubmissionDocumentType"
+          },
+          "file": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "file",
+          "type"
+        ]
+      },
+      "PartnerDocumentType": {
+        "type": "string",
+        "enum": [
+          "TRUST_ONBOARDING_OTHER",
+          "TRUST_ONBOARDING_DECLARATION_OF_INTENT"
+        ]
+      },
+      "TrustOnboardingSubmissionDocumentListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "trustOnboardingSubmissionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the trust onboarding submission this document belongs to."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the file.",
+            "example": "example.json",
+            "minLength": 1
+          },
+          "mediaType": {
+            "type": "string",
+            "description": "Media type of file.",
+            "example": "application/json"
+          },
+          "type": {
+            "$ref": "#/components/schemas/PartnerDocumentType",
+            "description": "Type of file."
+          },
+          "owningBusinessPartner": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the business partner this file belongs to."
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time and date when this document was submitted."
+          }
+        },
+        "required": [
+          "createdAt",
+          "id",
+          "mediaType",
+          "name",
+          "owningBusinessPartner",
+          "submittedAt",
+          "type",
+          "updatedAt"
+        ]
+      },
+      "TrustOnboardingSubmitRequest": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "CreateBusinessEntity": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique name of the entity to be created. Can not be changed once created. Allowed are letters, digits, spaces, and most special characters.",
+            "example": "John Doe",
+            "maxLength": 45,
+            "minLength": 0,
+            "pattern": "[^\\x00-\\x1F\\x7F]*"
+          },
+          "contactEmailAddress": {
+            "type": "string",
+            "description": "Email address how the controller of the entity can be reached. Ideally a shared mailbox.",
+            "example": "example@example.com",
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+          },
+          "type": {
+            "$ref": "#/components/schemas/BusinessPartnerType",
+            "description": "Type of the business partner.",
+            "example": "GOVERNMENTAL_INSTITUTION"
+          }
+        },
+        "required": [
+          "contactEmailAddress",
+          "name",
+          "type"
+        ]
+      },
+      "IdentifierUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          }
+        }
+      },
+      "BusinessPartnerListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Key of the partner under which it is registered with ePortal",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Unique name of the partner",
+            "minLength": 1
+          },
+          "type": {
+            "$ref": "#/components/schemas/BusinessPartnerType",
+            "description": "Type of the partner"
+          },
+          "limitInfos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectLimits"
+            }
+          },
+          "payedForTrustVerification": {
+            "type": "boolean",
+            "description": "User paid for trust onboarding"
+          },
+          "payedForDIDSlots": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of DID slots the user paid for already"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "trustVerificationStatus": {
+            "$ref": "#/components/schemas/BusinessPartnerTrustStatus",
+            "description": "Aggregated state of the trust process for this business partner"
+          },
+          "maxDateForTrustVerificationStatus": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time limit, if necessary, of the current aggregated state of the trust process"
+          }
+        },
+        "required": [
+          "createdAt",
+          "id",
+          "name",
+          "type",
+          "updatedAt"
+        ]
+      },
+      "PageMetadata": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PagedModelBusinessPartnerListItem": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BusinessPartnerListItem"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "JsonNode": {},
+      "VqpsSubmissionInternal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partnerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "$ref": "#/components/schemas/VqpsSubmissionStatus"
+          },
+          "sub": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose_name": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "minProperties": 1
+          },
+          "purpose_description": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Description of the purpose"
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "query": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "failureReason": {
+            "$ref": "#/components/schemas/VqpsPublicationFailureReason"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "partnerId",
+          "purpose_description",
+          "purpose_name",
+          "query",
+          "scope",
+          "status",
+          "sub",
+          "version"
+        ]
+      },
+      "VcSchemaSubmission": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "minLength": 1
+          },
+          "partnerId": {
+            "type": "string",
+            "format": "uuid",
+            "minLength": 1
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "$ref": "#/components/schemas/VcSchemaSubmissionStatus"
+          },
+          "file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          }
+        },
+        "required": [
+          "createdAt",
+          "file",
+          "id",
+          "partnerId",
+          "status",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "VcSchemaSubmissionStatus": {
+        "type": "string",
+        "enum": [
+          "ACCEPTED",
+          "SUCCEEDED",
+          "FAILED"
+        ]
+      },
+      "PagedModelTrustOnboardingSubmissionListItem": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrustOnboardingSubmissionListItem"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "TrustOnboardingSubmissionListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partnerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TrustOnboardingSubmissionStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "createdAt",
+          "id",
+          "partnerId",
+          "status",
+          "updatedAt"
+        ]
+      },
+      "PagedModelTrustOnboardingSubmissionDocumentListItem": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrustOnboardingSubmissionDocumentListItem"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "TrustOnboardingSubmissionDocument": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "trustOnboardingSubmissionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the trust onboarding submission this document belongs to."
+          },
+          "downloadUrl": {
+            "type": "string",
+            "format": "url",
+            "description": "Download link for the file.",
+            "example": "https://example.admin.ch/example.json"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Version number of this document."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the file.",
+            "example": "example.json",
+            "minLength": 1
+          },
+          "mediaType": {
+            "type": "string",
+            "description": "Media type of file.",
+            "example": "application/json"
+          },
+          "type": {
+            "$ref": "#/components/schemas/PartnerDocumentType",
+            "description": "Type of file."
+          },
+          "owningBusinessPartner": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the business partner this file belongs to."
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time and date when this document was submitted."
+          }
+        },
+        "required": [
+          "downloadUrl",
+          "mediaType",
+          "name",
+          "owningBusinessPartner",
+          "submittedAt",
+          "type",
+          "version"
+        ]
+      },
+      "TrustAdditionalDidsSubmissionInternalDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNSUBMITTED",
+              "UNSUBMITTED_TIMEOUT",
+              "SUBMITTED",
+              "SUCCEEDED",
+              "REJECTED"
+            ]
+          },
+          "permissionDid": {
+            "$ref": "#/components/schemas/ProofOfPossession"
+          },
+          "didsToAdd": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProofOfPossession"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "didsToAdd",
+          "id",
+          "permissionDid",
+          "status"
+        ]
+      },
+      "PagedModelBusinessEntity": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BusinessEntity"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "IdentifierEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "18fa7c77-9dd1-4e20-a147-fb1bec146085"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-29T09:35:16.809924Z"
+          },
+          "did": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NOT_INITIALIZED",
+              "INITIALIZED",
+              "USER_DEACTIVATED",
+              "DEACTIVATED_BY_MIGRATION_BECAUSE_OF_UNSUPPORTED_FORMAT"
+            ]
+          },
+          "identifierRegistryUrl": {
+            "type": "string",
+            "example": "https://identifier-reg.trust-infra.swiyu.admin.ch/api/v1/did/18fa7c77-9dd1-4e20-a147-fb1bec146085"
+          }
+        },
+        "required": [
+          "createdAt",
+          "id",
+          "updatedAt"
+        ]
+      },
+      "PagedModelIdentifierEntry": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifierEntry"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearer-jwt": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "jwt"
+      },
+      "prometheus": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "OIDC": {
+        "type": "openIdConnect",
+        "description": "OAuth2-Authentication",
+        "openIdConnectUrl": "https://swiyu-oauth-mock-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch/.well-known/openid-configuration"
+      }
+    }
+  }
+}

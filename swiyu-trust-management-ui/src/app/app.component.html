@@ -1,0 +1,32 @@
+<ob-master-layout
+  [navigation]="[
+    { url: '/home', label: 'app.menu.home' | translate },
+    { url: '/tasks', label: 'app.menu.tasks' | translate },
+  ]"
+>
+  <ng-template #obHeaderControl>
+    @if (authService.isLoggedIn) {
+      <button (click)="authService.logout()" mat-button obButton="secondary">
+        <mat-icon svgIcon="logout"></mat-icon>
+        {{ "app.logout" | translate }}
+      </button>
+    } @else {
+      <button (click)="authService.login()" mat-button obButton="secondary">
+        <mat-icon svgIcon="login"></mat-icon>
+        {{ "app.login" | translate }}
+      </button>
+    }
+  </ng-template>
+  <ng-container obHeaderTitle>{{ "app.name" | translate }}</ng-container>
+  <ng-container obOffCanvasTitle>
+    <app-sidepanel-header />
+  </ng-container>
+  <ng-container obOffCanvasContent>
+    <app-sidepanel />
+  </ng-container>
+  <ng-container obFooterInfo>
+    <p>
+      &copy; 2025 Powered by jEAP and Oblique - Generated with jEAP Initializer. Version: {{ appConfigService.version }}
+    </p>
+  </ng-container>
+</ob-master-layout>

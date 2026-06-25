@@ -1,0 +1,192 @@
+<h1>{{ "app.menu.tasks" | translate }}</h1>
+<form (ngSubmit)="applyFilter()" [formGroup]="filterForm" class="ob-inline-form filter-form">
+  <mat-form-field>
+    <mat-label>{{ "task.table.filter.assignee" | translate }}</mat-label>
+    <input
+      [formControl]="filterForm.controls.assignee"
+      matInput
+      placeholder="{{ 'task.table.filter.assignee' | translate }}"
+    />
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>{{ "task.table.filter.state" | translate }}</mat-label>
+    <mat-select [formControl]="filterForm.controls.state" multiple>
+      @for (status of statuses; track status) {
+        <mat-option [value]="status">
+          {{ "app.trust-onboarding-task.task.state." + status | translate }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Submission Date Range -->
+  <mat-form-field>
+    <mat-label>{{ "task.table.filter.submittedAt" | translate }}</mat-label>
+    <mat-date-range-input [rangePicker]="submissionPicker">
+      <input
+        [formControl]="filterForm.controls.submittedAt.controls.start"
+        matStartDate
+        placeholder="{{ 'task.table.filter.start' | translate }}"
+      />
+      <input
+        [formControl]="filterForm.controls.submittedAt.controls.end"
+        matEndDate
+        placeholder="{{ 'task.table.filter.end' | translate }}"
+      />
+    </mat-date-range-input>
+    <mat-datepicker-toggle [for]="submissionPicker" matIconSuffix></mat-datepicker-toggle>
+    <mat-date-range-picker #submissionPicker></mat-date-range-picker>
+  </mat-form-field>
+
+  <!-- Due Date Range -->
+  <mat-form-field>
+    <mat-label>{{ "task.table.filter.dueAt" | translate }}</mat-label>
+    <mat-date-range-input [rangePicker]="duePicker">
+      <input
+        [formControl]="filterForm.controls.dueAt.controls.start"
+        matStartDate
+        placeholder="{{ 'task.table.filter.start' | translate }}"
+      />
+      <input
+        [formControl]="filterForm.controls.dueAt.controls.end"
+        matEndDate
+        placeholder="{{ 'task.table.filter.end' | translate }}"
+      />
+    </mat-date-range-input>
+    <mat-datepicker-toggle [for]="duePicker" matIconSuffix></mat-datepicker-toggle>
+    <mat-date-range-picker #duePicker></mat-date-range-picker>
+  </mat-form-field>
+
+  <button color="primary" mat-button obButton="primary" type="submit">
+    {{ "app.common.filter" | translate }}
+  </button>
+  <button (click)="resetFilter()" mat-button obButton="secondary" type="button">
+    {{ "app.common.reset" | translate }}
+  </button>
+</form>
+
+<div class="task-table-container mat-elevation-z8">
+  <table [dataSource]="dataSource" class="ob-table" mat-table>
+    <!-- Issuer/Verifier Column -->
+    <ng-container matColumnDef="issuerOrVerifier">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "task.table.header.issuerOrVerifier" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        <a [routerLink]="task.taskType === 'ADD_DID' ? ['/tasks', task.id, 'add-did'] : ['/tasks', task.id]">{{
+          task.partnerName | multiLanguageText
+        }}</a>
+      </td>
+    </ng-container>
+
+    <!-- Task Type Column -->
+    <ng-container matColumnDef="taskType">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "task.table.header.taskType" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        {{ "task.table.taskType." + task.taskType | translate }}
+      </td>
+    </ng-container>
+
+    <!-- Submission Date Column -->
+    <ng-container matColumnDef="submittedAt">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "task.table.header.submittedAt" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        {{ task.submittedAt | date: "dd.MM.yyyy" }}
+      </td>
+    </ng-container>
+
+    <!-- Due Date Column -->
+    <ng-container matColumnDef="dueAt">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "task.table.header.dueAt" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        {{ task.dueAt | date: "dd.MM.yyyy" }}
+      </td>
+    </ng-container>
+
+    <!-- State Column -->
+    <ng-container matColumnDef="state">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "task.table.header.state" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        <app-task-status-chip [status]="task.state"></app-task-status-chip>
+      </td>
+    </ng-container>
+
+    <!-- Assignee Column -->
+    <ng-container matColumnDef="assignee">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "task.table.header.assignee" | translate }}
+      </th>
+      <td *matCellDef="let task" mat-cell>
+        {{ task.assignee }}
+      </td>
+    </ng-container>
+
+    <!-- Action Column -->
+    <ng-container matColumnDef="actions">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "task.table.header.actions" | translate }}
+      </th>
+      <td *matCellDef="let task" class="action-cell" mat-cell>
+        <div class="actions">
+          <button [matMenuTriggerFor]="menu" mat-icon-button obButton="secondary">
+            <mat-icon svgIcon="show-more_vertical"></mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            @if (isActionAllowed(TrustOnboardingTaskAction.Approve, task)) {
+              <button mat-menu-item (click)="sidepanelService.approve(task)">
+                <mat-icon svgIcon="checkmark"></mat-icon>
+                <span>{{ "app.trust-onboarding-task.actions.approve" | translate }}</span>
+              </button>
+            }
+            @if (isActionAllowed(TrustOnboardingTaskAction.Reject, task)) {
+              <button mat-menu-item (click)="sidepanelService.reject(task)">
+                <mat-icon svgIcon="xmark"></mat-icon>
+                <span>{{ "app.trust-onboarding-task.actions.reject" | translate }}</span>
+              </button>
+            }
+            @if (isActionAllowed(TrustOnboardingTaskAction.RequestMoreInformation, task)) {
+              <button mat-menu-item (click)="sidepanelService.requestMoreInformation(task)">
+                <mat-icon svgIcon="message"></mat-icon>
+                <span>{{ "app.trust-onboarding-task.actions.requestMoreInformation" | translate }}</span>
+              </button>
+            }
+            @if (isActionAllowed(TrustOnboardingTaskAction.AddInternalNote, task)) {
+              <button mat-menu-item (click)="sidepanelService.addNote(task)">
+                <mat-icon svgIcon="file"></mat-icon>
+                <span>{{ "app.trust-onboarding-task.actions.add-internal-note" | translate }}</span>
+              </button>
+            }
+            @if (isActionAllowed(TrustOnboardingTaskAction.AssignSelf, task)) {
+              <button mat-menu-item (click)="assignSelf(task)">
+                <mat-icon svgIcon="person"></mat-icon>
+                <span>{{ "app.trust-onboarding-task.actions.assign-self" | translate }}</span>
+              </button>
+            }
+          </mat-menu>
+          <button
+            [routerLink]="task.taskType === 'ADD_DID' ? ['/tasks', task.id, 'add-did'] : ['/tasks', task.id]"
+            mat-icon-button
+            obButton="secondary"
+          >
+            <mat-icon svgIcon="eye"></mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+    <tr *matRowDef="let row; columns: displayedColumns" mat-row [attr.data-cy]="row.id"></tr>
+  </table>
+
+  <mat-paginator [length]="totalItems" [pageSizeOptions]="[10, 25, 50]" [pageSize]="10" showFirstLastButtons>
+  </mat-paginator>
+</div>

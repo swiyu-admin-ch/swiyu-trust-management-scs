@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.admin.bit.jeap</groupId>
+        <artifactId>jeap-spring-boot-parent</artifactId>
+        <!--
+            Attention: when ever you update this version, check whether we can remove a CVE-OVERRIDE
+            from the dependencyManagement section
+         -->
+        <version>33.11.0</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>ch.admin.bj.swiyu</groupId>
+    <artifactId>swiyu-trust-management-scs</artifactId>
+    <version>3.28.4-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <java-uuid-generator.version>5.2.0</java-uuid-generator.version>
+        <didresolver.version>2.6.0</didresolver.version>
+        <swiyu-jws-signature-service.version>1.4.0</swiyu-jws-signature-service.version>
+        <com-securosys-primus-jce.version>2.4.4</com-securosys-primus-jce.version>
+        <!-- Keep didresolver and adapter in sync https://github.com/swiyu-admin-ch/swiyu-generic-java-lib/blob/main/swiyu-did-resolver-adapter/pom.xml -->
+        <swiyu-did-resolver-adapter.version>1.4.0</swiyu-did-resolver-adapter.version>
+        <swiyu-did-resolver.version>2.8.2</swiyu-did-resolver.version>
+
+        <archunit-junit5.version>1.4.1</archunit-junit5.version>
+        <nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
+        <sd-jwt.version>1.7</sd-jwt.version>
+        <jackson-databind-nullable.version>0.2.9</jackson-databind-nullable.version>
+        <jackson-databind-jsr310.version>2.21.1</jackson-databind-jsr310.version>
+        <openapi-generator-maven-plugin.version>7.20.0</openapi-generator-maven-plugin.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <spotless-maven-plugin.version>3.2.1</spotless-maven-plugin.version>
+        <cleanthat.version>2.25</cleanthat.version>
+        <prettier.version>3.8.1</prettier.version>
+        <prettier-plugin-java.version>2.8.1</prettier-plugin-java.version>
+        <openfeign.querydsl.version>7.1</openfeign.querydsl.version>
+        <!-- Sonar Rules -->
+        <sonar.cpd.exclusions>
+            **/*Dto.java
+        </sonar.cpd.exclusions>
+        <sonar.coverage.exclusions>
+            <!--
+                Sonar exclusion: TrustOnboardingTaskService.java
+                Reason: This class currently contains only a mocked implementation.
+                The full implementation and corresponding unit tests are planned under ticket EID-5345.
+            -->
+            **/*Dto.java,**/*Config.java,**/*Mock*,**/*Controller.java,**/TrustOnboardingTaskService.java,
+            src/main/java/ch/admin/bj/swiyu/core/business/modules/dataimport/**/*
+        </sonar.coverage.exclusions>
+
+        <sonar.issue.ignore.multicriteria>ignore-secrets</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.ignore-secrets.ruleKey>squid:S6706
+        </sonar.issue.ignore.multicriteria.ignore-secrets.ruleKey>
+        <sonar.issue.ignore.multicriteria.ignore-secrets.resourceKey>**/application-*.yml
+        </sonar.issue.ignore.multicriteria.ignore-secrets.resourceKey>
+
+        <sonar-maven-plugin.version>5.5.0.6356</sonar-maven-plugin.version>
+        <java.version>25</java.version>
+        <maven.compiler.release>25</maven.compiler.release>
+    </properties>
+
+    <modules>
+        <module>swiyu-trust-management-ui</module>
+        <module>swiyu-trust-management-service</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- CVE-OVERRIDE start -->
+            <dependency>
+                <groupId>org.springframework.kafka</groupId>
+                <artifactId>spring-kafka</artifactId>
+                <version>3.3.16</version>
+            </dependency>
+            <!-- CVE-OVERRIDE end -->
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar-maven-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <upToDateChecking>
+                        <!--
+                            upToDateChecking creates a cache in the target directory to only reformat modified files — improves performance.
+                            Enabled by default since version 2.35.0, but explicitly set here so it can be temporarily disabled locally if merge issues occur.
+                        -->
+                        <enabled>true</enabled>
+                    </upToDateChecking>
+                    <java>
+                        <includes>
+                            <include>**/src/main/java/**/*.java</include>
+                            <include>**/src/test/java/**/*.java</include>
+                        </includes>
+                        <cleanthat>
+                            <version>${cleanthat.version}</version>
+                            <sourceJdk>${java.version}</sourceJdk>
+                            <mutators>
+                                <mutator>SafeAndConsensual</mutator>
+                                <mutator>SafeButNotConsensual</mutator>
+                            </mutators>
+                            <includeDraft>true</includeDraft>
+                            <excludedMutators>
+                                <excludedMutator>AvoidInlineConditionals</excludedMutator>
+                                <excludedMutator>ForEachAddToStreamCollectToCollection</excludedMutator>
+                                <excludedMutator>NullCheckToOptionalOfNullable</excludedMutator>
+                                <excludedMutator>GuavaMutators</excludedMutator>
+                                <excludedMutator>GuavaStringsIsNullOrEmpty</excludedMutator>
+                                <excludedMutator>LoopIntRangeToIntStreamForEach</excludedMutator>
+                                <excludedMutator>ForEachToIterableForEach</excludedMutator>
+                                <excludedMutator>StreamForEachNestingForLoopToFlatMap</excludedMutator>
+                                <excludedMutator>RemoveExplicitCallToSuper</excludedMutator>
+                            </excludedMutators>
+                        </cleanthat>
+                        <importOrder>
+                            <order>java,javax,com,de,lombok,net,org</order>
+                        </importOrder>
+                        <removeUnusedImports/>
+                        <prettier>
+                            <devDependencies>
+                                <prettier>${prettier.version}</prettier>
+                                <prettier-plugin-java>${prettier-plugin-java.version}</prettier-plugin-java>
+                            </devDependencies>
+                            <config>
+                                <tabWidth>4</tabWidth>
+                                <parser>java</parser>
+                                <printWidth>120</printWidth>
+                                <plugins>prettier-plugin-java</plugins>
+                            </config>
+                        </prettier>
+                    </java>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Needed for CI pipeline in order to reduce the memory consumption -->
+                        <spring.test.context.cache.maxSize>5</spring.test.context.cache.maxSize>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>bit-profile</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.rudikershaw.gitbuildhook</groupId>
+                        <artifactId>git-build-hook-maven-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <configuration>
+                            <gitConfig>
+                                <core.hooksPath>.git-hooks</core.hooksPath>
+                            </gitConfig>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <!-- Sets git config specified under configuration > gitConfig. -->
+                                    <goal>configure</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

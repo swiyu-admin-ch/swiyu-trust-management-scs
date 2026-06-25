@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS idx_nca_did_trgm_ci;
+DROP EXTENSION IF EXISTS pg_trgm;

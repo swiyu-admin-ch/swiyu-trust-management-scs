@@ -1,0 +1,553 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Issuer OID4VCI service",
+    "description": "Generic Issuer OID4VCI service",
+    "version": "1.1.2-20250313143408-df938fb"
+  },
+  "servers": [
+    {
+      "url": "https://issuer-agent-oid4vci-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Well-known endpoints",
+      "description": "OpenID .well-known endpoints for issuer configuration and credentials API"
+    },
+    {
+      "name": "Actuator",
+      "description": "Monitor and interact",
+      "externalDocs": {
+        "description": "Spring Boot Actuator Web API Documentation",
+        "url": "https://docs.spring.io/spring-boot/docs/current/actuator-api/html/"
+      }
+    },
+    {
+      "name": "Issuer OID4VCI",
+      "description": "OpenID for Verifiable Credential Issuance API"
+    },
+    {
+      "name": "Credential Metadata",
+      "description": "Metadata for Verifiable Credentials"
+    }
+  ],
+  "paths": {
+    "/api/v1/token": {
+      "post": {
+        "tags": [
+          "Issuer OID4VCI"
+        ],
+        "summary": "Collect Bearer token with pre-authorized code",
+        "operationId": "oauthAccessToken",
+        "parameters": [
+          {
+            "name": "grant_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "urn:ietf:params:oauth:grant-type:pre-authorized_code"
+            }
+          },
+          {
+            "name": "pre-authorized_code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthToken"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/credential": {
+      "post": {
+        "tags": [
+          "Issuer OID4VCI"
+        ],
+        "summary": "Collect credential associated with the bearer token with the requested credential properties.",
+        "operationId": "createCredential",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/jwt": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vct/{metadataKey}": {
+      "get": {
+        "tags": [
+          "Credential Metadata"
+        ],
+        "operationId": "getCredentialTypeMetadata",
+        "parameters": [
+          {
+            "name": "metadataKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oca/{ocaKey}": {
+      "get": {
+        "tags": [
+          "Credential Metadata"
+        ],
+        "operationId": "getOverlaysCaptureArchitecture",
+        "parameters": [
+          {
+            "name": "ocaKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/json-schema/{schemaKey}": {
+      "get": {
+        "tags": [
+          "Credential Metadata"
+        ],
+        "operationId": "getJsonSchema",
+        "parameters": [
+          {
+            "name": "schemaKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/schema+json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuator": {
+      "get": {
+        "tags": [
+          "Actuator"
+        ],
+        "summary": "Actuator root web endpoint",
+        "operationId": "links",
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.spring-boot.actuator.v3+json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/Link"
+                    }
+                  }
+                }
+              },
+              "application/vnd.spring-boot.actuator.v2+json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/Link"
+                    }
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/Link"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuator/prometheus": {
+      "get": {
+        "tags": [
+          "Actuator"
+        ],
+        "summary": "Actuator web endpoint 'prometheus'",
+        "operationId": "scrape",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CONTENT_TYPE_004",
+                "CONTENT_TYPE_OPENMETRICS_100",
+                "CONTENT_TYPE_PROTOBUF"
+              ]
+            }
+          },
+          {
+            "name": "includedNames",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain;version=0.0.4;charset=utf-8": {
+                "schema": {
+                  "type": "object"
+                }
+              },
+              "application/openmetrics-text;version=1.0.0;charset=utf-8": {
+                "schema": {
+                  "type": "object"
+                }
+              },
+              "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuator/info": {
+      "get": {
+        "tags": [
+          "Actuator"
+        ],
+        "summary": "Actuator web endpoint 'info'",
+        "operationId": "info",
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.spring-boot.actuator.v3+json": {
+                "schema": {
+                  "type": "object"
+                }
+              },
+              "application/vnd.spring-boot.actuator.v2+json": {
+                "schema": {
+                  "type": "object"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuator/health": {
+      "get": {
+        "tags": [
+          "Actuator"
+        ],
+        "summary": "Actuator web endpoint 'health'",
+        "operationId": "health",
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.spring-boot.actuator.v3+json": {
+                "schema": {
+                  "type": "object"
+                }
+              },
+              "application/vnd.spring-boot.actuator.v2+json": {
+                "schema": {
+                  "type": "object"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/openid-credential-issuer": {
+      "get": {
+        "tags": [
+          "Well-known endpoints"
+        ],
+        "summary": "Information about credentials which can be issued.",
+        "operationId": "getIssuerMetadata",
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/openid-configuration": {
+      "get": {
+        "tags": [
+          "Well-known endpoints"
+        ],
+        "summary": "OpenID Connect information required for issuing VCs",
+        "operationId": "getOpenIDConfiguration",
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenIdConfiguration"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OAuthToken": {
+        "required": [
+          "access_token"
+        ],
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "access_token": {
+            "type": "string"
+          },
+          "expires_in": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "c_nonce": {
+            "type": "string"
+          }
+        }
+      },
+      "CredentialRequest": {
+        "required": [
+          "format"
+        ],
+        "type": "object",
+        "properties": {
+          "format": {
+            "pattern": "^vc\\+sd-jwt$",
+            "type": "string"
+          },
+          "proof": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Proof for holder binding. Can be in key:did or cnf format."
+            },
+            "description": "Proof for holder binding. Can be in key:did or cnf format."
+          },
+          "credential_response_encryption": {
+            "$ref": "#/components/schemas/CredentialResponseEncryption"
+          }
+        }
+      },
+      "CredentialResponseEncryption": {
+        "required": [
+          "alg",
+          "enc",
+          "jwk"
+        ],
+        "type": "object",
+        "properties": {
+          "jwk": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "alg": {
+            "type": "string"
+          },
+          "enc": {
+            "type": "string"
+          }
+        }
+      },
+      "Link": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "templated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OpenIdConfiguration": {
+        "type": "object",
+        "properties": {
+          "issuer": {
+            "type": "string"
+          },
+          "token_endpoint": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

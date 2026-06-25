@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.21.0",
+    "version_hint": "see here for latest release: https://github.com/OpenAPITools/openapi-generator/releases",
+    "repository": {
+      "queryUrl": "https://repo.bit.admin.ch/#browse/search=group.raw%3D${group.id}%20AND%20name.raw%3D${artifact.id}",
+      "downloadUrl": "https://repo.bit.admin.ch/repository/maven-central/${groupId}/${artifactId}/${versionName}/${artifactId}-${versionName}.jar"
+    },
+    "generators": {
+      "angular-client-api": {
+        "generatorName": "typescript-angular",
+        "additionalProperties": {
+          "fileNaming": "kebab-case",
+          "serviceFileSuffix": "-api",
+          "serviceSuffix": "Api",
+          "ngVersion": "20.0.0",
+          "ngVersion_hint": "see here for supported versions: https://openapi-generator.tech/docs/generators/typescript-angular/",
+          "supportsES6": "true",
+          "useSingleRequestParameter": "true",
+          "removeEnumValuePrefix": "false"
+        },
+        "inputSpec": "http://localhost:8400/api-docs/UI_API",
+        "output": "src/app/api/generated"
+      }
+    }
+  }
+}

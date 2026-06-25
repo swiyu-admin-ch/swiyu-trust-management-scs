@@ -1,0 +1,34 @@
+# @see: IssuerHealthIT
+app:
+  issuer:
+    jwt:
+      trust-issuer:
+        type: software_key
+        software:
+          private-key: |
+            -----BEGIN EC PRIVATE KEY-----
+            MHcCAQEEIGGJOv2bIWBcFDu01+OJSNYrxJoMHSZnt6J5kIC3qWWxoAoGCCqGSM49
+            AwEHoUQDQgAE5ept9Lg+BblkOCI6ubEsLhdxYO58+4ucbWpSGWoT2NFxIbuM43Ax
+            7P/okIT6xCjsI3NL7IRYIGiDqBw8CxpqWg==
+            -----END EC PRIVATE KEY-----
+          public-key: |
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5ept9Lg+BblkOCI6ubEsLhdxYO58
+            +4ucbWpSGWoT2NFxIbuM43Ax7P/okIT6xCjsI3NL7IRYIGiDqBw8CxpqWg==
+            -----END PUBLIC KEY-----
+          did-with-key-fragment: "did:tdw:QmbBoyVLWetfXMKwsrtZcejKVKhMY5nVy138R7F9bQwxtw:localhost#key-01"
+      public-transparency-issuer:
+        type: software_key
+        software:
+          private-key: |
+            -----BEGIN EC PRIVATE KEY-----
+            MHcCAQEEICaDOw7ZmjN6omUWU8gRL/S57VlnO5K8ydL5T1xWanv/oAoGCCqGSM49
+            AwEHoUQDQgAE5eQkcIasHNoaArD3/0HWcZPPip/J9/Xvq8yCp9H2z4rIjS1Z7oUH
+            pkTEBkSo5If0Q5pNJu+ZwkdDYuklyyK/OQ==
+            -----END EC PRIVATE KEY-----
+          public-key: |
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5eQkcIasHNoaArD3/0HWcZPPip/J
+            9/Xvq8yCp9H2z4rIjS1Z7oUHpkTEBkSo5If0Q5pNJu+ZwkdDYuklyyK/OQ==
+            -----END PUBLIC KEY-----
+          did-with-key-fragment: "did:tdw:QmUQ8AZp7hYrm5XEA6XPUYT6Nr3jvRnbthbE83PLxuT7u7:localhost#key-01"

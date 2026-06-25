@@ -1,0 +1,25 @@
+.sw-status-badge.mat-mdc-chip {
+  display: inline-block;
+  min-width: 130px;
+  text-align: center;
+
+  &.state-opened {
+    background-color: #2f4356;
+    color: white;
+  }
+
+  &.state-information-requested {
+    background-color: #1e40af;
+    color: white;
+  }
+
+  &.state-rejected {
+    background-color: #99191e;
+    color: white;
+  }
+
+  &.state-accepted {
+    background-color: #047857;
+    color: white;
+  }
+}

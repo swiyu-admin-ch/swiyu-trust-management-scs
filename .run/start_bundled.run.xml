@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="start:bundled" type="SpringBootApplicationConfigurationType"
+                   factoryName="Spring Boot">
+        <option name="ACTIVE_PROFILES" value="test-data-injection,local"/>
+        <module name="swiyu-trust-management-service"/>
+        <option name="SPRING_BOOT_MAIN_CLASS" value="ch.admin.bj.swiyu.trust.management.Application"/>
+        <method v="2">
+            <option name="RunConfigurationTask" enabled="true" run_configuration_name="format:spotless"
+                    run_configuration_type="MavenRunConfiguration"/>
+            <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="clean"/>
+            <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml"
+                    goal="-Dmaven.test.skip=true -DskipTests=true generate-resources install"/>
+            <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml"
+                    goal="-Dmaven.test.skip=true -DskipTests=true  package"/>
+        </method>
+    </configuration>
+</component>

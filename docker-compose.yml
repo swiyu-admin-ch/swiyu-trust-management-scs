@@ -1,0 +1,25 @@
+services:
+
+  # Info: Kafka containers are in the swiyu-core-business-service docker-compose.yml
+  # these containers should only be started once, so they're not included here
+
+  trust-management-db:
+    image: repo.bit.admin.ch:8444/postgres:17
+    container_name: trust-management-db
+    ports:
+      - "5400:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=trust-management-db
+
+  trust-registry-db:
+    image: repo.bit.admin.ch:8444/postgres:17
+    container_name: trust-registry-db
+    hostname: localhost
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=trust-registry-db
+    ports:
+      - '5380:5432'

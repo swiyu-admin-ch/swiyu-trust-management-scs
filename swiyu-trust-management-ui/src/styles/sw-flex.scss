@@ -1,0 +1,36 @@
+.sw-flex {
+  display: flex;
+  flex-direction: row;
+
+  &-center {
+    @extend .sw-flex;
+    justify-content: center;
+  }
+
+  &-left {
+    @extend .sw-flex;
+    justify-content: left;
+  }
+
+  &-right {
+    @extend .sw-flex;
+    justify-content: right;
+  }
+
+  &-space-between {
+    @extend .sw-flex;
+    justify-content: space-between;
+  }
+
+  > * {
+    margin: 0.3em;
+  }
+
+  > :first-child {
+    margin-left: 0;
+  }
+
+  > :last-child {
+    margin-right: 0;
+  }
+}

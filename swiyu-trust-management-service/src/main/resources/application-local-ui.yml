@@ -1,0 +1,9 @@
+
+app:
+  frontend:
+    external-url: "http://localhost:8401"
+
+cors:
+  allowed-origins:
+    - 'http://127.0.0.1:8401'
+    - 'http://localhost:8401'

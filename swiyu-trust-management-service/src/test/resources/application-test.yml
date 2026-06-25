@@ -1,0 +1,102 @@
+spring:
+  flyway:
+    enabled: true
+    locations: []  # no afterMigrate script in test environment
+  autoconfigure:
+    exclude: ch.admin.bit.jeap.monitor.metrics.health.HealthMetricsAutoConfig # since it invokes external health endpoints which are available in local profile
+  jpa:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: none
+  security:
+    oauth2:
+      client:
+        registration:
+          core-business-service-internal:
+            provider: mock-oauth-dev
+            client-id: ${spring.application.name}-sys
+            client-secret: "{noop}secret"
+          status-registry-api:
+            provider: mock-oauth-dev
+            client-id: ${spring.application.name}-b2b-sys
+            client-secret: "{noop}secret"
+        provider:
+          swiyu-keycloak-realm-ecosystem:
+            issuer-uri: https://auth-d.trust-infra.swiyu.admin.ch/realms/bj-swiyu-ecosystem
+            jwk-set-uri: https://auth-d.trust-infra.swiyu.admin.ch/realms/bj-swiyu-ecosystem/protocol/openid-connect/certs
+          mock-oauth-dev:
+            issuer-uri: https://swiyu-oauth-mock-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch
+            jwk-set-uri: https://swiyu-oauth-mock-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch/.well-known/jwks.json
+          mock-oauth-local:
+            issuer-uri: http://localhost:8480
+            jwk-set-uri: http://localhost:8480/.well-known/jwks.json
+
+logging:
+  level:
+    ch.admin.bit.jeap: INFO
+    ch.admin.bj.swiyu: DEBUG
+    # for transaction/sql logs set to TRACE / DEBUG
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    org.springframework.transaction: WARN
+jeap:
+  security:
+    oauth2:
+      resourceserver:
+        authorization-server:
+          issuer: https://swiyu-oauth-mock-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch
+          jwk-set-uri: https://swiyu-oauth-mock-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch/.well-known/jwks.json
+
+  messaging:
+    kafka:
+      bootstrapServers: "http://localhost:9092"
+      schemaRegistryUrl: "http://localhost:7781"
+      username: user
+      password: user-secret
+      securityProtocol: SASL_PLAINTEXT
+      publishWithoutContractAllowed: true
+      consumeWithoutContractAllowed: true
+
+database-migration: # under local development we want to run the migrations on startup
+  startup-migrate-mode-enabled: true
+  init-container: false
+
+registry:
+  trust-registry-data-uri: "https://trust-reg.trust-infra.swiyu.admin.ch/"
+  trust-registry-vc-schema-endpoint: "/api/v1/vc-schema"
+
+issuer:
+  status-list-uri: "http://localhost:8290/api/v1/statuslist/not-yet-working-status-list.jwt"
+  management-api-url: "http://dummy-test-url.ch/"
+  oid4vci-api-url: "http://dummy-test-url.ch/"
+  signing:
+    jwt-signing-key: "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIDqMm9PvL4vpyFboAwaeViQsH30CkaDcVtRniZPezFxpoAoGCCqGSM49\nAwEHoUQDQgAEQgjeqGSdu+2jq8+n78+6fXk2Yh22lQKBYCnu5FWPvKtat3wFEsQX\nqNHYgPXBxWmOBw5l2PE/gUDUJqGJSc1LuQ==\n-----END EC PRIVATE KEY-----"
+    jwt-signing-key-id: "test-id"
+http:
+  max-redirects: 5
+
+app:
+  frontend:
+    environment: "test"
+    external-url: "http://test.trust.management.scs"
+  functionality:
+    automatic-approval-enabled: false
+  issuer:
+    trust-root:
+      business-partner-id: 00000000-0000-0000-0000-000000000000
+    jwt:
+      public-transparency-issuer:
+        type: temporary
+      trust-issuer:
+        type: temporary
+
+cors:
+  allowed-origins:
+    - '*'
+
+core-business:
+  core-business-service-internal-base-url: http://test.internal.core.business.service
+
+status-registry:
+  write-base-url: http://test.b2b.core.business.service

@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="start:backend:shared:dev" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="local,local-ui,shared,shared-dev" />
+    <module name="swiyu-trust-management-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="ch.admin.bj.swiyu.trust.management.Application" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="ch.admin.bj.swiyu.trust.management.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="start" run_configuration_type="js.build_tools.npm" />
+    </method>
+  </configuration>
+</component>
