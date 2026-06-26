@@ -16,7 +16,7 @@
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>3.28.4-SNAPSHOT</version>
+    <version>3.28.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -33,7 +33,7 @@
         <sd-jwt.version>1.7</sd-jwt.version>
         <jackson-databind-nullable.version>0.2.9</jackson-databind-nullable.version>
         <jackson-databind-jsr310.version>2.21.1</jackson-databind-jsr310.version>
-        <openapi-generator-maven-plugin.version>7.20.0</openapi-generator-maven-plugin.version>
+        <openapi-generator-maven-plugin.version>7.23.0</openapi-generator-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <spotless-maven-plugin.version>3.2.1</spotless-maven-plugin.version>
         <cleanthat.version>2.25</cleanthat.version>
