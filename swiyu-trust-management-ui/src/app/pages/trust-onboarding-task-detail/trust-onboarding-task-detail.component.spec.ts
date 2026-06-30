@@ -241,8 +241,8 @@ function getTestTask(id: string): TrustOnboardingTask {
     partnerType: PartnerType.GovernmentalInstitution,
     uid: undefined,
     correspondenceLanguage: Language.DeCh,
-    entityNameDefault: 'test de',
     entityName: {
+      default: 'test de',
       'de-CH': 'test de',
       'it-CH': 'test it',
       'rm-CH': 'test rm',

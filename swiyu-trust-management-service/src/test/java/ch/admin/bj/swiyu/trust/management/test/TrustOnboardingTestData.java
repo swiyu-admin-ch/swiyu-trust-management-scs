@@ -5,7 +5,6 @@ import ch.admin.bit.jeap.domainevent.avro.AvroDomainEventPublisher;
 import ch.admin.bit.jeap.domainevent.avro.AvroDomainEventType;
 import ch.admin.bj.swiyu.messagetype.ti.*;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.*;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.PartnerName;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTask;
 import java.time.Instant;
@@ -13,6 +12,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.experimental.UtilityClass;
 
@@ -21,11 +21,26 @@ public class TrustOnboardingTestData {
 
     public static final ZoneId ZONE_ID_ZURICH = ZoneId.of("Europe/Zurich");
 
+    private static final Map<String, String> TEST_PARTNER_NAME = Map.of(
+        "default",
+        "Test Partner",
+        "de-CH",
+        "Test Partner",
+        "fr-CH",
+        "Test Partner FR",
+        "it-CH",
+        "Test Partner IT",
+        "en",
+        "Test Partner EN",
+        "rm-CH",
+        "Test Partner RM"
+    );
+
     public static TrustOnboardingTask trustOnboardingTask() {
         var submittedAt = LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant();
         return new TrustOnboardingTask(
             UUID.randomUUID(),
-            new PartnerName("Test Partner", "Test Partner FR", "Test Partner IT", "Test Partner EN", "Test Partner RM"),
+            TEST_PARTNER_NAME,
             UUID.randomUUID(),
             submittedAt.plus(12, ChronoUnit.DAYS),
             submittedAt
@@ -35,7 +50,7 @@ public class TrustOnboardingTestData {
     public static TrustOnboardingTask trustOnboardingTask(Instant submittedAt) {
         return new TrustOnboardingTask(
             UUID.randomUUID(),
-            new PartnerName("Test Partner", "Test Partner FR", "Test Partner IT", "Test Partner EN", "Test Partner RM"),
+            TEST_PARTNER_NAME,
             UUID.randomUUID(),
             LocalDate.now().atStartOfDay(ZONE_ID_ZURICH).toInstant().plus(12, ChronoUnit.DAYS),
             submittedAt
@@ -59,19 +74,28 @@ public class TrustOnboardingTestData {
 
         return new TrustOnboardingSubmissionDto()
             .id(id)
+            .version(1L)
             .partnerId(UUID.randomUUID())
             .proofOfPossessions(List.of(pop1, pop2))
             .businessPartnerType(BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION)
             .submittedAt(LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant())
             .updatedAt(LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant())
             .createdAt(LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant())
-            .entityName(
-                new MultiLanguageTextDto()
-                    .de("Migros(de)")
-                    .fr("Migros(fr)")
-                    .it("Migros(it)")
-                    .en("Migros(en)")
-                    .rm("Migros(rm)")
+            .name(
+                Map.of(
+                    "default",
+                    "Migros",
+                    "de-CH",
+                    "Migros(de)",
+                    "fr-CH",
+                    "Migros(fr)",
+                    "it-CH",
+                    "Migros(it)",
+                    "en",
+                    "Migros(en)",
+                    "rm-CH",
+                    "Migros(rm)"
+                )
             );
     }
 
@@ -79,7 +103,7 @@ public class TrustOnboardingTestData {
         var submittedAt = LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant();
         return new TrustAddDidTask(
             UUID.randomUUID(),
-            new PartnerName("Test Partner", "Test Partner FR", "Test Partner IT", "Test Partner EN", "Test Partner RM"),
+            TEST_PARTNER_NAME,
             UUID.randomUUID(),
             "did:example:permission123",
             submittedAt.plus(30, ChronoUnit.DAYS),

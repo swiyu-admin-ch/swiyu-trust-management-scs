@@ -75,7 +75,7 @@
       </th>
       <td *matCellDef="let task" mat-cell>
         <a [routerLink]="task.taskType === 'ADD_DID' ? ['/tasks', task.id, 'add-did'] : ['/tasks', task.id]">{{
-          task.partnerName | multiLanguageText
+          task.partnerName | localize
         }}</a>
       </td>
     </ng-container>

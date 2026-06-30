@@ -7,15 +7,14 @@ import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData.tr
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.LanguageDto;
-import ch.admin.bj.swiyu.trust.client.core.business.internal.model.MultiLanguageTextDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.SignatoryDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.BusinessPartnerTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskContactTypeDto;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskDto;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -46,10 +45,9 @@ class TrustOnboardingTaskMapperTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.entityName().get(TrustOnboardingTaskDto.LanguageDto.DE_CH)).isEqualTo(
-            submission.getEntityName().getDe()
-        );
-        assertThat(result.entityNameDefault()).isEqualTo("EntityDE");
+        assertThat(result.entityName())
+            .containsEntry("de-CH", submission.getName().get("de-CH"))
+            .containsEntry("default", "EntityDE");
         assertThat(result.partnerType()).isEqualTo(BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION);
         assertThat(result.dids().getFirst().did()).isEqualTo("did:123");
         assertThat(result.submittedAt()).isEqualTo(task.getSubmittedAt());
@@ -74,19 +72,18 @@ class TrustOnboardingTaskMapperTest {
     }
 
     @Test
-    void toTrustOnboardingTaskDtoTest_entityNameFallback() {
-        // Given
+    void toTrustOnboardingTaskDtoTest_entityNamePassthrough() {
+        // Given - the CBS localized map is passed through verbatim, including its "default" key
         var allowedActions = Set.of(TrustOnboardingTaskActionDto.APPROVE);
-        var entityNames = new MultiLanguageTextDto();
-        entityNames.setDe("test name de");
-        var submission = trustOnboardingSubmission(entityNames, LanguageDto.FR);
+        var entityName = Map.of("default", "test name de", "de-CH", "test name de");
+        var submission = trustOnboardingSubmission(entityName, LanguageDto.FR);
         var task = trustOnboardingTask();
 
         // When
         var result = toTrustOnboardingTaskDto(allowedActions, task, submission);
 
         // Then
-        assertThat(result.entityNameDefault()).isEqualTo("test name de");
+        assertThat(result.entityName()).containsEntry("default", "test name de");
     }
 
     @Test

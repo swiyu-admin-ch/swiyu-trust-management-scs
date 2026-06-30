@@ -6,7 +6,7 @@
   </div>
 } @else if (task().id) {
   <div class="sw-flex-space-between">
-    <h1>{{ task().entityNameDefault }}</h1>
+    <h1>{{ task().entityName | localize }}</h1>
     <button [matMenuTriggerFor]="menu" data-cy="btnTaskDetailMore" mat-icon-button obButton="secondary">
       <mat-icon svgIcon="show-more_vertical"></mat-icon>
     </button>
@@ -124,7 +124,7 @@
         <div class="sw-padding-sm">
           <small>{{ "app.trust-onboarding-task.fields.name_default.label" | translate }}</small
           ><br />
-          <span data-cy="partnerDefaultName">{{ task().entityNameDefault }}</span>
+          <span data-cy="partnerDefaultName">{{ task().entityName?.[DEFAULT_LOCALIZED_TEXT_KEY] || "-" }}</span>
         </div>
         @for (nameLanguage of Language | keyvalue; track nameLanguage) {
           <div class="sw-padding-sm">

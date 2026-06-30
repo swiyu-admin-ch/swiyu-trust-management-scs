@@ -22,7 +22,7 @@ import {
   TrustOnboardingTaskListItem,
   TrustOnboardingTaskStatus
 } from '../../api/generated';
-import {MultiLanguageTextPipe} from '../../core/i18n/multi-language-text.pipe';
+import {LocalizePipe} from '../../core/i18n/localized-text.pipe';
 import {TaskStatusChipComponent} from '../../shared/task-status-chip/task-status-chip.component';
 import {SidepanelService} from '../trust-onboarding-task-detail/sidepanel/sidepanel.service';
 
@@ -59,7 +59,7 @@ interface FilterFormModel {
     ObDatepickerModule,
     MatMenuModule,
     MatIconModule,
-    MultiLanguageTextPipe,
+    LocalizePipe,
     TaskStatusChipComponent,
     RouterLink
   ]

@@ -21,7 +21,7 @@ public class TrustAddDidTask extends TrustTask {
 
     public TrustAddDidTask(
         UUID partnerId,
-        PartnerName partnerName,
+        Map<String, String> partnerName,
         UUID trustAddDidSubmissionId,
         String permissionDid,
         Instant dueAt,

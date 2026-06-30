@@ -10,19 +10,16 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustAddDidsSub
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustAdditionalDidsSubmissionInternalDtoDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.PartnerName;
+import ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapUtil;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkStatus;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV2Details;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementDetails;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientResponseException;
@@ -72,14 +69,14 @@ public class TrustAddDidSubmissionEventProcessor {
             .orElse(null);
 
         // Create the task
-        PartnerName partnerName;
+        Map<String, String> partnerName;
         UUID partnerId;
         if (existingIdentityStatement != null) {
             partnerId = existingIdentityStatement.getPartnerId();
-            partnerName = buildPartnerNameFromDetails(existingIdentityStatement.getDetails());
+            partnerName = BusinessPartnerIdentityMapper.toLocalizedEntityName(existingIdentityStatement.getDetails());
         } else {
             partnerId = null;
-            partnerName = unkownPartnerName();
+            partnerName = LocalizedMapUtil.fromSingleName(UNKNOWN_PARTNER_NAME);
         }
 
         var taskId = taskService.createTask(
@@ -136,35 +133,5 @@ public class TrustAddDidSubmissionEventProcessor {
         // All DIDs processed successfully
         taskService.accept(taskId);
         log.info("Trust Add DID submission {} processed successfully.", submissionId);
-    }
-
-    private static @NonNull PartnerName unkownPartnerName() {
-        PartnerName partnerName;
-        var name = UNKNOWN_PARTNER_NAME;
-        partnerName = new PartnerName(name, name, name, name, name);
-        return partnerName;
-    }
-
-    private PartnerName buildPartnerNameFromDetails(TrustStatementDetails details) {
-        if (details instanceof IdentityV1Details identityDetails) {
-            var entityName = identityDetails.getEntityName();
-            return new PartnerName(
-                entityName.getOrDefault(IdentityV1Details.Language.DE_CH, ""),
-                entityName.getOrDefault(IdentityV1Details.Language.FR_CH, ""),
-                entityName.getOrDefault(IdentityV1Details.Language.IT_CH, ""),
-                entityName.getOrDefault(IdentityV1Details.Language.EN, ""),
-                entityName.getOrDefault(IdentityV1Details.Language.RM_CH, "")
-            );
-        } else if (details instanceof IdentityV2Details identityDetails) {
-            var entityName = identityDetails.getEntityName();
-            return new PartnerName(
-                entityName.getOrDefault(IdentityV2Details.Language.DE_CH, ""),
-                entityName.getOrDefault(IdentityV2Details.Language.FR_CH, ""),
-                entityName.getOrDefault(IdentityV2Details.Language.IT_CH, ""),
-                entityName.getOrDefault(IdentityV2Details.Language.EN, ""),
-                entityName.getOrDefault(IdentityV2Details.Language.RM_CH, "")
-            );
-        }
-        return unkownPartnerName();
     }
 }

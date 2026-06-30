@@ -2,11 +2,9 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static org.springframework.util.StringUtils.hasText;
 
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.PartnerName;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
@@ -15,12 +13,9 @@ import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskCont
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskListItemDto;
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskStatusDto;
-import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @UtilityClass
 public class TrustOnboardingTaskMapper {
 
@@ -37,7 +32,7 @@ public class TrustOnboardingTaskMapper {
     ) {
         return new TrustOnboardingTaskListItemDto(
             task.getId(),
-            toMultiLanguageTextDto(task.getPartnerName()),
+            task.getPartnerName(),
             task.getSubmittedAt(),
             task.getDueAt(),
             toTrustOnboardingTaskStatusDto(task.getStatus()),
@@ -47,25 +42,11 @@ public class TrustOnboardingTaskMapper {
         );
     }
 
-    public static ch.admin.bj.swiyu.trust.management.modules.ui.api.MultiLanguageTextDto toMultiLanguageTextDto(
-        PartnerName partnerName
-    ) {
-        return new ch.admin.bj.swiyu.trust.management.modules.ui.api.MultiLanguageTextDto(
-            partnerName.getPartnerNameDe(),
-            partnerName.getPartnerNameFr(),
-            partnerName.getPartnerNameIt(),
-            partnerName.getPartnerNameEn(),
-            partnerName.getPartnerNameRm()
-        );
-    }
-
     public static TrustOnboardingTaskDto toTrustOnboardingTaskDto(
         Set<TrustOnboardingTaskActionDto> allowedActions,
         TrustOnboardingTask task,
         TrustOnboardingSubmissionDto submission
     ) {
-        var entityName = toNameLanguageDtoMap(submission.getEntityName());
-        var correspondenceLanguage = toCorrespondanceLanguageDto(submission.getCorrespondingLanguage());
         return new TrustOnboardingTaskDto(
             task.getId(),
             task.getAssignee(),
@@ -75,53 +56,16 @@ public class TrustOnboardingTaskMapper {
             toBusinessPartnerTypeDto(submission),
             toUid(submission.getRegistryIds()),
             submission.getIsRegisteredInCommercialRegister(),
-            toEntityNameDefault(entityName, correspondenceLanguage),
-            entityName,
+            Map.copyOf(submission.getName()),
             toAddressStreet(submission.getAddress()),
             toAddressZipCodeCity(submission.getAddress()),
             toAddressCountry(submission.getAddress()),
             submission.getEntityEmail(),
-            correspondenceLanguage,
+            toCorrespondanceLanguageDto(submission.getCorrespondingLanguage()),
             toContactDto(submission),
             toDidDto(submission.getProofOfPossessions()),
             allowedActions
         );
-    }
-
-    private static String toEntityNameDefault(
-        Map<TrustOnboardingTaskDto.LanguageDto, String> entityNames,
-        @NotNull TrustOnboardingTaskDto.LanguageDto correspondenceLanguage
-    ) {
-        if (isEmpty(entityNames)) {
-            return null;
-        }
-        // partners currently only submit the name in one language
-        // in that case, we take that name as default
-        var names = entityNames
-            .entrySet()
-            .stream()
-            .filter(e -> hasText(e.getValue()))
-            .toList();
-        if (names.size() == 1) {
-            return names.getFirst().getValue();
-        }
-        // at this point there are multiple languages. we are guessing the default name by using the correspondence
-        // by using the correspondence language.This is a tech dept, which was introduced by implementing the MVP
-        // version of the trust onboarding.
-        var name = entityNames.get(correspondenceLanguage);
-        if (hasText(name)) {
-            return name; // taking name in correspondence language as default
-        } else {
-            var fallback = names.getFirst();
-            log.error(
-                "A trust onboarding submission with multiple names detected when mapping it to task. It contained the following languages {}. " +
-                    "The correspondence language is {} but it is not within the provided names. As fallback {} is taken. This should not happen and be fixed in Portal.",
-                entityNames.keySet(),
-                correspondenceLanguage,
-                fallback.getKey()
-            );
-            return null;
-        }
     }
 
     private static List<TrustOnboardingTaskDto.DidDto> toDidDto(List<ProofOfPossessionDto> source) {
@@ -174,31 +118,6 @@ public class TrustOnboardingTaskMapper {
             case GOVERNMENTAL_INSTITUTION -> BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION;
             case UNKNOWN -> BusinessPartnerTypeDto.UNKNOWN;
         };
-    }
-
-    private static Map<TrustOnboardingTaskDto.LanguageDto, String> toNameLanguageDtoMap(MultiLanguageTextDto source) {
-        if (source == null) {
-            return Collections.emptyMap();
-        }
-        Map<TrustOnboardingTaskDto.LanguageDto, String> result = new EnumMap<>(
-            TrustOnboardingTaskDto.LanguageDto.class
-        );
-        if (source.getDe() != null && !source.getDe().isBlank()) {
-            result.put(TrustOnboardingTaskDto.LanguageDto.DE_CH, source.getDe());
-        }
-        if (source.getEn() != null && !source.getEn().isBlank()) {
-            result.put(TrustOnboardingTaskDto.LanguageDto.EN, source.getEn());
-        }
-        if (source.getFr() != null && !source.getFr().isBlank()) {
-            result.put(TrustOnboardingTaskDto.LanguageDto.FR_CH, source.getFr());
-        }
-        if (source.getIt() != null && !source.getIt().isBlank()) {
-            result.put(TrustOnboardingTaskDto.LanguageDto.IT_CH, source.getIt());
-        }
-        if (source.getRm() != null && !source.getRm().isBlank()) {
-            result.put(TrustOnboardingTaskDto.LanguageDto.RM_CH, source.getRm());
-        }
-        return result;
     }
 
     private static List<TrustOnboardingTaskDto.ContactDto> toContactDto(TrustOnboardingSubmissionDto source) {

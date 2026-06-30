@@ -3,11 +3,14 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatusValidator.*;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.*;
+import ch.admin.bj.swiyu.trust.management.modules.common.i18n.ValidLocalizedMap;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.time.*;
 import java.util.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.*;
 
 @Entity
@@ -32,8 +35,10 @@ public abstract class TrustTask {
     private UUID partnerId;
 
     @NotNull
-    @Embedded
-    private PartnerName partnerName;
+    @ValidLocalizedMap
+    @Column(name = "partner_name", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, @NotBlank String> partnerName;
 
     @NotNull
     private Instant dueAt;
@@ -54,7 +59,7 @@ public abstract class TrustTask {
     protected TrustTask(
         UUID id,
         UUID partnerId,
-        PartnerName partnerName,
+        Map<String, String> partnerName,
         Instant dueAt,
         Instant submittedAt,
         TrustTaskType taskType

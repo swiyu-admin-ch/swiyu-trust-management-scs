@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 
 import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.PartnerName;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
@@ -19,6 +18,7 @@ import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,20 @@ class TrustAddDidTaskServiceIT {
     void createTask() {
         // given
         var partnerId = UUID.randomUUID();
-        var partnerName = new PartnerName("DE", "FR", "IT", "EN", "RM");
+        var partnerName = Map.of(
+            "default",
+            "DE",
+            "de-CH",
+            "DE",
+            "fr-CH",
+            "FR",
+            "it-CH",
+            "IT",
+            "en",
+            "EN",
+            "rm-CH",
+            "RM"
+        );
         var submissionId = UUID.randomUUID();
         var permissionDid = "did:example:permission123";
         var submittedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
@@ -80,7 +93,7 @@ class TrustAddDidTaskServiceIT {
         // then
         var task = trustAddDidTaskRepository.findById(taskId).orElseThrow();
         assertThat(task.getPartnerId()).isEqualTo(partnerId);
-        assertThat(task.getPartnerName().getPartnerNameDe()).isEqualTo("DE");
+        assertThat(task.getPartnerName().get("de-CH")).isEqualTo("DE");
         assertThat(task.getTrustAddDidSubmissionId()).isEqualTo(submissionId);
         assertThat(task.getPermissionDid()).isEqualTo(permissionDid);
         assertThat(task.getSubmittedAt()).isEqualTo(submittedAt);
@@ -91,7 +104,7 @@ class TrustAddDidTaskServiceIT {
     @Test
     void createTask_withNullPartnerId() {
         // given
-        var partnerName = new PartnerName("Unknown", "Unknown", "Unknown", "Unknown", "Unknown");
+        var partnerName = Map.of("default", "Unknown");
         var submissionId = UUID.randomUUID();
         var permissionDid = "did:example:untrusted";
         var submittedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);

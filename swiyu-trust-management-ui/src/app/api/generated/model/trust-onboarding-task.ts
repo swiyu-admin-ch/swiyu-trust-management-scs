@@ -23,7 +23,6 @@ export interface TrustOnboardingTask {
   partnerType: PartnerType;
   uid?: string;
   isRegisteredInCommercialRegister?: boolean;
-  entityNameDefault: string;
   entityName: {[key: string]: string};
   address?: string;
   zipCodeCity?: string;

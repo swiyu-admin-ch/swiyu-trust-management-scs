@@ -2,7 +2,6 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.PartnerName;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
@@ -12,6 +11,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.Ou
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustAddDidTaskDto;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class TrustAddDidTaskService {
             task.getSubmittedAt(),
             task.getDueAt(),
             TrustOnboardingTaskMapper.toTrustOnboardingTaskStatusDto(task.getStatus()),
-            TrustOnboardingTaskMapper.toMultiLanguageTextDto(task.getPartnerName()),
+            task.getPartnerName(),
             task.getPermissionDid(),
             task.getTrustAddDidSubmissionId()
         );
@@ -47,7 +47,7 @@ public class TrustAddDidTaskService {
     @Transactional
     public UUID createTask(
         UUID partnerId,
-        PartnerName partnerName,
+        Map<String, String> partnerName,
         UUID trustAddDidSubmissionId,
         String permissionDid,
         Instant submittedAt,

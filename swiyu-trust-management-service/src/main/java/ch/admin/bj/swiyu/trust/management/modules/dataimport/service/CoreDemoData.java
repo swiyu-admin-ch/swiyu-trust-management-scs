@@ -1,6 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.dataimport.service;
 
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
+import ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapUtil;
 import java.util.*;
 import lombok.experimental.*;
 
@@ -23,7 +23,8 @@ public class CoreDemoData {
     public static final UUID CORE_ID_TOS_INFO_REQUESTED = UUID.fromString("dc828a98-ffb1-4ae4-8f07-b35d2818ac87");
 
     // CORE_ID_BP_DEFAULT
-    public static final PartnerName CORE_ID_BP_DEFAULT_NAMES = new PartnerName(
+    public static final Map<String, String> CORE_ID_BP_DEFAULT_NAMES = LocalizedMapUtil.fromLanguages(
+        "Vertrau mir Beratung GmbH",
         "Vertrau mir Beratung GmbH (DE)",
         "Confiance Conseil GmbH (FR)",
         "Trusty Consulting S.r.l. (IT)",
@@ -33,7 +34,8 @@ public class CoreDemoData {
     public static final String CORE_ID_BP_DEFAULT_EMAIL = "erika.müller@trusty-consulting.com";
 
     // CORE_ID_BP_WANTS_TO_BE_TRUSTED
-    public static final PartnerName CORE_ID_BP_WANTS_TO_BE_TRUSTED_NAMES = new PartnerName(
+    public static final Map<String, String> CORE_ID_BP_WANTS_TO_BE_TRUSTED_NAMES = LocalizedMapUtil.fromLanguages(
+        "Böswilliges Umzugsunternehmen GmbH",
         "Böswilliges Umzugsunternehmen GmbH",
         "Déménageurs malveillants GmbH",
         "Traslocatori malintenzionati S.r.l.",
@@ -43,7 +45,8 @@ public class CoreDemoData {
     public static final String CORE_ID_BP_WANTS_TO_BE_TRUSTED_EMAIL = "ceo@m-m.com";
 
     // CORE_ID_BP_GOV
-    public static final PartnerName CORE_ID_BP_GOV_NAMES = new PartnerName(
+    public static final Map<String, String> CORE_ID_BP_GOV_NAMES = LocalizedMapUtil.fromLanguages(
+        "Demo Kanton",
         "Demo Kanton",
         "Demo Canton",
         "Demo Cantone",

@@ -1,8 +1,10 @@
 package ch.admin.bj.swiyu.trust.management.modules.ui.api;
 
+import ch.admin.bj.swiyu.trust.management.modules.common.i18n.ValidLocalizedMap;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskActionDto;
 import com.fasterxml.jackson.annotation.*;
 import io.swagger.v3.oas.annotations.media.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.*;
 import java.util.*;
@@ -21,8 +23,7 @@ public record TrustOnboardingTaskDto(
     @NotNull BusinessPartnerTypeDto partnerType,
     String uid,
     Boolean isRegisteredInCommercialRegister,
-    @NotNull String entityNameDefault,
-    @NotNull Map<LanguageDto, String> entityName,
+    @NotNull @ValidLocalizedMap Map<String, @NotBlank String> entityName,
     String address,
     String zipCodeCity,
     String country,

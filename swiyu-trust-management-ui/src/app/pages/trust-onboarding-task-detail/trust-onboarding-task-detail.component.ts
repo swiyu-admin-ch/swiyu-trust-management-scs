@@ -37,6 +37,9 @@ import {
   TrustOnboardingTaskStatus
 } from '../../api/generated';
 import {ConcatI18nKey} from '../../core/format/concat-i18n-key';
+import {LocalizeService} from '../../core/i18n/localize.service';
+import {DEFAULT_LOCALIZED_TEXT_KEY} from '../../core/i18n/localized-map.util';
+import {LocalizePipe} from '../../core/i18n/localized-text.pipe';
 import {TaskStatusChipComponent} from '../../shared/task-status-chip/task-status-chip.component';
 
 @Component({
@@ -62,7 +65,8 @@ import {TaskStatusChipComponent} from '../../shared/task-status-chip/task-status
     MatPaginatorModule,
     DomainEventListComponent,
     TaskStatusChipComponent,
-    ConcatI18nKey
+    ConcatI18nKey,
+    LocalizePipe
   ],
   templateUrl: './trust-onboarding-task-detail.component.html',
   styleUrl: './trust-onboarding-task-detail.component.scss'
@@ -72,9 +76,11 @@ export class TrustOnboardingTaskDetailComponent {
   private readonly documentsApi = inject(TrustOnboardingDocumentApi);
   private readonly notificationService = inject(ObNotificationService);
   private readonly translateService = inject(TranslateService);
+  private readonly localizeService = inject(LocalizeService);
   private readonly clipboard = inject(Clipboard);
   readonly sidepanelService = inject(SidepanelService);
   private readonly metaService = inject(ObDocumentMetaService);
+  protected readonly DEFAULT_LOCALIZED_TEXT_KEY = DEFAULT_LOCALIZED_TEXT_KEY;
 
   @ViewChild(DomainEventListComponent) domainEventList!: DomainEventListComponent;
   @ViewChild(MatPaginator) documentsPaginator!: MatPaginator;
@@ -204,7 +210,7 @@ export class TrustOnboardingTaskDetailComponent {
           this.notFoundError.set(false);
         }),
         tap(task => {
-          this.metaService.setTitle(task.entityNameDefault);
+          this.metaService.setTitle(this.localizeService.localize(task.entityName));
         }),
         mergeMap(() => {
           return this.loadDocuments();

@@ -7,7 +7,6 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import {MultiLanguageText} from './multi-language-text';
 import {TrustOnboardingTaskStatus} from './trust-onboarding-task-status';
 
 export interface TrustAddDidTask {
@@ -16,7 +15,7 @@ export interface TrustAddDidTask {
   submittedAt: string;
   dueAt: string;
   state: TrustOnboardingTaskStatus;
-  partnerName: MultiLanguageText;
+  partnerName: {[key: string]: string};
   permissionDid: string;
   trustAddDidSubmissionId: string;
 }

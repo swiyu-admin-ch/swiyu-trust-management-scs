@@ -23,12 +23,14 @@ import ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction.ApproveTaskA
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction.RejectTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction.RequestMoreInformationTaskActionDto;
 import com.querydsl.core.BooleanBuilder;
+import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -46,12 +48,13 @@ public class TrustOnboardingTaskService {
 
     private final TrustOnboardingTaskRepository trustOnboardingTaskRepository;
     private final TrustOnboardingSubmissionApi trustOnboardingSubmissionApi;
+    private final TrustTaskRepository trustTaskRepository;
     private final OutboxEventPublisher outboxEventPublisher;
     private final DomainEventService domainEventService;
     private final TrustOnboardingTaskRepository taskRepository;
-    private final TrustTaskRepository trustTaskRepository;
     private final TrustStatementService trustStatementService;
     private final TrustOnboardingTaskDomainService taskDomainService;
+    private final EntityManager entityManager;
 
     /**
      * Creates a new TrustOnboardingTask based on the provided TrustOnboardingSubmission
@@ -67,13 +70,7 @@ public class TrustOnboardingTaskService {
     ) {
         var task = new TrustOnboardingTask(
             trustOnboardingSubmission.getPartnerId(),
-            new PartnerName(
-                trustOnboardingSubmission.getEntityName().getDe(),
-                trustOnboardingSubmission.getEntityName().getFr(),
-                trustOnboardingSubmission.getEntityName().getIt(),
-                trustOnboardingSubmission.getEntityName().getEn(),
-                trustOnboardingSubmission.getEntityName().getRm()
-            ),
+            Map.copyOf(trustOnboardingSubmission.getName()),
             trustOnboardingSubmission.getId(),
             calculateDueAt(trustOnboardingSubmission),
             trustOnboardingSubmission.getSubmittedAt()

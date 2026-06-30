@@ -96,12 +96,13 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
                                     o.uuid("partnerId", BUSINESS_PARTNER_ID);
                                     o.stringValue("partnerId", BUSINESS_PARTNER_ID.toString());
                                     o.stringValue("status", "SUBMITTED");
-                                    o.object("entityName", e -> {
-                                        e.stringType("de", "Firma GmbH");
-                                        e.stringType("fr", "Société SàRL");
-                                        e.stringType("it", "Società SRL");
+                                    o.object("name", e -> {
+                                        e.stringType("default", "Firma GmbH");
+                                        e.stringType("de-CH", "Firma GmbH");
+                                        e.stringType("fr-CH", "Société SàRL");
+                                        e.stringType("it-CH", "Società SRL");
                                         e.stringType("en", "Company Ltd");
-                                        e.stringType("rm", "Interpresa");
+                                        e.stringType("rm-CH", "Interpresa");
                                     });
                                     o.stringType("entityEmail", "contact@example.com"); // needed both to have the matching capability and the value set for the response to not be null
                                     o.stringMatcher(

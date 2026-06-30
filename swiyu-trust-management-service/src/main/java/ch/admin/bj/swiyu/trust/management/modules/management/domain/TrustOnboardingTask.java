@@ -19,7 +19,7 @@ public class TrustOnboardingTask extends TrustTask {
 
     public TrustOnboardingTask(
         UUID partnerId,
-        PartnerName partnerName,
+        Map<String, String> partnerName,
         UUID trustOnboardingSubmissionId,
         Instant dueAt,
         Instant submittedAt
@@ -30,7 +30,7 @@ public class TrustOnboardingTask extends TrustTask {
     public TrustOnboardingTask(
         UUID id,
         UUID partnerId,
-        PartnerName partnerName,
+        Map<String, String> partnerName,
         UUID trustOnboardingSubmissionId,
         Instant dueAt,
         Instant submittedAt

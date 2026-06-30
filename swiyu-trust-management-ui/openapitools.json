@@ -21,7 +21,7 @@
           "useSingleRequestParameter": "true",
           "removeEnumValuePrefix": "false"
         },
-        "inputSpec": "http://localhost:8400/api-docs/UI_API",
+        "inputSpec": "../client-api-specs/trust-management-ui-openapi-spec.json",
         "output": "src/app/api/generated"
       }
     }

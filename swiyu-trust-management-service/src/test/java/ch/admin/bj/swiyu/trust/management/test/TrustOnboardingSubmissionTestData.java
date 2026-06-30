@@ -18,13 +18,14 @@ public class TrustOnboardingSubmissionTestData {
     }
 
     public static TrustOnboardingSubmissionDto trustOnboardingSubmission(
-        MultiLanguageTextDto entityName,
+        Map<String, String> entityName,
         LanguageDto correspondingLanguage
     ) {
         var submission = new TrustOnboardingSubmissionDto();
         submission.setId(UUID.randomUUID());
+        submission.setVersion(1L);
         submission.setAddress(address());
-        submission.setEntityName(entityName);
+        submission.setName(entityName);
         submission.setBusinessPartnerType(BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION);
         submission.setRegistryIds(Map.of("uid", "123456"));
         submission.setCorrespondingLanguage(correspondingLanguage);
@@ -34,6 +35,8 @@ public class TrustOnboardingSubmissionTestData {
         submission.setStatus(TrustOnboardingSubmissionStatusDto.UNSUBMITTED);
         submission.setEntityEmail("test@test.ch");
         submission.setSubmittedAt(LocalDateTime.of(2025, 8, 9, 10, 0, 0).toInstant(ZoneOffset.UTC));
+        submission.setCreatedAt(LocalDateTime.of(2025, 8, 9, 10, 0, 0).toInstant(ZoneOffset.UTC));
+        submission.setUpdatedAt(LocalDateTime.of(2025, 8, 9, 10, 0, 0).toInstant(ZoneOffset.UTC));
         return submission;
     }
 
@@ -46,14 +49,21 @@ public class TrustOnboardingSubmissionTestData {
         return List.of(pop);
     }
 
-    private static @NotNull MultiLanguageTextDto entityName() {
-        var entityName = new MultiLanguageTextDto();
-        entityName.setDe("EntityDE");
-        entityName.setFr("EntityFR");
-        entityName.setIt("EntityIT");
-        entityName.setEn("EntityEN");
-        entityName.setRm("EntityRM");
-        return entityName;
+    private static @NotNull Map<String, String> entityName() {
+        return Map.of(
+            "default",
+            "EntityDE",
+            "de-CH",
+            "EntityDE",
+            "fr-CH",
+            "EntityFR",
+            "it-CH",
+            "EntityIT",
+            "en",
+            "EntityEN",
+            "rm-CH",
+            "EntityRM"
+        );
     }
 
     private static @NotNull ContactDto contact() {

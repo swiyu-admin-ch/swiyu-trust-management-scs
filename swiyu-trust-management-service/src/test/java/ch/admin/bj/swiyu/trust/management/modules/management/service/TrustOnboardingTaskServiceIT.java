@@ -107,11 +107,7 @@ class TrustOnboardingTaskServiceIT {
         assertThat(task).isNotNull();
         assertThat(task.getId()).isNotNull();
         assertThat(task.getTrustOnboardingSubmissionId()).isEqualTo(submission.getId());
-        assertThat(task.getPartnerName().getPartnerNameDe()).isEqualTo(submission.getEntityName().getDe());
-        assertThat(task.getPartnerName().getPartnerNameFr()).isEqualTo(submission.getEntityName().getFr());
-        assertThat(task.getPartnerName().getPartnerNameIt()).isEqualTo(submission.getEntityName().getIt());
-        assertThat(task.getPartnerName().getPartnerNameEn()).isEqualTo(submission.getEntityName().getEn());
-        assertThat(task.getPartnerName().getPartnerNameRm()).isEqualTo(submission.getEntityName().getRm());
+        assertThat(task.getPartnerName()).isEqualTo(submission.getName());
         Assertions.assertNotNull(submission.getCreatedAt());
         Assertions.assertNotNull(submission.getSubmittedAt());
         assertThat(task.getSubmittedAt()).isEqualTo(submission.getSubmittedAt());

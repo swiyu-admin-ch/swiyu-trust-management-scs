@@ -117,9 +117,6 @@ export class DomainEventLogApi extends BaseService {
 
     let localVarHeaders = this.defaultHeaders;
 
-    // authentication (OIDC) required
-    localVarHeaders = this.configuration.addCredentialToHeaders('OIDC', 'Authorization', localVarHeaders, 'Bearer ');
-
     // authentication (bearer-jwt) required
     localVarHeaders = this.configuration.addCredentialToHeaders(
       'bearer-jwt',

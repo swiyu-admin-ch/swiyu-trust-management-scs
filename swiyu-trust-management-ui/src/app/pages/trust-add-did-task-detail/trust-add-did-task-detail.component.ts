@@ -6,7 +6,8 @@ import {TranslatePipe} from '@ngx-translate/core';
 import {ObAlertComponent, ObButtonModule, ObColumnLayoutModule, ObDocumentMetaService} from '@oblique/oblique';
 import {filter, tap} from 'rxjs';
 import {TrustAddDidTask, TrustOnboardingTaskApi} from '../../api/generated';
-import {MultiLanguageTextPipe} from '../../core/i18n/multi-language-text.pipe';
+import {LocalizeService} from '../../core/i18n/localize.service';
+import {LocalizePipe} from '../../core/i18n/localized-text.pipe';
 import {DomainEventListComponent} from '../../shared/domain-event-list/domain-event-list.component';
 import {TaskStatusChipComponent} from '../../shared/task-status-chip/task-status-chip.component';
 
@@ -25,12 +26,13 @@ import {TaskStatusChipComponent} from '../../shared/task-status-chip/task-status
     DatePipe,
     DomainEventListComponent,
     TaskStatusChipComponent,
-    MultiLanguageTextPipe
+    LocalizePipe
   ]
 })
 export class TrustAddDidTaskDetailComponent {
   private readonly api = inject(TrustOnboardingTaskApi);
   private readonly metaService = inject(ObDocumentMetaService);
+  private readonly localizeService = inject(LocalizeService);
 
   taskId = input.required<string>();
   task = signal({} as TrustAddDidTask);
@@ -50,7 +52,7 @@ export class TrustAddDidTaskDetailComponent {
         tap(task => {
           this.task.set(task);
           this.notFoundError.set(false);
-          this.metaService.setTitle(task.partnerName?.de || 'Add DID Task');
+          this.metaService.setTitle(this.localizeService.localize(task.partnerName) || 'Add DID Task');
         })
       )
       .subscribe({

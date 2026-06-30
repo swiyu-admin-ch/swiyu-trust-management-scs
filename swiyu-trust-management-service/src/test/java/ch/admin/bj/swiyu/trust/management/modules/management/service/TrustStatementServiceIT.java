@@ -212,6 +212,7 @@ class TrustStatementServiceIT {
                 {
                     "type":"TRUST_STATEMENT_IDENTITY_V1",
                     "entityName":{
+                        "":"Beispielorganisation",
                         "de-CH":"Beispielorganisation",
                         "it-CH":"Organizzazione di esempio",
                         "fr-CH":"Exemple d'organisation",

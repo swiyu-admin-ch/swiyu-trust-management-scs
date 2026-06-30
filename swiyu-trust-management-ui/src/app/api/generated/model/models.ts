@@ -8,7 +8,6 @@ export * from './domain-event-log';
 export * from './domain-event-type';
 export * from './field-error';
 export * from './language';
-export * from './multi-language-text';
 export * from './object-error';
 export * from './page-metadata';
 export * from './paged-model-domain-event-log';

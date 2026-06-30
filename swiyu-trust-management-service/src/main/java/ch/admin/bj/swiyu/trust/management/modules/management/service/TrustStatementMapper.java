@@ -83,7 +83,9 @@ public class TrustStatementMapper {
         }
         var result = new EnumMap<IdentityV1Details.Language, String>(IdentityV1Details.Language.class);
         source.forEach((locale, text) -> {
-            if (!LocalizedMapConstants.DEFAULT_VALUE_KEY.equals(locale)) {
+            if (LocalizedMapConstants.DEFAULT_VALUE_KEY.equals(locale)) {
+                result.put(IdentityV1Details.Language.DEFAULT, text);
+            } else {
                 result.put(IdentityV1Details.Language.fromJsonValue(locale), text);
             }
         });
