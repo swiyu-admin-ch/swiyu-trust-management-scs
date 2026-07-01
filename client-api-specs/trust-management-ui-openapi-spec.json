@@ -1,0 +1,1455 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SWIYU Trust Management SCS API",
+    "description": "IF-012 - APIs for the SWIYU Trust Management SCS",
+    "version": "3.29.0-SNAPSHOT"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8400",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "bearer-jwt": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "FrontendConfiguration",
+      "description": "Serves configuration information for the frontend as specified by Quadrel-Services/QdAuth.",
+      "externalDocs": {
+        "url": "https://confluence.bit.admin.ch/display/DAZUIC/Integration+der+Qd-Auth+Library"
+      }
+    }
+  ],
+  "paths": {
+    "/ui-api/tasks/{taskId}/request-more-information": {
+      "post": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "requestMoreInformation",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RequestMoreInformationTaskAction"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}/reject": {
+      "post": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "reject",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RejectTaskAction"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}/assign/self": {
+      "post": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "assignSelf",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}/approve": {
+      "post": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "approve",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ApproveTaskAction"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}/add-internal-note": {
+      "post": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "addInternalNote",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AddInternalNoteTaskAction"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}": {
+      "get": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "getTask",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustOnboardingTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}/add-did": {
+      "get": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "getAddDidTask",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustAddDidTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/": {
+      "get": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "getTasks",
+        "parameters": [
+          {
+            "name": "submissionStartDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "submissionEndDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dueStartDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dueEndDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "assignee",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelTrustOnboardingTaskListItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui-api/domain-event-logs/": {
+      "get": {
+        "tags": [
+          "DomainEventLog"
+        ],
+        "operationId": "getDomainEventLogs",
+        "parameters": [
+          {
+            "name": "trustOnboardingTaskId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelDomainEventLog"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui-api/documents/{taskId}/{documentId}": {
+      "get": {
+        "tags": [
+          "TrustOnboardingDocument"
+        ],
+        "operationId": "getTrustOnboardingSubmissionDocument",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "File download",
+            "content": {
+              "application/octet-stream": {}
+            }
+          }
+        }
+      }
+    },
+    "/ui-api/documents/": {
+      "get": {
+        "tags": [
+          "TrustOnboardingDocument"
+        ],
+        "operationId": "getTrustOnboardingSubmissionDocuments",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelTrustOnboardingSubmissionDocumentListItemDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui-api/configuration/": {
+      "get": {
+        "tags": [
+          "FrontendConfiguration"
+        ],
+        "operationId": "getConfiguration",
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FieldError": {
+        "type": "object",
+        "properties": {
+          "codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "arguments": {
+            "type": "array",
+            "items": {}
+          },
+          "defaultMessage": {
+            "type": "string"
+          },
+          "objectName": {
+            "type": "string"
+          },
+          "field": {
+            "type": "string"
+          },
+          "rejectedValue": {},
+          "bindingFailure": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "ObjectError": {
+        "type": "object",
+        "properties": {
+          "codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "arguments": {
+            "type": "array",
+            "items": {}
+          },
+          "defaultMessage": {
+            "type": "string"
+          },
+          "objectName": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "SimpleErrors": {
+        "type": "object",
+        "properties": {
+          "objectName": {
+            "type": "string"
+          },
+          "globalErrors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectError"
+            }
+          },
+          "fieldErrors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            }
+          },
+          "nestedPath": {
+            "type": "string"
+          },
+          "allErrors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectError"
+            }
+          },
+          "fieldError": {
+            "$ref": "#/components/schemas/FieldError"
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "globalErrorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "globalError": {
+            "$ref": "#/components/schemas/ObjectError"
+          },
+          "fieldErrorCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RequestMoreInformationTaskAction": {
+        "type": "object",
+        "properties": {
+          "declineReason": {
+            "$ref": "#/components/schemas/TrustOnboardingDeclineReason"
+          },
+          "partnerNote": {
+            "type": "string"
+          },
+          "internalNote": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "declineReason",
+          "partnerNote"
+        ]
+      },
+      "TrustOnboardingDeclineReason": {
+        "type": "string",
+        "enum": [
+          "MISSING_DOCUMENTS",
+          "UNAUTHORIZED_SIGNATORIES",
+          "INCORRECT_COMPANY_INFORMATION",
+          "INCORRECT_DECLARATION_OF_INTENT",
+          "OTHER"
+        ]
+      },
+      "RejectTaskAction": {
+        "type": "object",
+        "properties": {
+          "rejectReason": {
+            "$ref": "#/components/schemas/TrustOnboardingRejectReason"
+          },
+          "partnerNote": {
+            "type": "string"
+          },
+          "internalNote": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rejectReason"
+        ]
+      },
+      "TrustOnboardingRejectReason": {
+        "type": "string",
+        "enum": [
+          "INCOMPLETE_INFORMATION",
+          "INACCURATE_INFORMATION",
+          "OUTDATED_INFORMATION",
+          "IDENTITY_VERIFICATION_FAILURE",
+          "LACK_OF_AUTHORIZATION",
+          "TECHNICAL_ISSUES",
+          "DUPLICATE_APPLICATION",
+          "NO_RESPONSE_FROM_APPLICANT",
+          "FRAUDULENT_ACTIVITY",
+          "OTHER"
+        ]
+      },
+      "ApproveTaskAction": {
+        "type": "object",
+        "properties": {
+          "partnerNote": {
+            "type": "string"
+          },
+          "internalNote": {
+            "type": "string"
+          }
+        }
+      },
+      "AddInternalNoteTaskAction": {
+        "type": "object",
+        "properties": {
+          "internalNote": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "internalNote"
+        ]
+      },
+      "Contact": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TrustOnboardingTaskContactType"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "Did": {
+        "type": "object",
+        "properties": {
+          "did": {
+            "type": "string"
+          },
+          "proofOfPossessionDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "did"
+        ]
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "en",
+          "en-CH",
+          "de-CH",
+          "fr-CH",
+          "it-CH",
+          "rm-CH"
+        ]
+      },
+      "PartnerType": {
+        "type": "string",
+        "enum": [
+          "GOVERNMENTAL_INSTITUTION",
+          "BUSINESS",
+          "INDIVIDUAL",
+          "UNKNOWN"
+        ]
+      },
+      "TrustOnboardingTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignee": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "$ref": "#/components/schemas/TrustOnboardingTaskStatus"
+          },
+          "partnerType": {
+            "$ref": "#/components/schemas/PartnerType"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "isRegisteredInCommercialRegister": {
+            "type": "boolean"
+          },
+          "entityName": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "example": {
+                "default": "value: default",
+                "en": "value: english",
+                "de-CH": "value: german",
+                "fr-CH": "value: french",
+                "it-CH": "value: italian"
+              }
+            },
+            "example": {
+              "default": "value: default",
+              "en": "value: english",
+              "de-CH": "value: german",
+              "fr-CH": "value: french",
+              "it-CH": "value: italian"
+            }
+          },
+          "address": {
+            "type": "string"
+          },
+          "zipCodeCity": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "correspondenceLanguage": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "contacts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Contact"
+            }
+          },
+          "dids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Did"
+            }
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrustOnboardingTaskAction"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "allowedActions",
+          "contacts",
+          "correspondenceLanguage",
+          "dids",
+          "dueAt",
+          "entityName",
+          "id",
+          "partnerType",
+          "state",
+          "submittedAt"
+        ]
+      },
+      "TrustOnboardingTaskAction": {
+        "type": "string",
+        "enum": [
+          "REJECT",
+          "APPROVE",
+          "REQUEST_MORE_INFORMATION",
+          "ADD_INTERNAL_NOTE",
+          "ASSIGN_SELF"
+        ]
+      },
+      "TrustOnboardingTaskContactType": {
+        "type": "string",
+        "enum": [
+          "AUTHORISED_SIGNATORY",
+          "CONTACT_PERSON"
+        ]
+      },
+      "TrustOnboardingTaskStatus": {
+        "type": "string",
+        "enum": [
+          "REJECTED",
+          "ACCEPTED",
+          "OPENED",
+          "INFORMATION_REQUESTED"
+        ]
+      },
+      "TrustAddDidTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignee": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "$ref": "#/components/schemas/TrustOnboardingTaskStatus"
+          },
+          "partnerName": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "example": {
+                "default": "value: default",
+                "en": "value: english",
+                "de-CH": "value: german",
+                "fr-CH": "value: french",
+                "it-CH": "value: italian"
+              }
+            },
+            "example": {
+              "default": "value: default",
+              "en": "value: english",
+              "de-CH": "value: german",
+              "fr-CH": "value: french",
+              "it-CH": "value: italian"
+            }
+          },
+          "permissionDid": {
+            "type": "string"
+          },
+          "trustAddDidSubmissionId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "dueAt",
+          "id",
+          "partnerName",
+          "permissionDid",
+          "state",
+          "submittedAt",
+          "trustAddDidSubmissionId"
+        ]
+      },
+      "PageMetadata": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PagedModelTrustOnboardingTaskListItem": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrustOnboardingTaskListItem"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "TrustOnboardingTaskListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partnerName": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "example": {
+                "default": "value: default",
+                "en": "value: english",
+                "de-CH": "value: german",
+                "fr-CH": "value: french",
+                "it-CH": "value: italian"
+              }
+            },
+            "example": {
+              "default": "value: default",
+              "en": "value: english",
+              "de-CH": "value: german",
+              "fr-CH": "value: french",
+              "it-CH": "value: italian"
+            }
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "$ref": "#/components/schemas/TrustOnboardingTaskStatus"
+          },
+          "assignee": {
+            "type": "string"
+          },
+          "taskType": {
+            "type": "string"
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrustOnboardingTaskAction"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "allowedActions",
+          "dueAt",
+          "id",
+          "partnerName",
+          "state",
+          "submittedAt",
+          "taskType"
+        ]
+      },
+      "DomainEventLog": {
+        "type": "object",
+        "properties": {
+          "triggeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "triggeredBy": {
+            "type": "string"
+          },
+          "eventType": {
+            "$ref": "#/components/schemas/DomainEventType"
+          },
+          "partnerNote": {
+            "type": "string"
+          },
+          "internalNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DomainEventType": {
+        "type": "string",
+        "enum": [
+          "TRUST_ONBOARDING_SUBMISSION_RECEIVED",
+          "TRUST_ONBOARDING_SUCCEEDED",
+          "TRUST_ONBOARDING_REJECTED",
+          "TRUST_ONBOARDING_MORE_INFORMATION_REQUESTED",
+          "TRUST_ONBOARDING_TASK_NOTE_ADDED",
+          "TRUST_ONBOARDING_TASK_ASSIGNED",
+          "TRUST_ADD_DID_SUBMISSION_RECEIVED",
+          "TRUST_ADD_DID_SUCCEEDED",
+          "TRUST_ADD_DID_REJECTED",
+          "NON_COMPLIANT_ACTOR_ADDED",
+          "NON_COMPLIANT_ACTOR_REMOVED",
+          "PROTECTED_ISSUANCE_ENTRY_ADDED",
+          "PROTECTED_ISSUANCE_ENTRY_REMOVED"
+        ]
+      },
+      "PagedModelDomainEventLog": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DomainEventLog"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "PagedModelTrustOnboardingSubmissionDocumentListItemDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrustOnboardingSubmissionDocumentListItemDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "TrustOnboardingSubmissionDocumentListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "owningBusinessPartner": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "trustOnboardingSubmissionId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "AppConfig": {
+        "type": "object",
+        "description": "Comprehensive application configuration for frontend client",
+        "properties": {
+          "environment": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authConfig": {
+            "$ref": "#/components/schemas/AuthConfig"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "authConfig",
+          "environment",
+          "version"
+        ]
+      },
+      "AuthConfig": {
+        "type": "object",
+        "description": "Auth configuration for frontend",
+        "properties": {
+          "issuer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "useSilentRefresh": {
+            "type": "boolean"
+          },
+          "clientId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responseType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requireHttps": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "clientId",
+          "issuer",
+          "requireHttps",
+          "responseType",
+          "scope",
+          "useSilentRefresh"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "bearer-jwt": {
+        "type": "http",
+        "description": "JWT authentication",
+        "name": "bearerAuth",
+        "in": "header",
+        "scheme": "bearer",
+        "bearerFormat": "jwt"
+      },
+      "OIDC": {
+        "type": "openIdConnect",
+        "description": "OAuth2-Authentication",
+        "openIdConnectUrl": "https://swiyu-oauth-mock-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch/.well-known/openid-configuration"
+      }
+    }
+  }
+}

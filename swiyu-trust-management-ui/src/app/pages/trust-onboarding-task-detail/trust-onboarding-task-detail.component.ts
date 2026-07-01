@@ -16,7 +16,8 @@ import {
   ObColumnLayoutModule,
   ObDocumentMetaService,
   ObENotificationType,
-  ObNotificationService
+  ObNotificationService,
+  WINDOW
 } from '@oblique/oblique';
 import {RemoveWhitespacePipe} from '../../core/format/remove-whitespace.pipe';
 import {DomainEventListComponent} from '../../shared/domain-event-list/domain-event-list.component';
@@ -80,17 +81,18 @@ export class TrustOnboardingTaskDetailComponent {
   private readonly clipboard = inject(Clipboard);
   readonly sidepanelService = inject(SidepanelService);
   private readonly metaService = inject(ObDocumentMetaService);
+  private readonly window = inject(WINDOW);
   protected readonly DEFAULT_LOCALIZED_TEXT_KEY = DEFAULT_LOCALIZED_TEXT_KEY;
 
   @ViewChild(DomainEventListComponent) domainEventList!: DomainEventListComponent;
   @ViewChild(MatPaginator) documentsPaginator!: MatPaginator;
 
-  documentsPageable = signal({
+  documentsPageable = signal<PageMetadata>({
     size: 5,
     number: 0,
     totalElements: 0,
     totalPages: 0
-  } as PageMetadata);
+  });
   documents = new MatTableDataSource<TrustOnboardingSubmissionDocumentListItemDto>();
   documentDisplayedColumns = ['name', 'submittedAt', 'download-link'];
 
@@ -115,7 +117,7 @@ export class TrustOnboardingTaskDetailComponent {
   }
 
   shareLink() {
-    const link = window.location.toString();
+    const link = this.window.location.toString();
     this.translateService.get('app.trust-onboarding-task.actions.share-link.notification.title').subscribe(title => {
       this.translateService
         .get('app.trust-onboarding-task.actions.share-link.notification.message', {link: link})
@@ -179,14 +181,14 @@ export class TrustOnboardingTaskDetailComponent {
       .subscribe({
         next: download => {
           const blob = new Blob([download], {type: documentListItem.mediaType});
-          const url = window.URL.createObjectURL(blob);
+          const url = globalThis.URL.createObjectURL(blob);
 
           const a = document.createElement('a');
           a.href = url;
           a.download = documentListItem.name!;
           document.body.appendChild(a);
           a.click();
-          document.body.removeChild(a);
+          a.remove();
         }
       });
   }
@@ -236,6 +238,7 @@ export class TrustOnboardingTaskDetailComponent {
     // Required for translate service auto collection of i18n keys
     // @see: NameLanguage
     this.translateService.get('app.trust-onboarding-task.fields.name.en.label');
+    this.translateService.get('app.trust-onboarding-task.fields.name.en-CH.label');
     this.translateService.get('app.trust-onboarding-task.fields.name.de-CH.label');
     this.translateService.get('app.trust-onboarding-task.fields.name.fr-CH.label');
     this.translateService.get('app.trust-onboarding-task.fields.name.it-CH.label');

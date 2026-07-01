@@ -15,8 +15,8 @@ export interface SimpleErrors {
   globalErrors?: Array<ObjectError>;
   fieldErrors?: Array<FieldError>;
   nestedPath?: string;
-  fieldError?: FieldError;
   allErrors?: Array<ObjectError>;
+  fieldError?: FieldError;
   errorCount?: number;
   globalErrorCount?: number;
   globalError?: ObjectError;

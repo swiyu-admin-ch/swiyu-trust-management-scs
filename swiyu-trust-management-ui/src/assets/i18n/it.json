@@ -10,15 +10,11 @@
   "app.menu.tasks": "Attività",
   "app.name": "swiyu-trust-management",
   "app.trust-add-did-task.alert.resource-not-found": "Attività con ID {{taskId}} non trovata.",
-  "app.trust-add-did-task.auto-processed": "Elaborazione automatica",
   "app.trust-add-did-task.fields.assignee.label": "Responsabile",
-  "app.trust-add-did-task.fields.didsToAdd.label": "Nuovi DID",
   "app.trust-add-did-task.fields.dueAt.label": "Data di scadenza",
   "app.trust-add-did-task.fields.permissionDid.label": "DID di autorizzazione",
-  "app.trust-add-did-task.fields.status.label": "Stato",
   "app.trust-add-did-task.fields.submittedAt.label": "Data di invio",
   "app.trust-add-did-task.history": "Cronologia",
-  "app.trust-add-did-task.title": "Aggiungi DID",
   "app.trust-onboarding-task.actions.add-internal-note": "Aggiungi nota interna",
   "app.trust-onboarding-task.actions.approve": "Approva",
   "app.trust-onboarding-task.actions.assign-self": "Assegna a me",
@@ -56,6 +52,7 @@
   "app.trust-onboarding-task.fields.isRegisteredInCommercialRegister.value.false": "No",
   "app.trust-onboarding-task.fields.isRegisteredInCommercialRegister.value.true": "Si",
   "app.trust-onboarding-task.fields.name.de-CH.label": "Nome (Tedesco)",
+  "app.trust-onboarding-task.fields.name.en-CH.label": "Nome (Inglese)",
   "app.trust-onboarding-task.fields.name.en.label": "Nome (Inglese)",
   "app.trust-onboarding-task.fields.name.fr-CH.label": "Nome (Francese)",
   "app.trust-onboarding-task.fields.name.it-CH.label": "Nome (Italiano)",
@@ -129,7 +126,5 @@
   "task.table.header.issuerOrVerifier": "Emittente/Verificatore",
   "task.table.header.state": "Stato",
   "task.table.header.submittedAt": "Data di invio",
-  "task.table.header.taskType": "Tipo di attività",
-  "task.table.taskType.ADD_DID": "Aggiungi DID",
-  "task.table.taskType.ONBOARDING": "Onboarding"
+  "task.table.header.taskType": "Tipo di attività"
 }

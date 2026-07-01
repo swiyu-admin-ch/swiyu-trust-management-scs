@@ -155,9 +155,10 @@ public class TrustOnboardingTaskMapper {
         return contacts;
     }
 
+    @SuppressWarnings("java:S5738") // EID-6303
     private static TrustOnboardingTaskDto.LanguageDto toCorrespondanceLanguageDto(LanguageDto source) {
         if (source == null) {
-            return null;
+            return TrustOnboardingTaskDto.LanguageDto.EN_CH;
         }
         return switch (source) {
             case DE -> TrustOnboardingTaskDto.LanguageDto.DE_CH;

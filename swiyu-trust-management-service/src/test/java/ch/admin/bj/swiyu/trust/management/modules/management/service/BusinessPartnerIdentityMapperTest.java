@@ -21,6 +21,7 @@ class BusinessPartnerIdentityMapperTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5738") // EID-6303
     void toLocalizedEntityName_addDid_roundTripsStoredDefaultLanguage() {
         var details = new IdentityV1Details(
             Map.of(
@@ -45,6 +46,7 @@ class BusinessPartnerIdentityMapperTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5738") // EID-6303
     void toLocalizedEntityName_addDid_legacyStatementWithoutDefault_fallsBackToFirstLocale() {
         var details = new IdentityV1Details(
             Map.of(IdentityV1Details.Language.DE_CH, "Acme DE", IdentityV1Details.Language.EN, "Acme EN"),
@@ -55,8 +57,9 @@ class BusinessPartnerIdentityMapperTest {
         var entityName = BusinessPartnerIdentityMapper.toLocalizedEntityName(details);
 
         // Legacy statements without a stored DEFAULT get one synthesized from the lexicographically first locale.
-        assertThat(entityName.get("default")).isEqualTo("Acme DE");
-        assertThat(entityName.get("de-CH")).isEqualTo("Acme DE");
-        assertThat(entityName.get("en")).isEqualTo("Acme EN");
+        assertThat(entityName)
+            .containsEntry("default", "Acme DE")
+            .containsEntry("de-CH", "Acme DE")
+            .containsEntry("en", "Acme EN");
     }
 }

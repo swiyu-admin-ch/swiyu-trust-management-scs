@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 class TrustStatementMapperTest {
 
     @Test
+    @SuppressWarnings("java:S5738") // EID-6303
     void toIdentityV1LanguageMap_mapsDefaultKeyToDefaultLanguage() {
         var source = Map.of("default", "val_default", "de-CH", "val_de", "en", "val_en");
 
@@ -24,6 +25,7 @@ class TrustStatementMapperTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5738") // EID-6303
     void toProtectedIssuanceAuthorizationV2DetailsLanguageMap_mapsDefaultKeyToDefaultLanguage() {
         var source = Map.of("de-CH", "val_de", "default", "val_default", "en", "val_en");
 
@@ -36,6 +38,7 @@ class TrustStatementMapperTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5738") // EID-6303
     void toVerificationQueryV2LanguageMap_mapsDefaultKeyToDefaultLanguage() {
         var source = Map.of("default", "val_default", "de-CH", "val_de", "en", "val_en");
 
@@ -48,6 +51,7 @@ class TrustStatementMapperTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5738") // EID-6303
     void toIdentityV2LanguageMap_mapsDefaultKeyToDefaultLanguage() {
         var source = Map.of("default", "val_default", "de-CH", "val_de", "en", "val_en");
 

@@ -6,7 +6,7 @@
     <parent>
         <groupId>ch.admin.bj.swiyu</groupId>
         <artifactId>swiyu-trust-management-scs</artifactId>
-        <version>3.28.5-SNAPSHOT</version>
+        <version>3.29.4-SNAPSHOT</version>
     </parent>
 
 

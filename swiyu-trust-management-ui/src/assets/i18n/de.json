@@ -10,15 +10,11 @@
   "app.menu.tasks": "Aufgaben",
   "app.name": "Swiyu Trust Management",
   "app.trust-add-did-task.alert.resource-not-found": "Aufgabe mit ID {{taskId}} nicht gefunden.",
-  "app.trust-add-did-task.auto-processed": "Automatisch verarbeitet",
   "app.trust-add-did-task.fields.assignee.label": "Zuständige Person",
-  "app.trust-add-did-task.fields.didsToAdd.label": "Neue DIDs",
   "app.trust-add-did-task.fields.dueAt.label": "Fälligkeitsdatum",
   "app.trust-add-did-task.fields.permissionDid.label": "Berechtigungs-DID",
-  "app.trust-add-did-task.fields.status.label": "Status",
   "app.trust-add-did-task.fields.submittedAt.label": "Eingangsdatum",
   "app.trust-add-did-task.history": "Verlauf",
-  "app.trust-add-did-task.title": "DID Hinzufügen",
   "app.trust-onboarding-task.actions.add-internal-note": "Füge interne Notiz hinzu",
   "app.trust-onboarding-task.actions.approve": "Genehmigen",
   "app.trust-onboarding-task.actions.assign-self": "Mir zuweisen",
@@ -56,6 +52,7 @@
   "app.trust-onboarding-task.fields.isRegisteredInCommercialRegister.value.false": "Nein",
   "app.trust-onboarding-task.fields.isRegisteredInCommercialRegister.value.true": "Ja",
   "app.trust-onboarding-task.fields.name.de-CH.label": "Name (Deutsch)",
+  "app.trust-onboarding-task.fields.name.en-CH.label": "Name (Englisch)",
   "app.trust-onboarding-task.fields.name.en.label": "Name (Englisch)",
   "app.trust-onboarding-task.fields.name.fr-CH.label": "Name (Französisch)",
   "app.trust-onboarding-task.fields.name.it-CH.label": "Name (Italienisch)",
@@ -129,7 +126,5 @@
   "task.table.header.issuerOrVerifier": "Aussteller/Prüfer",
   "task.table.header.state": "Status",
   "task.table.header.submittedAt": "Eingangsdatum",
-  "task.table.header.taskType": "Aufgabentyp",
-  "task.table.taskType.ADD_DID": "DID hinzufügen",
-  "task.table.taskType.ONBOARDING": "Onboarding"
+  "task.table.header.taskType": "Aufgabentyp"
 }

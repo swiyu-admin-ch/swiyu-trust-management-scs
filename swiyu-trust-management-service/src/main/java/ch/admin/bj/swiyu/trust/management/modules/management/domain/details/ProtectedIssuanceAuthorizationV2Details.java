@@ -33,7 +33,9 @@ public final class ProtectedIssuanceAuthorizationV2Details extends TrustStatemen
     @AllArgsConstructor
     public enum Language {
         DEFAULT(""),
+        @Deprecated(forRemoval = true, since = "3.29.1") // Remove in EID-6303
         EN("en"),
+        EN_CH("en-CH"),
         DE_CH("de-CH"),
         FR_CH("fr-CH"),
         IT_CH("it-CH"),

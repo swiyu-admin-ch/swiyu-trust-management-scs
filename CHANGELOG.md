@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.29.4
+
+### Changed
+
+- Add missing translation for trust onboarding tasks org name title en-CH
+
+## 3.29.3
+
+### Fixed
+
+- Update pact test for swiyu-core-business-service to use en-CH instead for the organization name
+
+## 3.29.2
+
+### Fixed
+
+- Force shell-quote,fast-uri,logback versions to fix HIGH vulnerability
+
+## 3.29.1
+
+### Changed
+
+- Add missing language key en-CH which is used by swiyu-core-business-service
+- Add missing open api spec for swiyu-trust-management-service ui
+
 ## 3.29.0
 
 ### Changed

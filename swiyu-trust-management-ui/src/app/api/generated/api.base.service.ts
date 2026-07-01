@@ -13,7 +13,7 @@ import {CustomHttpParameterCodec} from './encoder';
 import {OpenApiHttpParams, QueryParamStyle, concatHttpParamsObject} from './query.params';
 
 export class BaseService {
-  protected basePath = 'http://localhost';
+  protected basePath = 'http://localhost:8400';
   public defaultHeaders = new HttpHeaders();
   public configuration: Configuration;
   public encoder: HttpParameterCodec;

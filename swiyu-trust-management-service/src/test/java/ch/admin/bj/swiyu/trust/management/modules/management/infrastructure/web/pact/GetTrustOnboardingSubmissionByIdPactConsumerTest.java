@@ -101,7 +101,7 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
                                         e.stringType("de-CH", "Firma GmbH");
                                         e.stringType("fr-CH", "Société SàRL");
                                         e.stringType("it-CH", "Società SRL");
-                                        e.stringType("en", "Company Ltd");
+                                        e.stringType("en-CH", "Company Ltd");
                                         e.stringType("rm-CH", "Interpresa");
                                     });
                                     o.stringType("entityEmail", "contact@example.com"); // needed both to have the matching capability and the value set for the response to not be null

@@ -10,6 +10,7 @@
 
 export const Language = {
   En: 'en',
+  EnCh: 'en-CH',
   DeCh: 'de-CH',
   FrCh: 'fr-CH',
   ItCh: 'it-CH',

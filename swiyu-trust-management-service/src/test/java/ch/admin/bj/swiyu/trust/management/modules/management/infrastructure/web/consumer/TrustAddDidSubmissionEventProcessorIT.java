@@ -65,6 +65,7 @@ class TrustAddDidSubmissionEventProcessorIT {
     @Autowired
     AsyncTestConfig asyncTestConfig;
 
+    @SuppressWarnings("java:S5738") // EID-6303
     private void createActiveIdentityTrustStatement(UUID partnerId, String permissionDid) {
         var statement = TrustStatementPartnerLink.createIdentityV1(
             partnerId,
@@ -153,7 +154,7 @@ class TrustAddDidSubmissionEventProcessorIT {
         var task = tasks.getFirst();
         assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
         // Note: partnerId is null due to TrustStatementPartnerLink constructor not storing partnerId (pre-existing issue)
-        assertThat(task.getPartnerName().get("de-CH")).isEqualTo("Test Partner DE");
+        assertThat(task.getPartnerName()).containsEntry("de-CH", "Test Partner DE");
         assertThat(task.getPermissionDid()).isEqualTo(permissionDid);
         assertThat(task.getTrustAddDidSubmissionId()).isEqualTo(submissionId);
 

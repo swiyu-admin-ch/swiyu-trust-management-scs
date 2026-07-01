@@ -24,6 +24,7 @@ public class NonCompliantActorMapper {
             .toList();
     }
 
+    @SuppressWarnings("java:S5738") // EID-6303
     private static Map<NonComplianceV2Details.Language, String> toNonComplianceV2DetailsActorReason(
         NonCompliantReasonText reason
     ) {

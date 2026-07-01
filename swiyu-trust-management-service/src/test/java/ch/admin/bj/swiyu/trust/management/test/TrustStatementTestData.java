@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public class TrustStatementTestData {
 
+    @SuppressWarnings("java:S5738") // EID-6303
     public static TrustStatementPartnerLink identityV1(String subject) {
         return TrustStatementPartnerLink.createIdentityV1(
             UUID.randomUUID(),
