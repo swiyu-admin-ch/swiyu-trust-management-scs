@@ -17,4 +17,9 @@ ignore:
         reason: 'Need to upgrade to angular 21; ticket created: EID-6533'
         expires: 2026-07-23T14:52:11.173Z
         created: 2026-06-23T14:52:11.176Z
+  SNYK-JS-FASTURI-17675102:
+    - '*':
+        reason: 'Oblique needs to be upgraded first; ticket created: EID-6533'
+        expires: 2026-07-30T09:00:00.000Z
+        created: 2026-06-30T09:00:00.000Z
 patch: {}
