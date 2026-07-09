@@ -1,5 +1,5 @@
 
-# SWIYU Trust Managament SCS
+# SWIYU Trust Management SCS
 
 The service contains the business logic to do the onboardings to the trust registry.
 
@@ -7,7 +7,7 @@ The service contains the business logic to do the onboardings to the trust regis
 
 Before using the service make sure the following services are running:
 
-- [swiu-core-business-service](https://bitbucket.bit.admin.ch/projects/EID/repos/swiyu-core-business-service/browse) for the kafka container setup
+- [swiu-core-business-service](https://github.com/swiyu-admin-ch/swiyu-core-business-service) for the kafka container setup
 
 For local development, the service can be started with the following command:
 
@@ -25,7 +25,6 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local,local-ui
 ```shell
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local,shared
 ```
-
 
 ### Backend with extra served UI and shared services from DEV
 ```shell
@@ -48,7 +47,6 @@ The following environment variables must be set
 | `PROMETHEUS_PASSWORD`                               | The password for accessing /actuator/prometheus endpoint.                                 |                          |
 | `IS_INIT_CONTAINER_EXECUTION`                       | Indicates if the application is running in an init container.                             | false                    |
 | `REGISTRY_BASE_READ_URL`                            | The URL for base registry for reading entries.                                            |                          |
-| `REGISTRY_BASE_WRITE_URL`                           | The URL for base registry for writing entries.                                            |                          |
 | `ISSUER_STATUS_LIST_URI`                            | The URI of the status list which should be used for onboardings.                          |                          |
 | `ISSUER_MANAGEMENT_URL`                             | The URL for the issuer management API endpoint.                                           |                          |
 | `ISSUER_OID4VCI_URL`                                | The URL for the issuer oid4vci API endpoint.                                              |                          |
@@ -65,10 +63,10 @@ The following environment variables must be set
 
 ## Generating Keys in order to access Gov Trust Issuer and Trust Registry API
 
-When acessing the APIs of gov trust issuer, the request must be signed with a private key. The private key must be
-configured for the trust managament scs and the public key must be configured on the gov trust issuer.
+When accessing the APIs of gov trust issuer, the request must be signed with a private key. The private key must be
+configured for the trust management scs and the public key must be configured on the gov trust issuer.
 
-** For a detailed setup guide see https://confluence.bit.admin.ch/x/_Cw_N**
+** For a detailed setup guide see https://confluence.bit.admin.ch/x/_Cw_N (for FOITT internal usage only)**
 
 To generate a new private and public key for a new stage, the following scripts can be executed:
 
@@ -78,7 +76,7 @@ mvn -f utils/key-generator/pom.xml compile exec:java
 
 This will create 2 files in a `.keys` directory, with those files you can now configure
 
-1. Trust managament scs
+1. Trust management scs
 
 - in vault put the content of JWT_SIGNING_KEY.pem into a variable JWT_SIGNING_KEY
 - in vault put the `kid` value from JWT_PUBLIC_KEY.json into the JWT_SIGNING_KEY_ID

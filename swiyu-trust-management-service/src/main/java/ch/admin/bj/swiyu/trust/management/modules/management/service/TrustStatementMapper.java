@@ -83,12 +83,17 @@ public class TrustStatementMapper {
         }
         var result = new EnumMap<IdentityV1Details.Language, String>(IdentityV1Details.Language.class);
         source.forEach((locale, text) -> {
-            if (LocalizedMapConstants.DEFAULT_VALUE_KEY.equals(locale)) {
-                result.put(IdentityV1Details.Language.DEFAULT, text);
-            } else {
+            // V1 does not know about a default language
+            if (!LocalizedMapConstants.DEFAULT_VALUE_KEY.equals(locale)) {
                 result.put(IdentityV1Details.Language.fromJsonValue(locale), text);
             }
         });
+        // Edge case: only "default" language is the only one set,
+        // and we do not know which language that would be.
+        // We assume de-CH is the default language.
+        if (result.isEmpty() && source.containsKey(LocalizedMapConstants.DEFAULT_VALUE_KEY)) {
+            result.put(IdentityV1Details.Language.DE_CH, source.get(LocalizedMapConstants.DEFAULT_VALUE_KEY));
+        }
         return result;
     }
 

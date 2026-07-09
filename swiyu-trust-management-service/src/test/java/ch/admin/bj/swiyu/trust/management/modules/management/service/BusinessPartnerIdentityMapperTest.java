@@ -21,32 +21,8 @@ class BusinessPartnerIdentityMapperTest {
     }
 
     @Test
-    @SuppressWarnings("java:S5738") // EID-6303
-    void toLocalizedEntityName_addDid_roundTripsStoredDefaultLanguage() {
-        var details = new IdentityV1Details(
-            Map.of(
-                IdentityV1Details.Language.DEFAULT,
-                "Acme",
-                IdentityV1Details.Language.DE_CH,
-                "Acme DE",
-                IdentityV1Details.Language.EN,
-                "Acme EN"
-            ),
-            false,
-            List.of()
-        );
-
-        var entityName = BusinessPartnerIdentityMapper.toLocalizedEntityName(details);
-
-        // The explicitly stored DEFAULT wins; no de-first guessing.
-        assertThat(entityName)
-            .containsEntry("default", "Acme")
-            .containsEntry("de-CH", "Acme DE")
-            .containsEntry("en", "Acme EN");
-    }
-
-    @Test
-    @SuppressWarnings("java:S5738") // EID-6303
+    // EID-6303
+    @SuppressWarnings("java:S5738")
     void toLocalizedEntityName_addDid_legacyStatementWithoutDefault_fallsBackToFirstLocale() {
         var details = new IdentityV1Details(
             Map.of(IdentityV1Details.Language.DE_CH, "Acme DE", IdentityV1Details.Language.EN, "Acme EN"),

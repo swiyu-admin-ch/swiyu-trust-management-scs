@@ -46,7 +46,6 @@ public final class IdentityV1Details extends TrustStatementDetails {
 
     @AllArgsConstructor
     public enum Language {
-        DEFAULT(""),
         @Deprecated(forRemoval = true, since = "3.29.1") // Remove in EID-6303
         EN("en"),
         EN_CH("en-CH"),
@@ -59,6 +58,9 @@ public final class IdentityV1Details extends TrustStatementDetails {
 
         @JsonCreator
         public static Language fromJsonValue(String value) {
+            if (value.isEmpty()) {
+                return Language.DE_CH;
+            }
             for (Language language : values()) {
                 if (language.jsonValue.equals(value)) {
                     return language;
