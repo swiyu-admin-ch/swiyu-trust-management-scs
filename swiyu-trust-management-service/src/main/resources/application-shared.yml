@@ -9,11 +9,38 @@
 app:
   frontend:
     environment: "local-shared"
-#jeap:
-#  security:
-#    oauth2:
-#      resourceserver:
-#        # local mock server
-#        authorization-server:
-#          issuer: http://localhost:8480
-#          jwk-set-uri: http://localhost:8480/.well-known/jwks.json
+  #jeap:
+  #  security:
+  #    oauth2:
+  #      resourceserver:
+  #        # local mock server
+  #        authorization-server:
+  #          issuer: http://localhost:8480
+  #          jwk-set-uri: http://localhost:8480/.well-known/jwks.json
+
+
+  issuer:
+    trust-root:
+      business-partner-id: 7b24f978-afe7-4f60-af2f-57ae5a01d303 # E2E BP
+    jwt:
+      public-transparency-issuer:
+        type: software_key
+        software:
+          did-with-key-fragment: "did:webvh:QmPidcC5K8DxBHUCTwn12YCYK6VAkAc3EyEZpsbMaHooyy:localhost%3A8190:api:v1:did:1133c5ee-f7b2-400c-a358-3bae4bba7672#assert-key-01"
+          private-key: |
+            -----BEGIN EC PRIVATE KEY-----
+            MHcCAQEEIP8EzXYXu0FZZf3Y5B97RfT/MJ4eYyPXafy06lpQNklVoAoGCCqGSM49
+            AwEHoUQDQgAEb8iC+SjRKmuoSIGDhD7C7GTiSq06aIyx07yI9WlryF4azJVFlwjJ
+            zqlxcoKXFOLBcZMJxdl/qxZcDy1CZaBEEg==
+            -----END EC PRIVATE KEY-----
+      trust-issuer:
+        type: software_key
+        software:
+          did-with-key-fragment: "did:webvh:QmPidcC5K8DxBHUCTwn12YCYK6VAkAc3EyEZpsbMaHooyy:localhost%3A8190:api:v1:did:1133c5ee-f7b2-400c-a358-3bae4bba7672#assert-key-01"
+          private-key: |
+            -----BEGIN EC PRIVATE KEY-----
+            MHcCAQEEIP8EzXYXu0FZZf3Y5B97RfT/MJ4eYyPXafy06lpQNklVoAoGCCqGSM49
+            AwEHoUQDQgAEb8iC+SjRKmuoSIGDhD7C7GTiSq06aIyx07yI9WlryF4azJVFlwjJ
+            zqlxcoKXFOLBcZMJxdl/qxZcDy1CZaBEEg==
+            -----END EC PRIVATE KEY-----
+

@@ -31,9 +31,10 @@ spring:
       enabled: true
       file: docker-compose.yml
 issuer:
+  mockClient: false
   # only 1 for now until we have management service with overflow-handling
   # Note: local setup is not yet implemented, this is just a dummy url so the app starts
-  status-list-uri: "https://status-reg-d.trust-infra.swiyu.admin.ch/api/v1/statuslist/0075c371-c9b4-4182-b07c-3007568afc4c.jwt"
+  status-list-uri: "https://status-reg-d.trust-infra.swiyu.admin.ch/api/v1/statuslist/4b19cdfb-63cd-42e0-8764-235fb27a5243.jwt"
   management-api-url: "https://swiyu-gov-issuer-mgmt-service-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch"
   oid4vci-api-url: "https://swiyu-gov-issuer-oid4vci-service-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch"
   signing:
@@ -58,23 +59,24 @@ app:
       public-transparency-issuer:
         type: software_key
         software:
-          did-with-key-fragment: "did:webvh:QmWN8Qf539b7LvZYaAvqepxNwy9ZCsEF1tLdCD1s3s5h8Q:identifier-reg-d.trust-infra.swiyu.admin.ch:api:v1:did:ff047bad-3915-429d-bac6-558842c0fe34#assert-key-01"
+          did-with-key-fragment: "did:webvh:QmUe2cycZKtt8X1sE3zRQ9c2spcE39xqSCGgBxjxBFfgUq:identifier-reg-d.trust-infra.swiyu.admin.ch:api:v1:did:f01afe33-48a9-42b7-9d2a-08760d39d879#assert-key-01"
           private-key: |
             -----BEGIN EC PRIVATE KEY-----
-            MHcCAQEEIIRLYYI1Q16DSPwPWzHuL/fJ8BHsX0lzljTY1vHz5ZXroAoGCCqGSM49
-            AwEHoUQDQgAEm+BkBIi50KnXgUFWo1nrht5EwfK33uhiJhwp6jHgR1EhtuwUoUN9
-            yfnHgD1Asta2T/FUGBC+LKz+9wspGIgDwQ==
+            MHcCAQEEIENi+QR0DoYJHMzmamVZ45ALfBcnK18eDSdzHrWikUyKoAoGCCqGSM49
+            AwEHoUQDQgAESB7Mjqm+eakkzF0bzeMYR+SybiPGnOs2xZadZlj69iBOQ08xEMzZ
+            BjEuG6Her8WWLIZ7pS/EI6Ivd5yOO99PAQ==
             -----END EC PRIVATE KEY-----
       trust-issuer:
         type: software_key
         software:
-          did-with-key-fragment: "did:webvh:QmWN8Qf539b7LvZYaAvqepxNwy9ZCsEF1tLdCD1s3s5h8Q:identifier-reg-d.trust-infra.swiyu.admin.ch:api:v1:did:ff047bad-3915-429d-bac6-558842c0fe34#assert-key-01"
+          did-with-key-fragment: "did:webvh:QmUe2cycZKtt8X1sE3zRQ9c2spcE39xqSCGgBxjxBFfgUq:identifier-reg-d.trust-infra.swiyu.admin.ch:api:v1:did:f01afe33-48a9-42b7-9d2a-08760d39d879#assert-key-01"
           private-key: |
             -----BEGIN EC PRIVATE KEY-----
-            MHcCAQEEIIRLYYI1Q16DSPwPWzHuL/fJ8BHsX0lzljTY1vHz5ZXroAoGCCqGSM49
-            AwEHoUQDQgAEm+BkBIi50KnXgUFWo1nrht5EwfK33uhiJhwp6jHgR1EhtuwUoUN9
-            yfnHgD1Asta2T/FUGBC+LKz+9wspGIgDwQ==
+            MHcCAQEEIENi+QR0DoYJHMzmamVZ45ALfBcnK18eDSdzHrWikUyKoAoGCCqGSM49
+            AwEHoUQDQgAESB7Mjqm+eakkzF0bzeMYR+SybiPGnOs2xZadZlj69iBOQ08xEMzZ
+            BjEuG6Her8WWLIZ7pS/EI6Ivd5yOO99PAQ==
             -----END EC PRIVATE KEY-----
+
 
 core-business:
   core-business-service-internal-base-url: https://swiyu-core-business-service-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch

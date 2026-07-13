@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="start:backend:shared" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" value="test-data-injection,local,local-ui,shared" />
+    <option name="ACTIVE_PROFILES" value="test-data-injection,local,local-ui,shared,secret" />
     <module name="swiyu-trust-management-service" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="ch.admin.bj.swiyu.trust.management.Application" />
     <extension name="coverage">
