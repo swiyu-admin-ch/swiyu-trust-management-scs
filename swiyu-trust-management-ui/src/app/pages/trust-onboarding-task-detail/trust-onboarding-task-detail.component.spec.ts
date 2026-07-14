@@ -100,15 +100,9 @@ describe('TrustOnboardingTaskComponent', () => {
     const mockTitle = 'app.trust-onboarding-task.actions.share-link.notification.title';
     // after translations work check that the mockUrl is part of the mockMessage
     const mockMessage = 'app.trust-onboarding-task.actions.share-link.notification.message';
-    const mockUrl = 'http://localhost';
+    const mockUrl = 'http://localhost/';
 
-    // Mock window.location
-    Object.defineProperty(window, 'location', {
-      value: {
-        toString: () => mockUrl
-      },
-      writable: true
-    });
+    window.history.replaceState(null, '', mockUrl);
 
     component.shareLink();
 

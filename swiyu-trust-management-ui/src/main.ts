@@ -4,9 +4,8 @@ import localeDECH from '@angular/common/locales/de-CH';
 import localeENCH from '@angular/common/locales/en';
 import localeFRCH from '@angular/common/locales/fr-CH';
 import localeITCH from '@angular/common/locales/it-CH';
-import {ApplicationConfig, importProvidersFrom, provideAppInitializer, provideZoneChangeDetection} from '@angular/core';
+import {ApplicationConfig, provideAppInitializer, provideZoneChangeDetection} from '@angular/core';
 import {bootstrapApplication} from '@angular/platform-browser';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {provideRouter, withComponentInputBinding} from '@angular/router';
 import {OB_BANNER, ObHttpApiInterceptor, provideObliqueConfiguration} from '@oblique/oblique';
 import {provideOAuthClient} from 'angular-oauth2-oidc';
@@ -61,7 +60,6 @@ const applicationConfig: ApplicationConfig = {
         contact: [{/* at least 1 email or phone number has to be provided */ email: ''}]
       }
     }),
-    importProvidersFrom([BrowserAnimationsModule]),
     provideHttpClient(withInterceptorsFromDi()),
     provideOAuthClient({
       resourceServer: {

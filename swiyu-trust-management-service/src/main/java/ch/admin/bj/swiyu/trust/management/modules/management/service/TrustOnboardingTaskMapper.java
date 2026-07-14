@@ -14,6 +14,7 @@ import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskListItemDto;
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskStatusDto;
 import java.util.*;
+import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -56,7 +57,7 @@ public class TrustOnboardingTaskMapper {
             toBusinessPartnerTypeDto(submission),
             toUid(submission.getRegistryIds()),
             submission.getIsRegisteredInCommercialRegister(),
-            Map.copyOf(submission.getName()),
+            toEntityName(submission.getName()),
             toAddressStreet(submission.getAddress()),
             toAddressZipCodeCity(submission.getAddress()),
             toAddressCountry(submission.getAddress()),
@@ -66,6 +67,17 @@ public class TrustOnboardingTaskMapper {
             toDidDto(submission.getProofOfPossessions()),
             allowedActions
         );
+    }
+
+    private static Map<String, String> toEntityName(Map<String, String> name) {
+        if (isEmpty(name)) {
+            return Map.of();
+        }
+        return name
+            .entrySet()
+            .stream()
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private static List<TrustOnboardingTaskDto.DidDto> toDidDto(List<ProofOfPossessionDto> source) {

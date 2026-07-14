@@ -87,6 +87,40 @@ class TrustOnboardingTaskMapperTest {
     }
 
     @Test
+    void toTrustOnboardingTaskDtoTest_nameIsNull_shouldReturnEmptyEntityName() {
+        // Given - reproduces bug: CBS sends "name": null despite the field being marked required.
+        var allowedActions = Set.of(TrustOnboardingTaskActionDto.APPROVE);
+        var submission = trustOnboardingSubmission();
+        submission.setName(null);
+        var task = trustOnboardingTask();
+
+        // When
+        var result = toTrustOnboardingTaskDto(allowedActions, task, submission);
+
+        // Then - must not throw NullPointerException; entityName should resolve to an empty map
+        assertThat(result).isNotNull();
+        assertThat(result.entityName()).isEmpty();
+    }
+
+    @Test
+    void toTrustOnboardingTaskDtoTest_nameWithNullValue_shouldDropEntry() {
+        // Given - reproduces bug: "de-CH" key is present but its value is null.
+        var allowedActions = Set.of(TrustOnboardingTaskActionDto.APPROVE);
+        var nameWithNullValue = new HashMap<String, String>();
+        nameWithNullValue.put("default", "EntityDE");
+        nameWithNullValue.put("de-CH", null);
+        var submission = trustOnboardingSubmission(nameWithNullValue, LanguageDto.DE);
+        var task = trustOnboardingTask();
+
+        // When
+        var result = toTrustOnboardingTaskDto(allowedActions, task, submission);
+
+        // Then - must not throw NullPointerException; null-valued entry is dropped
+        assertThat(result).isNotNull();
+        assertThat(result.entityName()).containsEntry("default", "EntityDE").doesNotContainKey("de-CH");
+    }
+
+    @Test
     void toTrustOnboardingTaskDto_mapsContactPersonOnly_whenSignatoriesNull() {
         var allowedActions = Set.of(TrustOnboardingTaskActionDto.APPROVE);
         var submission = trustOnboardingSubmission();
