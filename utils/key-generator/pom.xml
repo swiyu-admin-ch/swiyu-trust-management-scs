@@ -10,11 +10,11 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.9.1</nimbus-jose-jwt.version>
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
-        <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
-        <bcpkix-jdk18on.version>1.84</bcpkix-jdk18on.version>
+        <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+        <bcpkix-jdk18on.version>1.85</bcpkix-jdk18on.version>
     </properties>
 
     <dependencies>

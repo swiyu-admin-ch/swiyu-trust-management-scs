@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -11,35 +10,35 @@
             from the dependencyManagement section
          -->
         <version>33.11.0</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>3.31.0-SNAPSHOT</version>
+    <version>3.31.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
         <java-uuid-generator.version>5.2.0</java-uuid-generator.version>
         <didresolver.version>2.6.0</didresolver.version>
-        <swiyu-jws-signature-service.version>1.4.0</swiyu-jws-signature-service.version>
+        <swiyu-jws-signature-service.version>1.7.0</swiyu-jws-signature-service.version>
         <com-securosys-primus-jce.version>2.4.4</com-securosys-primus-jce.version>
         <!-- Keep didresolver and adapter in sync https://github.com/swiyu-admin-ch/swiyu-generic-java-lib/blob/main/swiyu-did-resolver-adapter/pom.xml -->
-        <swiyu-did-resolver-adapter.version>1.4.0</swiyu-did-resolver-adapter.version>
+        <swiyu-did-resolver-adapter.version>1.7.0</swiyu-did-resolver-adapter.version>
         <swiyu-did-resolver.version>2.8.2</swiyu-did-resolver.version>
 
-        <archunit-junit5.version>1.4.1</archunit-junit5.version>
-        <nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
-        <sd-jwt.version>1.7</sd-jwt.version>
-        <jackson-databind-nullable.version>0.2.9</jackson-databind-nullable.version>
-        <jackson-databind-jsr310.version>2.21.1</jackson-databind-jsr310.version>
+        <archunit-junit5.version>1.4.2</archunit-junit5.version>
+        <nimbus-jose-jwt.version>10.9.1</nimbus-jose-jwt.version>
+        <sd-jwt.version>1.9</sd-jwt.version>
+        <jackson-databind-nullable.version>0.2.10</jackson-databind-nullable.version>
+        <jackson-databind-jsr310.version>2.22.1</jackson-databind-jsr310.version>
         <openapi-generator-maven-plugin.version>7.23.0</openapi-generator-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-        <spotless-maven-plugin.version>3.2.1</spotless-maven-plugin.version>
+        <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
         <cleanthat.version>2.25</cleanthat.version>
         <prettier.version>3.8.1</prettier.version>
         <prettier-plugin-java.version>2.8.1</prettier-plugin-java.version>
-        <openfeign.querydsl.version>7.1</openfeign.querydsl.version>
+        <openfeign.querydsl.version>7.4.0</openfeign.querydsl.version>
         <!-- Sonar Rules -->
         <sonar.cpd.exclusions>
             **/*Dto.java
@@ -60,7 +59,7 @@
         <sonar.issue.ignore.multicriteria.ignore-secrets.resourceKey>**/application-*.yml
         </sonar.issue.ignore.multicriteria.ignore-secrets.resourceKey>
 
-        <sonar-maven-plugin.version>5.5.0.6356</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.7.0.6970</sonar-maven-plugin.version>
         <java.version>25</java.version>
         <maven.compiler.release>25</maven.compiler.release>
     </properties>
@@ -76,7 +75,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
-                <version>1.5.36</version>
+                <version>1.5.38</version>
             </dependency>
             <!-- CVE-OVERRIDE end -->
         </dependencies>
@@ -140,7 +139,7 @@
                         <importOrder>
                             <order>java,javax,com,de,lombok,net,org</order>
                         </importOrder>
-                        <removeUnusedImports/>
+                        <removeUnusedImports />
                         <prettier>
                             <devDependencies>
                                 <prettier>${prettier.version}</prettier>

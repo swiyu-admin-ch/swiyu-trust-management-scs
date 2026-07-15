@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.31.2
+
+### Changed
+
+- Update maven from 3.9.12 to 3.9.16
+- Update org.apache.maven.plugins:maven-surefire-plugin from 3.5.5 to 3.5.6
+- Update ch.qos.logback:logback-core from 1.5.36 to 1.5.38
+- Update org.sonarsource.scanner.maven:sonar-maven-plugin from 5.5.0.6356 to 5.7.0.6970
+- Update io.github.openfeign.querydsl:querydsl-jpa-spring from 7.1 to 7.4.0
+- Update io.github.openfeign.querydsl:querydsl-apt from 7.1 to 7.4.0
+- Update com.diffplug.spotless:spotless-maven-plugin from 3.2.1 to 3.8.0
+- Update com.fasterxml.jackson.datatype:jackson-datatype-jsr310 from 2.21.1 to 2.22.1
+- Update org.openapitools:jackson-databind-nullable from 0.2.9 to 0.2.10
+- Update com.authlete:sd-jwt from 1.7 to 1.9
+- Update com.nimbusds:nimbus-jose-jwt from 10.8 to 10.9.1
+- Update com.tngtech.archunit:archunit-junit5 from 1.4.1 to 1.4.2
+- Update ch.admin.swiyu:swiyu-did-resolver-adapter from 1.4.0 to 1.7.0
+- Update ch.admin.swiyu:swiyu-jws-signature-service from 1.4.0 to 1.7.0
+- Update org.bouncycastle:bcpkix-jdk18on from 1.84 to 1.85
+- Update org.apache.maven.plugins:maven-resources-plugin from 3.4.0 to 3.5.0
+- Update com.nimbusds:nimbus-jose-jwt from 10.8 to 10.9.1
+
+
 ## 3.31.1
 
 ### Changed
