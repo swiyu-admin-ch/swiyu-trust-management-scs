@@ -1,19 +1,19 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
-import ch.admin.bj.swiyu.trust.management.modules.management.service.StatementRefreshScheduler;
+import ch.admin.bj.swiyu.trust.management.modules.jobs.service.StatementRefreshJob;
 
 public enum StatusListMetadataStatus {
     /**
      * A statuslist is considered ACTIVE if there are free index entries to be assigned to a statement.
      * <p>
-     * An ACTIVE statuslist gets an automatic refresh of the statuslist token with {@link StatementRefreshScheduler#refreshStatusLists()}.
+     * An ACTIVE statuslist gets an automatic refresh of the statuslist token with {@link StatementRefreshJob#refreshStatusLists()}.
      */
     ACTIVE,
     /**
      * A statuslist is considered FULL if all available index entries are accosted with a statement.
      * No new index can be assigned from this statuslist.
      * <p>
-     * A FULL statuslist gets an automatic refresh of the statuslist token with {@link StatementRefreshScheduler#refreshStatusLists()}.
+     * A FULL statuslist gets an automatic refresh of the statuslist token with {@link StatementRefreshJob#refreshStatusLists()}.
      */
     FULL,
     /**

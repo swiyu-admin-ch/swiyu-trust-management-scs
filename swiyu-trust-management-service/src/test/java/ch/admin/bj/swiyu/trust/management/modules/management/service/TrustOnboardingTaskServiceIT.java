@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusiness.IssuerTrustRootProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType;
@@ -15,7 +16,6 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.JsonJwtDeserializer;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.TrustRegistryService;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction.ApproveTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.test.*;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Assertions;

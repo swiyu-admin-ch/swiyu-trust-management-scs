@@ -1,9 +1,9 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
+import ch.admin.bj.swiyu.trust.management.modules.management.api.DomainEventLogDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.DomainEventTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLog;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventType;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.DomainEventLogDto;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.DomainEventTypeDto;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass

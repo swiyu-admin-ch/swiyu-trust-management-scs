@@ -1,6 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingSubmissionDocumentListItemDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingSubmissionDocumentListItemDto;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass

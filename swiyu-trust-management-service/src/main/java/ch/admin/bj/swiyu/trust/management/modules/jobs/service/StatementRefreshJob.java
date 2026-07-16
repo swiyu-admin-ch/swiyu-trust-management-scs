@@ -1,13 +1,15 @@
-package ch.admin.bj.swiyu.trust.management.modules.management.service;
+package ch.admin.bj.swiyu.trust.management.modules.jobs.service;
+
+import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.setSystemUserAuthentication;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.async.Lock;
-import ch.admin.bj.swiyu.trust.management.modules.common.security.SystemUserAuthentication;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.StatusListDomainService;
+import ch.admin.bj.swiyu.trust.management.modules.management.service.NonCompliantActorPublicationService;
+import ch.admin.bj.swiyu.trust.management.modules.management.service.StatusListService;
+import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,30 +25,30 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class StatementRefreshScheduler {
+public class StatementRefreshJob {
 
-    private final StatusListDomainService statusListDomainService;
+    private final StatusListService statusListService;
     private final NonCompliantActorPublicationService nonCompliantActorPublicationService;
     private final TrustStatementService trustStatementService;
 
-    @Scheduled(cron = "${app.statement-defaults.non-compliance-trust-list-statement.refresh-cron}")
+    @Scheduled(cron = "${app.jobs.statement-non-compliance-trust-list-refresh-interval}")
     @SchedulerLock(name = Lock.NON_COMPLIANCE_TRUST_LIST_PUBLISHING)
     public void refreshNonComplianceList() {
-        SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
+        setSystemUserAuthentication();
         nonCompliantActorPublicationService.triggerPublication();
     }
 
-    @Scheduled(cron = "${app.statement-defaults.protected-issuance-trust-list-statement.refresh-cron}")
+    @Scheduled(cron = "${app.jobs.statement-protected-issuance-trust-list-refresh-interval}")
     @SchedulerLock(name = Lock.PROTECTED_ISSUANCE_TRUST_LIST_PUBLISHING)
     public void refreshProtectedIssuanceTrustList() {
-        SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
+        setSystemUserAuthentication();
         trustStatementService.issueAndPublishProtectedIssuanceV2TrustListStatement();
     }
 
-    @Scheduled(cron = "${app.statement-defaults.statuslist.refresh-cron}")
+    @Scheduled(cron = "${app.jobs.statement-status-list-refresh-interval}")
     @SchedulerLock(name = Lock.STATUS_LIST_PUBLISHING)
     public void refreshStatusLists() {
-        SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
-        statusListDomainService.triggerPublications();
+        setSystemUserAuthentication();
+        statusListService.triggerPublications();
     }
 }

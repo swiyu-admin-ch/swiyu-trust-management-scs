@@ -1,10 +1,12 @@
 package ch.admin.bj.swiyu.trust.management;
 
+import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.*;
 import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predicates.annotatedWith;
 import static com.tngtech.archunit.lang.conditions.ArchConditions.beAnnotatedWith;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
+import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -46,8 +48,6 @@ public class ArchitectureTest {
     private static final String CLIENT_APIS_PACKAGE = "ch.admin.bj.swiyu.trust.client..";
 
     private static final String COMMON_MODULE = "ch.admin.bj.swiyu.trust.management.modules.common..";
-    private static final String MANAGEMENT_MODULE = "ch.admin.bj.swiyu.trust.management.modules.management..";
-    private static final String REGISTRY_MODULE = "ch.admin.bj.swiyu.trust.management.modules.registry..";
 
     private static Architectures.LayeredArchitecture getArchitectureLayers() {
         return layeredArchitecture()
@@ -191,32 +191,29 @@ public class ArchitectureTest {
             .onlyDependOnClassesThat(resideInAnyPackage(COMMON_MODULE).or(resideOutsideOfPackage(ROOT_PACKAGE)));
 
         @ArchTest
-        static final ArchRule managementModuleDependencies = classes()
-            .that()
-            .resideInAnyPackage(MANAGEMENT_MODULE)
+        static final ArchRule noDependenciesBetweenModules = slices()
+            .matching("ch.admin.bj.swiyu.trust.management.modules.(*)..")
             .should()
-            .onlyDependOnClassesThat(
-                resideInAnyPackage(MANAGEMENT_MODULE, REGISTRY_MODULE, COMMON_MODULE, ROOT_PACKAGE).or(
-                    resideOutsideOfPackage(ROOT_PACKAGE)
-                )
-            );
-
-        @ArchTest
-        static final ArchRule registryModuleDependencies = classes()
-            .that()
-            .resideInAnyPackage(REGISTRY_MODULE)
-            .should()
-            .onlyDependOnClassesThat(
-                resideInAnyPackage(REGISTRY_MODULE, COMMON_MODULE).or(resideOutsideOfPackage(ROOT_PACKAGE))
-            );
-
-        @ArchTest
-        static final ArchRule managementModuleShouldNotAccessDomainClassesOfRegistryModule = noClasses()
-            .that()
-            .resideInAnyPackage("..modules.management..")
-            .should()
-            .dependOnClassesThat()
-            .resideInAnyPackage("..modules.registry.domain..");
+            .notDependOnEachOther()
+            // common is a shared infrastructure module - all other modules may depend on it
+            .ignoreDependency(alwaysTrue(), resideInAPackage("ch.admin.bj.swiyu.trust.management.modules.common.."))
+            // management -> registry
+            .ignoreDependency(
+                resideInAPackage("ch.admin.bj.swiyu.trust.management.modules.management.service.."),
+                resideInAPackage("ch.admin.bj.swiyu.trust.management.modules.registry.[api|service]..")
+            )
+            // ui -> management
+            .ignoreDependency(
+                resideInAPackage("ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.controller.."),
+                resideInAPackage("ch.admin.bj.swiyu.trust.management.modules.management.[api|service]..")
+            )
+            // jobs -> management
+            .ignoreDependency(
+                resideInAPackage("ch.admin.bj.swiyu.trust.management.modules.jobs.."),
+                resideInAPackage("ch.admin.bj.swiyu.trust.management.modules.management.[api|service]..")
+            )
+            // demodata -> allow all
+            .ignoreDependency(resideInAPackage("..swiyu.trust.management.modules.dataimport.."), alwaysTrue());
 
         /**
          * We don't want accidental exposing of generated client API model types in our REST controllers. Types of this

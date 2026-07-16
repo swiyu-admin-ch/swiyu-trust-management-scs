@@ -1,4 +1,4 @@
-package ch.admin.bj.swiyu.trust.management.modules.ui.api;
+package ch.admin.bj.swiyu.trust.management.modules.management.api;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.i18n.ValidLocalizedMap;
 import io.swagger.v3.oas.annotations.media.Schema;

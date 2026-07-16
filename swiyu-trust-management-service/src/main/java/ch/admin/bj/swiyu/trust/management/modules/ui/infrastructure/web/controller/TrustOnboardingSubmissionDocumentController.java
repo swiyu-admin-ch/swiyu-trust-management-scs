@@ -1,8 +1,8 @@
 package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.controller;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingSubmissionDocumentListItemDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingSubmissionDocumentService;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingSubmissionDocumentListItemDto;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

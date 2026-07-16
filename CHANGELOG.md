@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.31.4
+
+### Changed
+
+- Update error message when update statuslist fails
+
+## 3.31.3
+
+### Changed
+
+- refactored jobs into dedicated module
+
 ## 3.31.2
 
 ### Changed
@@ -27,13 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update org.apache.maven.plugins:maven-resources-plugin from 3.4.0 to 3.5.0
 - Update com.nimbusds:nimbus-jose-jwt from 10.8 to 10.9.1
 
-
 ## 3.31.1
 
 ### Changed
 
 - Update to Angular 21 and Oblique 15
-- 
+
 ## 3.31.0
 
 ### Added

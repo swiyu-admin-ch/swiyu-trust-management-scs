@@ -119,7 +119,7 @@ public class StatusListDomainService {
             );
         } catch (RestClientResponseException e) {
             throw new ExternalSystemException(
-                "Could not create new StatusList",
+                "Could not update StatusList",
                 ExternalSystem.CORE_BUSINESS_SERVICE,
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 e

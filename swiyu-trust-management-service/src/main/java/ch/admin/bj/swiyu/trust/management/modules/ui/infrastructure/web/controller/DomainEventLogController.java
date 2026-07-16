@@ -1,8 +1,8 @@
 package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.controller;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.DomainEventLogDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.DomainEventService;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.DomainEventLogDto;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;

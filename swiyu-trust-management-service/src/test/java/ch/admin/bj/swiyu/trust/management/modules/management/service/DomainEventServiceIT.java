@@ -1,6 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
-import static ch.admin.bj.swiyu.trust.management.modules.ui.api.DomainEventTypeDto.*;
+import static ch.admin.bj.swiyu.trust.management.modules.management.api.DomainEventTypeDto.*;
 import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData.trustAddDidTask;
 import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData.trustOnboardingTask;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

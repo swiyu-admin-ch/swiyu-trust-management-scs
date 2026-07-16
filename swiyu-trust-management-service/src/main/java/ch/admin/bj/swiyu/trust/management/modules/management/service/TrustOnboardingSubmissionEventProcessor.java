@@ -8,8 +8,8 @@ import ch.admin.bj.swiyu.messagetype.ti.TiTrustOnboardingSubmissionAcceptedEvent
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.FunctionalityProperties;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction.ApproveTaskActionDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

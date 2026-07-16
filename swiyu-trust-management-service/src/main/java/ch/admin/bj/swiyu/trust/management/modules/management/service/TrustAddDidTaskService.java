@@ -2,13 +2,13 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustAddDidTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustAddDidSubmissionAcceptedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustAddDidSubmissionRejectedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustAddDidTaskDto;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;

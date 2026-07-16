@@ -3,15 +3,15 @@ package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.control
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustAddDidTaskDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskListItemDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.AddInternalNoteTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RejectTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RequestMoreInformationTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustAddDidTaskService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingTaskService;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustAddDidTaskDto;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskDto;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.TrustOnboardingTaskListItemDto;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction.AddInternalNoteTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction.ApproveTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction.RejectTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction.RequestMoreInformationTaskActionDto;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;

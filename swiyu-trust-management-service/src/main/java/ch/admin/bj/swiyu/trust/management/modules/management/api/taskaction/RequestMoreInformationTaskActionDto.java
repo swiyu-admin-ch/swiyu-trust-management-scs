@@ -1,4 +1,4 @@
-package ch.admin.bj.swiyu.trust.management.modules.ui.api.taskaction;
+package ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingDeclineReasonDto;
 import io.swagger.v3.oas.annotations.media.Schema;

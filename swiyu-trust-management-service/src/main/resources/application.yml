@@ -183,23 +183,25 @@ app:
     time-to-live: P6M # 6 Months
     statuslist:
       size: 100_000
+      # We have a max lifetime of time-to-live for token. If we have an error in the refresh of this token, this is
+      # the MAX time we have, to solve the problem before the ecosystem is in disarray.
       time-to-live: P1W # 1 Week
-      #* We have a max lifetime of time-to-live for the token.
-      #* If we do have an error in the refresh of this token this is the MAX time we have to solve the problem before the ecosystem is in disarray.
-      #* The refresh-cron MUST therefore be a fraction of the time-to-live.
-      refresh-cron: "0 30 0,6,12,18 * * *"
     non-compliance-trust-list-statement:
+      # We have a max lifetime of time-to-live for token. If we have an error in the refresh of this token, this is
+      # the MAX time we have, to solve the problem before the ecosystem is in disarray.
       time-to-live: P6M # 6 Months
-      #* We have a max lifetime of time-to-live for the token.
-      #* If we do have an error in the refresh of this token this is the MAX time we have to solve the problem before the ecosystem is in disarray.
-      #* The refresh-cron MUST therefore be a fraction of the time-to-live.
-      refresh-cron: "0 15 0,6,12,18 * * *"
     protected-issuance-trust-list-statement:
+      # We have a max lifetime of time-to-live for token. If we have an error in the refresh of this token, this is
+      # the MAX time we have, to solve the problem before the ecosystem is in disarray.
       time-to-live: P6M # 6 Months
-      #* We have a max lifetime of time-to-live for the token.
-      #* If we do have an error in the refresh of this token this is the MAX time we have to solve the problem before the ecosystem is in disarray.
-      #* The refresh-cron MUST therefore be a fraction of the time-to-live.
-      refresh-cron: "0 0 0,6,12,18 * * *"
+
+  jobs:
+    # The interval MUST be a fraction of ${app.statement-defaults.statuslist.time-to-live}.
+    statement-status-list-refresh-interval: "0 30 0,6,12,18 * * *"
+    # The interval MUST be a fraction of ${app.statement-defaults.protected-issuance-trust-list-statement.time-to-live}.
+    statement-non-compliance-trust-list-refresh-interval: "0 15 0,6,12,18 * * *"
+    # The interval MUST be a fraction of ${app.statement-defaults.protected-issuance-trust-list-statement.time-to-live}.
+    statement-protected-issuance-trust-list-refresh-interval: "0 0 0,6,12,18 * * *"
   issuer:
     trust-root:
       business-partner-id: ${TRUST_ROOT_BUSINESS_PARTNER_ID:}

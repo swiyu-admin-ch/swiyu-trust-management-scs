@@ -1,4 +1,4 @@
-package ch.admin.bj.swiyu.trust.management.modules.ui.api;
+package ch.admin.bj.swiyu.trust.management.modules.management.api;
 
 import java.time.Instant;
 import java.util.UUID;

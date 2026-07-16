@@ -33,4 +33,8 @@ public class SecurityContextSupport {
             return UNKNOWN_USER;
         }
     }
+
+    public static void setSystemUserAuthentication() {
+        SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
+    }
 }
