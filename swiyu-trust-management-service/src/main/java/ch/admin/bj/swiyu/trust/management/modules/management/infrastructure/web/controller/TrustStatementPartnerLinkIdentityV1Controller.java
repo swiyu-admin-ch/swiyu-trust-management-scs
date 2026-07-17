@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR;
+
 import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV1RequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementPartnerLinkDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementService;
@@ -26,7 +27,7 @@ public class TrustStatementPartnerLinkIdentityV1Controller {
     private final TrustStatementService trustStatementService;
 
     @PostMapping("")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     @Operation(summary = "Prepare a new trust statement request. If confirmed it gets also issued and published.")
     public ResponseEntity<TrustStatementPartnerLinkDto> issueAndPublishIdentityTrustStatement(
         @RequestParam(required = false) @Parameter(

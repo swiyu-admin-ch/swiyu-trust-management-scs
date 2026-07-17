@@ -1,11 +1,11 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Names.EDITOR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkRepository;
 import ch.admin.bj.swiyu.trust.management.test.AsyncTestConfig;
 import ch.admin.bj.swiyu.trust.management.test.MockAuditPublisherTestConfiguration;
@@ -49,7 +49,7 @@ class TrustStatementPartnerLinkProtectedVerificationAuthorizationV2ControllerIT 
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void create_ProtectedVerificationAuthorizationV2() throws Exception {
         // Given
         var request = RequestTestData.tsProtectedVerificationAuthorizationV2Request(null, null, null, null);

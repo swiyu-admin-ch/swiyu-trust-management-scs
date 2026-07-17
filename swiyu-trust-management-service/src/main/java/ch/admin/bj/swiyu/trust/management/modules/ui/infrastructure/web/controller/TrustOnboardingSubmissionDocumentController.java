@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.controller;
 
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR_OR_READER;
+
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingSubmissionDocumentListItemDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingSubmissionDocumentService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,7 +33,7 @@ public class TrustOnboardingSubmissionDocumentController {
     private final TrustOnboardingSubmissionDocumentService trustOnboardingSubmissionDocumentService;
 
     @GetMapping("/")
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @PageableAsQueryParam
     public PagedModel<TrustOnboardingSubmissionDocumentListItemDto> getTrustOnboardingSubmissionDocuments(
         @SortDefault(sort = "updatedAt", direction = Sort.Direction.DESC) @Parameter(
@@ -44,7 +45,7 @@ public class TrustOnboardingSubmissionDocumentController {
     }
 
     @GetMapping(value = "/{taskId}/{documentId}")
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @ApiResponses(
         value = {
             @ApiResponse(

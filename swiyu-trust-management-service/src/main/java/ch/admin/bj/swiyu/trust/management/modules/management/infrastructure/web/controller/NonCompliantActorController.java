@@ -1,8 +1,9 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR_OR_READER;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorFilterDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorRequestDto;
@@ -38,13 +39,13 @@ public class NonCompliantActorController {
     private final NonCompliantActorPublicationService nonCompliantActorPublicationService;
 
     @GetMapping("/{nonCompliantActorId}")
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     public NonCompliantActorDto getNonCompliantActor(@PathVariable @Valid @NotNull UUID nonCompliantActorId) {
         return this.nonCompliantActorService.getNonCompliantActor(nonCompliantActorId);
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @PageableAsQueryParam
     public PagedModel<NonCompliantActorDto> getNonCompliantActors(
         @ParameterObject @Valid @NotNull NonCompliantActorFilterDto filters,
@@ -56,7 +57,7 @@ public class NonCompliantActorController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     public ResponseEntity<NonCompliantActorDto> createNonCompliantActor(
         @RequestBody @Valid @NotNull NonCompliantActorRequestDto request
     ) {
@@ -69,7 +70,7 @@ public class NonCompliantActorController {
     }
 
     @DeleteMapping("/{nonCompliantActorId}")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     public void deleteNonCompliantActor(@PathVariable @Valid @NotNull UUID nonCompliantActorId) {
         this.nonCompliantActorService.deleteNonCompliantActor(nonCompliantActorId, getCurrentUserFullName());
         this.nonCompliantActorPublicationService.triggerPublicationAsync();

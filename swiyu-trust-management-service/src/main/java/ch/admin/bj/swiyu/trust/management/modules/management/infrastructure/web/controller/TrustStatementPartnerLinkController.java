@@ -1,6 +1,8 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR_OR_READER;
+
 import ch.admin.bj.swiyu.trust.management.modules.management.api.DeactivationRequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementPartnerLinkDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementPartnerLinkFilterDto;
@@ -33,7 +35,7 @@ public class TrustStatementPartnerLinkController {
     private final TrustStatementService trustStatementService;
 
     @GetMapping("/")
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @Operation(summary = "Get a paginated list of trust statements.")
     @PageableAsQueryParam
     public PagedModel<TrustStatementPartnerLinkListItemDto> getPartnerLinks(
@@ -46,14 +48,14 @@ public class TrustStatementPartnerLinkController {
     }
 
     @GetMapping("/{trustStatementId}")
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @Operation(summary = "Get detailed info to a trust statement request.")
     public TrustStatementPartnerLinkDto getSubmission(@PathVariable @Valid @NotNull UUID trustStatementId) {
         return this.trustStatementService.getPartnerLink(trustStatementId);
     }
 
     @DeleteMapping("/{trustStatementId}")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     @Operation(summary = "Deactivates a trust statement.")
     public TrustStatementPartnerLinkDto deactivateSubmission(
         @PathVariable @Valid @NotNull UUID trustStatementId,

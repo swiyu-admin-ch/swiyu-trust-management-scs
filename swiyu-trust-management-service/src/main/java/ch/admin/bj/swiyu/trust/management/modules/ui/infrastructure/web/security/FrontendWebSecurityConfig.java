@@ -2,6 +2,8 @@ package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.securit
 
 import static org.springframework.http.HttpMethod.GET;
 
+import ch.admin.bit.jeap.security.resource.properties.ResourceServerProperties;
+import ch.admin.bj.swiyu.trust.management.modules.common.auth.JwtTokenAuthoritiesResolver;
 import ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.config.CorsProperties;
 import java.util.List;
 import java.util.stream.Stream;
@@ -106,5 +108,10 @@ public class FrontendWebSecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    JwtTokenAuthoritiesResolver jwtTokenAuthoritiesResolver(ResourceServerProperties resourceServerProperties) {
+        return new JwtTokenAuthoritiesResolver(resourceServerProperties.getAudience());
     }
 }

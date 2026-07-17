@@ -1,8 +1,9 @@
 package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.controller;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR_OR_READER;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustAddDidTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskListItemDto;
@@ -41,7 +42,7 @@ public class TrustOnboardingTaskController {
     private final TrustAddDidTaskService trustAddDidTaskService;
 
     @GetMapping("/")
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @PageableAsQueryParam
     public PagedModel<TrustOnboardingTaskListItemDto> getTasks(
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate submissionStartDate,
@@ -68,31 +69,31 @@ public class TrustOnboardingTaskController {
     }
 
     @GetMapping("/{taskId}")
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     public TrustOnboardingTaskDto getTask(@PathVariable UUID taskId) {
         return this.trustOnboardingTaskService.getTask(taskId);
     }
 
     @GetMapping("/{taskId}/add-did")
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     public TrustAddDidTaskDto getAddDidTask(@PathVariable UUID taskId) {
         return this.trustAddDidTaskService.getTask(taskId);
     }
 
     @PostMapping("/{taskId}/approve")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     public void approve(@PathVariable UUID taskId, @NotNull ApproveTaskActionDto request) {
         this.trustOnboardingTaskService.approve(taskId, request, getCurrentUserFullName());
     }
 
     @PostMapping("/{taskId}/reject")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     public void reject(@PathVariable UUID taskId, @NotNull RejectTaskActionDto request) {
         this.trustOnboardingTaskService.reject(taskId, request, getCurrentUserFullName());
     }
 
     @PostMapping("/{taskId}/request-more-information")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     public void requestMoreInformation(
         @PathVariable UUID taskId,
         @NotNull RequestMoreInformationTaskActionDto request
@@ -101,13 +102,13 @@ public class TrustOnboardingTaskController {
     }
 
     @PostMapping("/{taskId}/add-internal-note")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     public void addInternalNote(@PathVariable @NotNull UUID taskId, @NotNull AddInternalNoteTaskActionDto request) {
         this.trustOnboardingTaskService.addInternalNote(taskId, request.internalNote(), getCurrentUserFullName());
     }
 
     @PostMapping("/{taskId}/assign/self")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     public void assignSelf(@PathVariable @NotNull UUID taskId) {
         var user = getCurrentUserFullName();
         this.trustOnboardingTaskService.assign(taskId, user, user);

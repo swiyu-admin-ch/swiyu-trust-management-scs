@@ -1,11 +1,11 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Names.EDITOR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantActorRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkStatus;
@@ -56,7 +56,7 @@ class NonCompliantActorControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void create_NonComplianceActor() throws Exception {
         // Given
         var request = RequestTestData.tsNonComplianceActorCreateRequest(null);
@@ -80,7 +80,7 @@ class NonCompliantActorControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void get_NonComplianceActor() throws Exception {
         // Given
         mockMvc.perform(
@@ -106,7 +106,7 @@ class NonCompliantActorControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void list_NonComplianceActor() throws Exception {
         // Given
         mockMvc.perform(
@@ -143,7 +143,7 @@ class NonCompliantActorControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void delete_NonComplianceActor() throws Exception {
         // Given
         mockMvc

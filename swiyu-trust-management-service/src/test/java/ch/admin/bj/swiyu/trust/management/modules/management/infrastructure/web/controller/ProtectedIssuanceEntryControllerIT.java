@@ -1,11 +1,11 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Names.EDITOR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedIssuanceEntryRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkStatus;
@@ -61,7 +61,7 @@ class ProtectedIssuanceEntryControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void create_ProtectedIssuanceEntry() throws Exception {
         // Given
         var request = RequestTestData.tsProtectedIssuanceEntryCreateRequest("urn:vct:test");
@@ -88,7 +88,7 @@ class ProtectedIssuanceEntryControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void get_ProtectedIssuanceEntry() throws Exception {
         // Given
         mockMvc.perform(
@@ -117,7 +117,7 @@ class ProtectedIssuanceEntryControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void list_ProtectedIssuanceEntry_filterByVct() throws Exception {
         // Given
         mockMvc.perform(
@@ -157,7 +157,7 @@ class ProtectedIssuanceEntryControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void list_ProtectedIssuanceEntry() throws Exception {
         // Given
         mockMvc.perform(
@@ -194,7 +194,7 @@ class ProtectedIssuanceEntryControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void delete_ProtectedIssuanceEntry() throws Exception {
         // Given
         mockMvc

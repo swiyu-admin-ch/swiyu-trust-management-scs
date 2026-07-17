@@ -7,6 +7,7 @@ import {
   ObButtonModule,
   ObDocumentMetaModule,
   ObDocumentMetaService,
+  ObHttpApiInterceptorConfig,
   ObMasterLayoutConfig,
   ObMasterLayoutModule,
   ObOffCanvasModule
@@ -37,6 +38,7 @@ export class AppComponent implements OnInit {
   readonly authService = inject(AuthService);
   private readonly config: ObMasterLayoutConfig = inject(ObMasterLayoutConfig);
   private readonly meta = inject(ObDocumentMetaService);
+  private readonly interceptorConfig = inject(ObHttpApiInterceptorConfig);
 
   constructor() {
     this.config.layout.hasMaxWidth = true;
@@ -44,6 +46,8 @@ export class AppComponent implements OnInit {
     this.config.header.serviceNavigation.displayLanguages = true;
     this.meta.titleSuffix = 'app.name';
     this.meta.titleSeparator = ' | ';
+    this.interceptorConfig.api.spinner = true;
+    this.interceptorConfig.api.url = 'ui-api';
   }
 
   ngOnInit(): void {

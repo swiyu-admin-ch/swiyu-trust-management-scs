@@ -1,5 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Names.EDITOR;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Names.READER;
 import static ch.admin.bj.swiyu.trust.management.modules.common.persistence.TransactionManagerNames.MANAGEMENT_TRANSACTION_MANAGER;
 import static ch.admin.bj.swiyu.trust.management.test.RequestTestData.BUSINESS_PARTNER_A_ID;
 import static ch.admin.bj.swiyu.trust.management.test.TrustStatementTestData.issuanceV1;
@@ -13,7 +15,6 @@ import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.trust.client.issuer.management.api.CredentialApi;
 import ch.admin.bj.swiyu.trust.client.issuer.management.model.CredentialStatusTypeDto;
 import ch.admin.bj.swiyu.trust.client.issuer.oid4vci.api.IssuerOid4VciApi;
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementService;
 import ch.admin.bj.swiyu.trust.management.test.IssuerTestData;
@@ -86,7 +87,7 @@ class TrustStatementPartnerLinkControllerIT {
 
     @Test
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.READER })
+    @WithJeapAuthenticationToken(userRoles = { READER })
     void getSubmissions() {
         // Given
         trustStatementPartnerLinkRepository.saveAllAndFlush(List.of(issuanceV1("did:1"), issuanceV1("did:2")));
@@ -102,7 +103,7 @@ class TrustStatementPartnerLinkControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.EDITOR })
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void deactivateSubmission() {
         // GIVEN
         whenIssuerReturnsOk();
@@ -127,7 +128,7 @@ class TrustStatementPartnerLinkControllerIT {
     }
 
     @Test
-    @WithJeapAuthenticationToken(userRoles = { UserRoles.READER })
+    @WithJeapAuthenticationToken(userRoles = { READER })
     void getSubmission_NotFound() {
         // GIVEN
         var id = UUID.randomUUID();

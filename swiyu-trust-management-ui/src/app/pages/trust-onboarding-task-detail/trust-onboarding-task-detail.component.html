@@ -124,7 +124,7 @@
         <div class="sw-padding-sm">
           <small>{{ "app.trust-onboarding-task.fields.name_default.label" | translate }}</small
           ><br />
-          <span data-cy="partnerDefaultName">{{ task().entityName?.[DEFAULT_LOCALIZED_TEXT_KEY] || "-" }}</span>
+          <span data-cy="partnerDefaultName">{{ task().entityName[DEFAULT_LOCALIZED_TEXT_KEY] || "-" }}</span>
         </div>
         @for (nameLanguage of Language | keyvalue; track nameLanguage) {
           <div class="sw-padding-sm">
@@ -133,7 +133,6 @@
             <span [attr.data-cy]="'partnerName' + nameLanguage.value">{{
               task().entityName[nameLanguage.value] || "-"
             }}</span>
-            <!--							<span>{{ task().entityName[nameLanguage.value] || "-" }}</span>-->
           </div>
         }
       </div>

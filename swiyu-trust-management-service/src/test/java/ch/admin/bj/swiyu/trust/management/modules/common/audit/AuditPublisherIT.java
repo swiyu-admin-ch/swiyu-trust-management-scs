@@ -11,6 +11,7 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCa
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.TRUST_STATEMENT_DEACTIVATED;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.TRUST_STATEMENT_PUBLISHED;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.VC_SCHEMA_PUBLISHED;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Names.EDITOR;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +25,6 @@ import ch.admin.bit.jeap.audit.record.create.CreateAuditRecordCommand;
 import ch.admin.bit.jeap.messaging.kafka.interceptor.JeapKafkaMessageCallback;
 import ch.admin.bit.jeap.messaging.transactionaloutbox.outbox.DeferredMessageRepository;
 import ch.admin.bit.jeap.security.test.resource.JeapAuthenticationTestTokenBuilder;
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantActor;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantReasonText;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink;
@@ -229,7 +229,7 @@ class AuditPublisherIT {
                 .withGivenName("Max")
                 .withFamilyName("Mustermann")
                 .withClaim("iss", EIAM_REF_ISSUER)
-                .withUserRoles(UserRoles.EDITOR)
+                .withUserRoles(EDITOR)
                 .build()
         );
         SecurityContextHolder.setContext(context);

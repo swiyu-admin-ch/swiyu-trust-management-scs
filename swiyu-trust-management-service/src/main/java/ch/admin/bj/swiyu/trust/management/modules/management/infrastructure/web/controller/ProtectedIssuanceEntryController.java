@@ -1,8 +1,9 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR_OR_READER;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedIssuanceEntryCreateRequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedIssuanceEntryDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedIssuanceEntryFilterDto;
@@ -38,7 +39,7 @@ public class ProtectedIssuanceEntryController {
     private final ProtectedIssuanceTrustListStatementPublicationService protectedIssuanceTrustListStatementPublicationService;
 
     @PostMapping("")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     @Operation(
         summary = "Add a new vct to the list of protected VCTs in the ecosystem. Also publishes a new Protected Issuance Trust List Statement."
     )
@@ -51,7 +52,7 @@ public class ProtectedIssuanceEntryController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR)
     @Operation(summary = "Delete a protected VCT.")
     public void deleteProtectedIssuanceEntry(@Valid @PathVariable UUID id) {
         this.protectedIssuanceEntryService.deleteProtectedIssuanceEntry(id, getCurrentUserFullName());
@@ -59,14 +60,14 @@ public class ProtectedIssuanceEntryController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "') or hasRole('" + UserRoles.READER + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @Operation(summary = "Get a protected VCT.")
     public ProtectedIssuanceEntryDto getProtectedIssuanceEntry(@Valid @PathVariable UUID id) {
         return this.protectedIssuanceEntryService.getProtectedIssuanceEntry(id);
     }
 
     @GetMapping("/")
-    @PreAuthorize("hasRole('" + UserRoles.EDITOR + "') or hasRole('" + UserRoles.READER + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @Operation(summary = "Get a list of protected VCT.")
     @PageableAsQueryParam
     public PagedModel<ProtectedIssuanceEntryDto> listProtectedIssuanceEntries(

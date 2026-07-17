@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.controller;
 
-import ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRoles;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR_OR_READER;
+
 import ch.admin.bj.swiyu.trust.management.modules.management.api.DomainEventLogDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.DomainEventService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,7 +31,7 @@ public class DomainEventLogController {
 
     @PageableAsQueryParam
     @GetMapping("/")
-    @PreAuthorize("hasAnyRole('" + UserRoles.READER + "', '" + UserRoles.EDITOR + "')")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     public PagedModel<DomainEventLogDto> getDomainEventLogs(
         @RequestParam(required = false) UUID trustOnboardingTaskId,
         @SortDefault(sort = "triggeredAt", direction = Sort.Direction.DESC) @Parameter(hidden = true) Pageable pageable
