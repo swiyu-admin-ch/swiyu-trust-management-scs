@@ -46,4 +46,10 @@ mvn versions:set -DnewVersion="$NEW_VERSION" -DprocessAllModules
 # Remove backup files
 mvn versions:commit
 
+# set npm ui version (package.json & package-lock.json) if a UI project exists
+UI_DIR=$(find . -maxdepth 1 -type d -name '*-ui*' | head -1)
+if [ -n "$UI_DIR" ]; then
+    (cd "$UI_DIR" && npm version --allow-same-version "$BASE_VERSION")
+fi
+
 echo "Version updated to $NEW_VERSION in all modules"

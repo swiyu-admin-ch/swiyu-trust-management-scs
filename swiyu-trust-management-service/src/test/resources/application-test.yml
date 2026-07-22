@@ -100,3 +100,6 @@ core-business:
 
 status-registry:
   write-base-url: http://test.b2b.core.business.service
+
+zas-sbn:
+  base-url: https://usntools.zas.admin.ch/usntools-svc

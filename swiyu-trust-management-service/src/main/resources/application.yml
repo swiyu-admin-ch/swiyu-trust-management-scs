@@ -164,6 +164,9 @@ core-business:
 status-registry:
   write-base-url: ${STATUS_REGISTRY_WRITE_BASE_URL:}
 
+zas-sbn:
+  base-url: ${ZAS_SBN_BASE_URL:https://usntools.zas.admin.ch/usntools-svc}
+
 http:
   max-redirects: 5
 

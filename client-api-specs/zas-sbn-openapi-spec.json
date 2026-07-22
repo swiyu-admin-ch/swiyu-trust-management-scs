@@ -1,0 +1,587 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ZAS USN Public Search API",
+    "version": "1.0.0",
+    "description": "Öffentlich zugängliche Suche nach SBN/USN (Systematische Benutzer der AHV-Nummer). Die Schnittstelle liefert ausschliesslich aktive SBNs zurück."
+  },
+  "servers": [
+    {
+      "url": "https://usntools.zas.admin.ch/usntools-svc",
+      "description": "Produktionsumgebung"
+    },
+    {
+      "url": "https://usntools-a.zas.admin.ch/usntools-svc",
+      "description": "AQ-Umgebung (Qualitätssicherung)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "USN",
+      "description": "Öffentliche Suche nach SBN/USN"
+    }
+  ],
+  "paths": {
+    "/api/public/usns": {
+      "get": {
+        "tags": [
+          "USN"
+        ],
+        "summary": "Aktive SBN/USN suchen",
+        "description": "Sucht aktive SBN/USN anhand optionaler Filterkriterien. Mehrere angegebene Kriterien werden gemeinsam auf die Suche angewendet. Inaktive oder abgelehnte SBN/USN werden nicht zurückgegeben.",
+        "operationId": "searchUsns",
+        "parameters": [
+          {
+            "name": "businessId",
+            "in": "query",
+            "required": false,
+            "description": "Eindeutige Fachkennung der SBN/USN; exakte, nicht case-sensitive Übereinstimmung.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "9e204e8e-b4d2-406e-8ee5-7cef7c58e360"
+          },
+          {
+            "name": "organisationName",
+            "in": "query",
+            "required": false,
+            "description": "Name der Organisation; nicht case-sensitive Teilübereinstimmung.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Helsana"
+          },
+          {
+            "name": "organisationIde",
+            "in": "query",
+            "required": false,
+            "description": "UID-Nummer der Organisation; nicht case-sensitive Teilübereinstimmung.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "CHE-102.695.608"
+          },
+          {
+            "name": "organisationCanton",
+            "in": "query",
+            "required": false,
+            "description": "Kantonscode; exakte, nicht case-sensitive Übereinstimmung.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "ZH"
+          },
+          {
+            "name": "organisationNpa",
+            "in": "query",
+            "required": false,
+            "description": "Postleitzahl der Organisation; nicht case-sensitive Teilübereinstimmung.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "8600"
+          },
+          {
+            "name": "organisationStreetName",
+            "in": "query",
+            "required": false,
+            "description": "Strassenname der Organisation; nicht case-sensitive Teilübereinstimmung.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Zürichstrasse"
+          },
+          {
+            "name": "organisationLocality",
+            "in": "query",
+            "required": false,
+            "description": "Ort der Organisation; nicht case-sensitive Teilübereinstimmung.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Dübendorf"
+          },
+          {
+            "name": "activityDomain",
+            "in": "query",
+            "required": false,
+            "description": "Tätigkeitsbereichscode; exakte, nicht case-sensitive Übereinstimmung.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "6512032-B"
+          },
+          {
+            "name": "usnMandating",
+            "in": "query",
+            "required": false,
+            "description": "Filtert nach dem Vorhandensein einer bevollmächtigten Organisation: true = mit, false = ohne bevollmächtigte Organisation.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "legalBasis",
+            "in": "query",
+            "required": false,
+            "description": "Code der Gesetzesgrundlage; exakte, nicht case-sensitive Übereinstimmung.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Seitennummer, beginnend bei 0.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "description": "Anzahl der Elemente pro Seite.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "required": false,
+            "description": "Zu sortierendes Feld, beispielsweise id.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "id"
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "required": false,
+            "description": "Sortierreihenfolge.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            },
+            "example": "ASC"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreiche Suche",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsnPage"
+                },
+                "example": {
+                  "content": [
+                    {
+                      "organisation": {
+                        "id": 2651,
+                        "canton": {
+                          "translation": {
+                            "labelFr": "Zurich",
+                            "labelDe": "Zürich",
+                            "labelIt": "Zurigo",
+                            "key": null,
+                            "updateDate": null
+                          },
+                          "code": "ZH"
+                        },
+                        "ide": "CHE-102.695.608",
+                        "name": "Helsana Versicherungen AG",
+                        "streetName": "Zürichstrasse 130",
+                        "streetNumber": "",
+                        "poBox": null,
+                        "npa": "8600",
+                        "locality": "Dübendorf"
+                      },
+                      "id": 2651,
+                      "businessId": "319bdaeb-1611-46e9-bff7-dd2dbba45d74",
+                      "status": {
+                        "translation": null,
+                        "code": "ACTIVE"
+                      },
+                      "commissionedOrganisationId": null,
+                      "activityDomain": {
+                        "translation": {
+                          "labelFr": "Assurance maladie obligatoire",
+                          "labelDe": "Obligatorische Krankenversicherung",
+                          "labelIt": "Assicurazione malattie obbligatoria",
+                          "key": null,
+                          "updateDate": null
+                        },
+                        "code": "6512032-B"
+                      }
+                    }
+                  ],
+                  "pageable": {
+                    "pageNumber": 0,
+                    "pageSize": 10,
+                    "sort": {
+                      "empty": true,
+                      "sorted": false,
+                      "unsorted": true
+                    },
+                    "offset": 0,
+                    "paged": true,
+                    "unpaged": false
+                  },
+                  "last": true,
+                  "totalPages": 1,
+                  "totalElements": 1,
+                  "first": true,
+                  "size": 10,
+                  "number": 0,
+                  "sort": {
+                    "empty": true,
+                    "sorted": false,
+                    "unsorted": true
+                  },
+                  "numberOfElements": 1,
+                  "empty": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültige Abfrageparameter"
+          },
+          "500": {
+            "description": "Interner Serverfehler"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UsnPage": {
+        "type": "object",
+        "description": "Paginierte Liste der gefundenen SBN/USN.",
+        "required": [
+          "content",
+          "pageable",
+          "last",
+          "totalPages",
+          "totalElements",
+          "first",
+          "size",
+          "number",
+          "sort",
+          "numberOfElements",
+          "empty"
+        ],
+        "properties": {
+          "content": {
+            "type": "array",
+            "description": "Liste der SBN/USN, die den Kriterien entsprechen.",
+            "items": {
+              "$ref": "#/components/schemas/Usn"
+            }
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/Pageable"
+          },
+          "last": {
+            "type": "boolean",
+            "description": "Gibt an, ob dies die letzte Seite ist."
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gesamtzahl der Seiten."
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Gesamtzahl der Elemente."
+          },
+          "first": {
+            "type": "boolean",
+            "description": "Gibt an, ob dies die erste Seite ist."
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Grösse der angeforderten Seite."
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Nummer der aktuellen Seite."
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Anzahl der Elemente auf der aktuellen Seite."
+          },
+          "empty": {
+            "type": "boolean",
+            "description": "Gibt an, ob keine Ergebnisse vorhanden sind."
+          }
+        }
+      },
+      "Usn": {
+        "type": "object",
+        "description": "Systematischer Benutzer der AHV-Nummer (SBN/USN).",
+        "required": [
+          "id",
+          "businessId",
+          "organisation",
+          "status",
+          "activityDomain"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Technischer Identifikator der SBN/USN."
+          },
+          "businessId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Eindeutige Fachkennung."
+          },
+          "organisation": {
+            "$ref": "#/components/schemas/Organisation"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "commissionedOrganisationId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "description": "ID der bevollmächtigten Organisation, falls vorhanden."
+          },
+          "activityDomain": {
+            "$ref": "#/components/schemas/ActivityDomain"
+          }
+        }
+      },
+      "Organisation": {
+        "type": "object",
+        "description": "Mit der SBN/USN verbundene Organisation.",
+        "required": [
+          "id",
+          "canton",
+          "name",
+          "streetName",
+          "streetNumber",
+          "npa",
+          "locality"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Technischer Identifikator der Organisation."
+          },
+          "canton": {
+            "$ref": "#/components/schemas/Canton"
+          },
+          "ide": {
+            "type": "string",
+            "nullable": true,
+            "description": "UID-Nummer der Organisation."
+          },
+          "name": {
+            "type": "string",
+            "description": "Vollständiger Name der Organisation."
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "Telefonnummer der Organisation. Das Feld ist in der Beispielantwort des PDF enthalten, jedoch nicht in der dortigen Feldtabelle beschrieben."
+          },
+          "streetName": {
+            "type": "string",
+            "description": "Strassenname; die API kann hier gemäss Beispielen auch die Hausnummer enthalten."
+          },
+          "streetNumber": {
+            "type": "string",
+            "description": "Hausnummer; kann als leerer String geliefert werden."
+          },
+          "poBox": {
+            "type": "string",
+            "nullable": true,
+            "description": "Postfach."
+          },
+          "npa": {
+            "type": "string",
+            "description": "Postleitzahl."
+          },
+          "locality": {
+            "type": "string",
+            "description": "Ort der Organisation."
+          }
+        }
+      },
+      "Canton": {
+        "type": "object",
+        "required": [
+          "code",
+          "translation"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Kantonscode.",
+            "example": "VD"
+          },
+          "translation": {
+            "$ref": "#/components/schemas/Translation"
+          }
+        }
+      },
+      "Status": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Statuscode. Die öffentliche Suche liefert nur aktive SBN/USN.",
+            "example": "ACTIVE"
+          },
+          "translation": {
+            "$ref": "#/components/schemas/NullableTranslation"
+          }
+        }
+      },
+      "ActivityDomain": {
+        "type": "object",
+        "required": [
+          "code",
+          "translation"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Tätigkeitsbereichscode.",
+            "example": "841100-A"
+          },
+          "translation": {
+            "$ref": "#/components/schemas/Translation"
+          }
+        }
+      },
+      "Translation": {
+        "type": "object",
+        "description": "Mehrsprachige Bezeichnung.",
+        "required": [
+          "labelFr",
+          "labelDe",
+          "labelIt"
+        ],
+        "properties": {
+          "labelFr": {
+            "type": "string",
+            "description": "Französische Bezeichnung."
+          },
+          "labelDe": {
+            "type": "string",
+            "description": "Deutsche Bezeichnung."
+          },
+          "labelIt": {
+            "type": "string",
+            "description": "Italienische Bezeichnung."
+          },
+          "key": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optionaler Übersetzungsschlüssel; im PDF-Beispiel als null geliefert."
+          },
+          "updateDate": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optionales Aktualisierungsdatum; das konkrete Format ist in der Dokumentation nicht spezifiziert."
+          }
+        }
+      },
+      "Pageable": {
+        "type": "object",
+        "description": "Informationen zur aktuellen Paginierung.",
+        "required": [
+          "pageNumber",
+          "pageSize",
+          "sort",
+          "offset",
+          "paged",
+          "unpaged"
+        ],
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sort"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Sort": {
+        "type": "object",
+        "description": "Informationen zum Sortierungszustand.",
+        "required": [
+          "empty",
+          "sorted",
+          "unsorted"
+        ],
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NullableTranslation": {
+        "type": "object",
+        "nullable": true,
+        "description": "Mehrsprachige Bezeichnung, die auch null sein kann.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Translation"
+          }
+        ]
+      }
+    }
+  }
+}
