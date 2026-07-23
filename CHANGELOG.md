@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.32.2
+
+### Changed
+
+- Add tomcat-embed-core 10.1.56.
+- Add postgresql driver 42.7.12.
+- Add httpcore5-h2 5.4.3.
+
+## 3.32.1
+
+### Changed
+
+- Upgrade Jackson-databind to 2.22.1 to address CVE‑2026‑59889
+- Upgrade fast-uri to 3.1.4 to address CVE‑2026‑16221
+
 ## 3.32.0
 
 ### Added
@@ -16,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - fix user role handling for int (preview) stages
-- 
+
 ## 3.31.5
 
 ### Changed
