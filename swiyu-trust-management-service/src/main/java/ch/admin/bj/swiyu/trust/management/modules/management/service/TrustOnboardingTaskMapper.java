@@ -65,7 +65,8 @@ public class TrustOnboardingTaskMapper {
             toCorrespondanceLanguageDto(submission.getCorrespondingLanguage()),
             toContactDto(submission),
             toDidDto(submission.getProofOfPossessions()),
-            allowedActions
+            allowedActions,
+            task.getTimesResubmitted()
         );
     }
 
@@ -187,6 +188,7 @@ public class TrustOnboardingTaskMapper {
             case ACCEPTED -> TrustOnboardingTaskStatusDto.ACCEPTED;
             case OPENED -> TrustOnboardingTaskStatusDto.OPENED;
             case INFORMATION_REQUESTED -> TrustOnboardingTaskStatusDto.INFORMATION_REQUESTED;
+            case RESUBMITTED -> TrustOnboardingTaskStatusDto.RESUBMITTED;
         };
     }
 }

@@ -13,6 +13,7 @@ public class CoreDemoData {
     public static final UUID CORE_ID_BP_WANTS_TO_BE_TRUSTED = UUID.fromString(CORE_ID_BP_WANTS_TO_BE_TRUSTED_S);
     public static final UUID CORE_ID_BP_GOV = UUID.fromString("39f92e48-619e-4e92-8958-468ae138d8a3");
     public static final UUID CORE_ID_BP_BASE_ONBOARDING_ONLY = UUID.fromString("e97e84e6-f40e-47ba-bdfe-d92f3d3dbc84");
+    public static final UUID CORE_ID_BP_OVERDUE = UUID.fromString("4b9f08ac-aa29-4bcf-97a4-88e73e49c3e1");
 
     public static final String CORE_ID_TOS_UNSUBMITTED_S = "46ada91a-84ce-422b-b9b5-e0d2e3e8c46d";
     public static final UUID CORE_ID_TOS_UNSUBMITTED = UUID.fromString(CORE_ID_TOS_UNSUBMITTED_S);
@@ -21,6 +22,7 @@ public class CoreDemoData {
     public static final String CORE_ID_TOS_SUCCEEDED_S = "8369160f-697c-4b12-80d3-91abff1a29ee";
     public static final UUID CORE_ID_TOS_SUCCEEDED = UUID.fromString(CORE_ID_TOS_SUCCEEDED_S);
     public static final UUID CORE_ID_TOS_INFO_REQUESTED = UUID.fromString("dc828a98-ffb1-4ae4-8f07-b35d2818ac87");
+    public static final UUID CORE_ID_TOS_OVERDUE = UUID.fromString("161d56d8-0999-46e5-a618-ba922414382a");
 
     // CORE_ID_BP_DEFAULT
     public static final Map<String, String> CORE_ID_BP_DEFAULT_NAMES = LocalizedMapUtil.fromLanguages(
@@ -54,4 +56,15 @@ public class CoreDemoData {
         "Demochaun"
     );
     public static final String CORE_ID_BP_GOV_EMAIL = "s.schmid@democanton.admin.ch";
+
+    // CORE_ID_BP_OVERDUE
+    public static final Map<String, String> CORE_ID_BP_OVERDUE_NAMES = LocalizedMapUtil.fromLanguages(
+        "Schleppende Logistik AG",
+        "Schleppende Logistik AG",
+        "Logistique Lente SA",
+        "Logistica Lenta S.r.l.",
+        "Sluggish Logistics AG",
+        "S.L. AG"
+    );
+    public static final String CORE_ID_BP_OVERDUE_EMAIL = "p.keller@schleppende-logistik.ch";
 }

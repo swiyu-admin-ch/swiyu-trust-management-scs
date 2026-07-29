@@ -7,11 +7,8 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import {TrustOnboardingDeclineReason} from './trust-onboarding-decline-reason';
 
 export interface RequestMoreInformationTaskAction {
-  declineReason: TrustOnboardingDeclineReason;
   partnerNote: string;
   internalNote?: string;
 }
-export namespace RequestMoreInformationTaskAction {}

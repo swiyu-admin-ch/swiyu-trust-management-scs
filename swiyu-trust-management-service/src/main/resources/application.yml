@@ -182,6 +182,12 @@ app:
     environment: ${ENVIRONMENT:}
   functionality:
     automatic-approval-enabled: ${FUNCTIONALITY_AUTOMATIC_APPROVAL_ENABLED:}
+  trust-onboarding-task:
+    due-date-period: 5 # 5 Days
+    rejection-enforcement-period: 30 # 30 Days
+    #* We have a max lifetime of rejection-enforcement-period for a task awaiting resubmission.
+    #* The rejection-enforcement-check-cron MUST therefore be a fraction of the rejection-enforcement-period.
+    rejection-enforcement-check-cron: "0 0 1 * * *" # once a day at 01:00
   statement-defaults:
     time-to-live: P6M # 6 Months
     statuslist:
@@ -197,6 +203,8 @@ app:
       # We have a max lifetime of time-to-live for token. If we have an error in the refresh of this token, this is
       # the MAX time we have, to solve the problem before the ecosystem is in disarray.
       time-to-live: P6M # 6 Months
+  identity-defaults:
+    validity: P3Y # 3 years
 
   jobs:
     # The interval MUST be a fraction of ${app.statement-defaults.statuslist.time-to-live}.

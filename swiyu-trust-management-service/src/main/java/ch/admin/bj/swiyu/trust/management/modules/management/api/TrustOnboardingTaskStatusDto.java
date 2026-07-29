@@ -8,4 +8,5 @@ public enum TrustOnboardingTaskStatusDto {
     ACCEPTED,
     OPENED,
     INFORMATION_REQUESTED,
+    RESUBMITTED,
 }

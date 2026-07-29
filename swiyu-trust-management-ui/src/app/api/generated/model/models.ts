@@ -18,7 +18,6 @@ export * from './reject-task-action';
 export * from './request-more-information-task-action';
 export * from './simple-errors';
 export * from './trust-add-did-task';
-export * from './trust-onboarding-decline-reason';
 export * from './trust-onboarding-reject-reason';
 export * from './trust-onboarding-submission-document-list-item-dto';
 export * from './trust-onboarding-task';

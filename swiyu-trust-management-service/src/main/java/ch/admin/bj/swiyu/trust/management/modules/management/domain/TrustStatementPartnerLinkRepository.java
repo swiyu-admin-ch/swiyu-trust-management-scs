@@ -61,4 +61,10 @@ public interface TrustStatementPartnerLinkRepository
         List<TrustStatementPartnerLinkType> type,
         TrustStatementPartnerLinkStatus status
     );
+
+    List<TrustStatementPartnerLink> findAllByPartnerIdAndTypeInAndStatus(
+        UUID businessPartnerIdentityId,
+        List<TrustStatementPartnerLinkType> type,
+        TrustStatementPartnerLinkStatus trustStatementPartnerLinkStatus
+    );
 }

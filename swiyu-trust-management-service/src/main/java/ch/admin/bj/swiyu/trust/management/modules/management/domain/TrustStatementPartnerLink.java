@@ -29,14 +29,7 @@ public class TrustStatementPartnerLink {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    /**
-     * The id of the business partner. Currently nullable only because:
-     * <ol>
-     *      <li>TrustStatementMetadataV1 do not have a referencing partnerid</li>*
-     * </ol>
-     * <p>
-     * Once this limitation is removed we can make it NOT NULL.
-     */
+    @NotNull
     private UUID partnerId;
 
     @Enumerated(EnumType.STRING)
@@ -74,7 +67,7 @@ public class TrustStatementPartnerLink {
      * @param statusListEntry Statements statuslist position
      */
     protected TrustStatementPartnerLink(
-        UUID partnerId,
+        @NotNull UUID partnerId,
         TrustStatementPartnerLinkType type,
         String subject,
         Instant validFrom,

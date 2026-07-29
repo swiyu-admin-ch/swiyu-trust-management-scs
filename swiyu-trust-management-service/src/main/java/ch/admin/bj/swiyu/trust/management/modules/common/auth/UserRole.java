@@ -52,5 +52,6 @@ public enum UserRole implements GrantedAuthority {
         public static final String HAS_ROLE_EDITOR_OR_READER =
             "hasAnyRole('" + Names.EDITOR + "', '" + Names.READER + "')";
         public static final String HAS_ROLE_EDITOR = "hasRole('" + Names.EDITOR + "')";
+        public static final String HAS_ROLE_READER = "hasRole('" + Names.READER + "')";
     }
 }

@@ -1,7 +1,9 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
+import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserName;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus.*;
+import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.toBusinessPartnerIdentity;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingTaskActionsResolver.resolvePossibleActions;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingTaskMapper.toTrustOnboardingTaskDto;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementMapper.toTrustStatementPartnerLinkIdentityV1RequestDtoList;
@@ -11,12 +13,15 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboarding
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.TrustOnboardingTaskStatusValidationException;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingRejectReasonDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskListItemDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RejectTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RequestMoreInformationTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.config.TrustOnboardingTaskProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustOnboardingInformationRequestedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustOnboardingRejectedEventBuilder;
@@ -28,7 +33,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +59,7 @@ public class TrustOnboardingTaskService {
     private final TrustStatementService trustStatementService;
     private final TrustOnboardingTaskDomainService taskDomainService;
     private final EntityManager entityManager;
+    private final TrustOnboardingTaskProperties trustOnboardingTaskProperties;
 
     /**
      * Creates a new TrustOnboardingTask based on the provided TrustOnboardingSubmission
@@ -80,6 +85,31 @@ public class TrustOnboardingTaskService {
         return task.getId();
     }
 
+    /**
+     * Creates a new TrustOnboardingTask for the given submission, or, if a task for this submission already
+     * exists (i.e. the partner resubmitted after being asked for more information), marks it as resubmitted.
+     *
+     * @param trustOnboardingSubmission the submission that was accepted
+     * @param currentUserName           the name of the user triggering the creation, used for event publishing
+     * @return the id of the created or resubmitted task
+     */
+    @Transactional
+    public UUID createOrResubmitTaskByTrustOnboardingSubmission(
+        TrustOnboardingSubmissionDto trustOnboardingSubmission,
+        String currentUserName
+    ) {
+        var existingTask = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
+            trustOnboardingSubmission.getId()
+        );
+        if (existingTask == null) {
+            return createTaskByTrustOnboardingSubmission(trustOnboardingSubmission, currentUserName);
+        }
+        existingTask.markResubmitted(calculateDueAt(trustOnboardingSubmission));
+        trustOnboardingTaskRepository.save(existingTask);
+        domainEventService.trustOnboardingSubmissionResubmitted(existingTask.getId(), currentUserName);
+        return existingTask.getId();
+    }
+
     @Transactional(readOnly = true)
     public TrustOnboardingTaskDto getTask(UUID taskId) {
         var task = taskDomainService.getTrustOnboardingTask(taskId);
@@ -98,7 +128,12 @@ public class TrustOnboardingTaskService {
         }
 
         return toTrustOnboardingTaskDto(
-            resolvePossibleActions(task.getStatus(), task.getAssignee(), getCurrentUserFullName()),
+            resolvePossibleActions(
+                task.getStatus(),
+                task.getAssignee(),
+                getCurrentUserFullName(),
+                task.canRequestMoreInformation()
+            ),
             task,
             submission
         );
@@ -112,7 +147,8 @@ public class TrustOnboardingTaskService {
         LocalDate dueStartDate,
         LocalDate dueEndDate,
         List<String> states,
-        String assignee
+        String assignee,
+        List<String> taskTypes
     ) {
         QTrustTask q = QTrustTask.trustTask;
 
@@ -150,10 +186,19 @@ public class TrustOnboardingTaskService {
         if (assignee != null && !assignee.isBlank()) {
             where.and(q.assignee.equalsIgnoreCase(assignee));
         }
+        if (taskTypes != null && !taskTypes.isEmpty()) {
+            List<TrustTaskType> taskTypeEnums = taskTypes.stream().map(TrustTaskType::valueOf).toList();
+            where.and(q.taskType.in(taskTypeEnums));
+        }
         return this.trustTaskRepository.findAll(where, pageable).map(task ->
             TrustOnboardingTaskMapper.toTaskListItemDto(
                 task,
-                resolvePossibleActions(task.getStatus(), task.getAssignee(), getCurrentUserFullName())
+                resolvePossibleActions(
+                    task.getStatus(),
+                    task.getAssignee(),
+                    getCurrentUserFullName(),
+                    !(task instanceof TrustOnboardingTask onboardingTask) || onboardingTask.canRequestMoreInformation()
+                )
             )
         );
     }
@@ -209,14 +254,19 @@ public class TrustOnboardingTaskService {
     public void requestMoreInformation(UUID taskId, RequestMoreInformationTaskActionDto request, String triggeredBy) {
         log.info("Task {} is send back to user by {}", taskId.toString(), triggeredBy);
         var task = taskDomainService.getTrustOnboardingTask(taskId);
+        if (!task.canRequestMoreInformation()) {
+            throw new TrustOnboardingTaskStatusValidationException(
+                "Task " + taskId + " has already been resubmitted the maximum number of times"
+            );
+        }
         var submissionId = task.getTrustOnboardingSubmissionId();
-        task.changeStatus(INFORMATION_REQUESTED);
+        task.requestMoreInformation(Instant.now().plus(trustOnboardingTaskProperties.rejectionEnforcementPeriod()));
         taskRepository.save(task);
         outboxEventPublisher.publishTrustOnboardingInformationRequestedEvent(
             TiTrustOnboardingInformationRequestedEventBuilder.create()
                 .trustOnboardingSubmissionId(submissionId)
                 .partnerNote(request.partnerNote())
-                .declineReasonType(request.declineReason().toString())
+                .declineReasonType(TrustOnboardingRejectReasonDto.OTHER.toString())
                 .build()
         );
         domainEventService.trustOnboardingSubmissionMoreInformationRequested(
@@ -225,6 +275,34 @@ public class TrustOnboardingTaskService {
             request.partnerNote(),
             request.internalNote()
         );
+    }
+
+    /**
+     * Automatically rejects trust onboarding tasks that are awaiting partner resubmission past the
+     * rejection-enforcement deadline.
+     */
+    @Transactional
+    public void rejectTasksPastRejectionEnforcementDeadline() {
+        var now = Instant.now();
+        QTrustOnboardingTask q = QTrustOnboardingTask.trustOnboardingTask;
+        var overdueForResubmission = q.status.eq(INFORMATION_REQUESTED).and(q.rejectionEnforcedAt.lt(now));
+
+        var triggeredBy = getCurrentUserName();
+        for (var task : trustOnboardingTaskRepository.findAll(overdueForResubmission)) {
+            log.info(
+                "Task {} is automatically rejected due to exceeding its rejection-enforcement deadline",
+                task.getId()
+            );
+            reject(
+                task.getId(),
+                new RejectTaskActionDto(
+                    TrustOnboardingRejectReasonDto.NO_RESPONSE_FROM_APPLICANT,
+                    "Automatically rejected by system due to exceeded rejection-enforcement deadline",
+                    "Automatic rejection by system - rejection-enforcement deadline passed"
+                ),
+                triggeredBy
+            );
+        }
     }
 
     @Transactional
@@ -242,9 +320,8 @@ public class TrustOnboardingTaskService {
     }
 
     private void issueAndPublishIdentityTrustStatements(TrustOnboardingSubmissionDto trustOnboardingSubmissionDto) {
-        var businessPartnerIdentity = BusinessPartnerIdentityMapper.toBusinessPartnerIdentity(
-            trustOnboardingSubmissionDto
-        );
+        //        businessPartnerIdentityService.issueTrustStatements(trustOnboardingSubmissionDto.getPartnerId()); // should we add a new trustedIdentifier and call that ? // EID-6609
+        var businessPartnerIdentity = toBusinessPartnerIdentity(trustOnboardingSubmissionDto);
 
         // map onboardingSubmissionDto to trustStatementRequestV1
         var trustStatementPartnerLinkRequestList = toTrustStatementPartnerLinkIdentityV1RequestDtoList(
@@ -287,6 +364,6 @@ public class TrustOnboardingTaskService {
 
     private Instant calculateDueAt(TrustOnboardingSubmissionDto trustOnboardingSubmission) {
         var referenceInstant = Optional.ofNullable(trustOnboardingSubmission.getSubmittedAt()).orElseThrow();
-        return referenceInstant.plus(30, ChronoUnit.DAYS);
+        return referenceInstant.plus(trustOnboardingTaskProperties.dueDatePeriod());
     }
 }

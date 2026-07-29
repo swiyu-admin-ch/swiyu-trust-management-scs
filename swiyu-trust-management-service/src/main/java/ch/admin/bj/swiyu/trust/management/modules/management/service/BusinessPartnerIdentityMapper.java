@@ -2,8 +2,11 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.DEFAULT_VALUE_KEY;
 
+import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.BusinessPartnerTypeDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerIdentityDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerIdentityStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV1RequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV2RequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
@@ -13,6 +16,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.Iden
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementDetails;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,38 +26,91 @@ import org.jetbrains.annotations.NotNull;
 @UtilityClass
 public class BusinessPartnerIdentityMapper {
 
+    public static BusinessPartnerIdentityDto toBusinessPartnerIdentityDto(
+        BusinessPartnerIdentity businessPartnerIdentity
+    ) {
+        return new BusinessPartnerIdentityDto(
+            businessPartnerIdentity.getId(),
+            Map.copyOf(businessPartnerIdentity.getEntityName()),
+            businessPartnerIdentity.getLastActivated(),
+            businessPartnerIdentity.getUid(),
+            businessPartnerIdentity.getIsRegisteredInCommercialRegister(),
+            businessPartnerIdentity.getCorrespondingLanguage(),
+            toBusinessPartnerIdentityStatusDto(businessPartnerIdentity.getStatus()),
+            businessPartnerIdentity.getIsStateActor(),
+            businessPartnerIdentity.getTrustedIdentifier(),
+            businessPartnerIdentity.getValidUntil(),
+            businessPartnerIdentity.getLastIssuanceAt(),
+            businessPartnerIdentity.getVersion(),
+            businessPartnerIdentity.getAudit().getLastModifiedAt(),
+            businessPartnerIdentity.getAudit().getLastModifiedBy(),
+            businessPartnerIdentity.getAudit().getCreatedAt(),
+            businessPartnerIdentity.getAudit().getCreatedBy()
+        );
+    }
+
+    // must fully be adapted in EID-6609
     public static BusinessPartnerIdentity toBusinessPartnerIdentity(TrustOnboardingSubmissionDto submission) {
         return new BusinessPartnerIdentity(
             submission.getPartnerId(),
             Map.copyOf(submission.getName()),
+            Instant.now(), // must be adapted in EID-6609
+            submission.getRegistryIds().get("UID") == null ? null : submission.getRegistryIds().get("UID"),
+            submission.getIsRegisteredInCommercialRegister() != null &&
+                submission.getIsRegisteredInCommercialRegister(),
+            submission.getCorrespondingLanguage() == null ? null : submission.getCorrespondingLanguage().toString(),
+            BusinessPartnerIdentityStatus.ACTIVE,
             submission.getBusinessPartnerType() == BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION,
-            submission
-                .getRegistryIds()
-                .entrySet()
-                .stream()
-                .map(e -> new BusinessPartnerIdentity.RegistryId(e.getKey(), e.getValue()))
-                .toList()
+            Instant.now().atZone(ZoneOffset.UTC).plusMonths(6).toInstant(), // to be adapted to the config in EID-6609
+            Instant.now()
         );
     }
 
+    // must be fully adapted in EID-6609
     public static BusinessPartnerIdentity toBusinessPartnerIdentity(TrustStatementPartnerLink partnerLink) {
         return switch (partnerLink.getType()) {
             case TRUST_STATEMENT_IDENTITY_V1 -> {
                 var details = (IdentityV1Details) partnerLink.getDetails();
+                var uid = details
+                    .getRegistryIds()
+                    .stream()
+                    .filter(registryId -> "UID".equals(registryId.type()))
+                    .map(IdentityV1Details.RegistryId::value)
+                    .findFirst()
+                    .orElse(null);
                 yield new BusinessPartnerIdentity(
                     partnerLink.getPartnerId(),
                     toLocalizedEntityName(details),
+                    Instant.now(), // must be adapted in EID-6609
+                    uid,
+                    false,
+                    "de-DE",
+                    BusinessPartnerIdentityStatus.ACTIVE,
                     details.getIsStateActor(),
-                    toRegistryIdsFromIdentityV1Details(details.getRegistryIds())
+                    partnerLink.getValidUntil(),
+                    Instant.now()
                 );
             }
             case TRUST_STATEMENT_IDENTITY_V2 -> {
                 var details = (IdentityV2Details) partnerLink.getDetails();
+                var uid = details
+                    .getRegistryIds()
+                    .stream()
+                    .filter(registryId -> "UID".equals(registryId.type()))
+                    .map(IdentityV2Details.RegistryId::value)
+                    .findFirst()
+                    .orElse(null);
                 yield new BusinessPartnerIdentity(
                     partnerLink.getPartnerId(),
                     toLocalizedEntityName(details),
+                    Instant.now(), // must be adapted in EID-6609
+                    uid,
+                    false,
+                    "de-DE",
+                    BusinessPartnerIdentityStatus.ACTIVE,
                     details.getIsStateActor(),
-                    toRegistryIdsFromIdentityV2Details(details.getRegistryIds())
+                    partnerLink.getValidUntil(),
+                    Instant.now()
                 );
             }
             default -> throw new IllegalArgumentException(
@@ -90,13 +147,13 @@ public class BusinessPartnerIdentityMapper {
         BusinessPartnerIdentity businessPartnerIdentity
     ) {
         return new IdentityV2RequestDto(
-            businessPartnerIdentity.businessPartnerId(),
+            businessPartnerIdentity.getId(),
             did,
             Instant.now(),
             Instant.now().plus(Duration.ofDays(365)),
-            businessPartnerIdentity.entityName(),
-            businessPartnerIdentity.isStateActor(),
-            toRequestRegistryIdsV2(businessPartnerIdentity.registryIds())
+            businessPartnerIdentity.getEntityName(),
+            businessPartnerIdentity.getIsStateActor(),
+            toRegistryIdDtoV2List(businessPartnerIdentity.getUid())
         );
     }
 
@@ -108,34 +165,24 @@ public class BusinessPartnerIdentityMapper {
             did,
             Instant.now(),
             Instant.now().plus(Duration.ofDays(365)),
-            businessPartnerIdentity.entityName(),
-            businessPartnerIdentity.isStateActor(),
-            toRequestRegistryIdsV1(businessPartnerIdentity.registryIds())
+            businessPartnerIdentity.getEntityName(),
+            businessPartnerIdentity.getIsStateActor(),
+            toRegistryIdDtoV1List(businessPartnerIdentity.getUid())
         );
     }
 
-    public static List<IdentityV1RequestDto.RegistryIdDto> toRequestRegistryIdsV1(
-        List<BusinessPartnerIdentity.RegistryId> source
-    ) {
-        if (source == null) {
+    public static List<IdentityV1RequestDto.RegistryIdDto> toRegistryIdDtoV1List(String uid) {
+        if (uid == null) {
             return List.of();
         }
-        return source
-            .stream()
-            .map(r -> new IdentityV1RequestDto.RegistryIdDto(r.type(), r.value()))
-            .toList();
+        return List.of(new IdentityV1RequestDto.RegistryIdDto("UID", uid));
     }
 
-    public static List<IdentityV2RequestDto.RegistryIdDto> toRequestRegistryIdsV2(
-        List<BusinessPartnerIdentity.RegistryId> source
-    ) {
-        if (source == null) {
+    public static List<IdentityV2RequestDto.RegistryIdDto> toRegistryIdDtoV2List(String uid) {
+        if (uid == null) {
             return List.of();
         }
-        return source
-            .stream()
-            .map(r -> new IdentityV2RequestDto.RegistryIdDto(r.type(), r.value()))
-            .toList();
+        return List.of(new IdentityV2RequestDto.RegistryIdDto("UID", uid));
     }
 
     private static void putLocalizedEntry(Map<String, String> target, String languageCode, String text) {
@@ -146,21 +193,12 @@ public class BusinessPartnerIdentityMapper {
         target.put(languageCode.isEmpty() ? DEFAULT_VALUE_KEY : languageCode, text);
     }
 
-    private static List<BusinessPartnerIdentity.RegistryId> toRegistryIdsFromIdentityV1Details(
-        List<IdentityV1Details.RegistryId> registryIds
+    private static BusinessPartnerIdentityStatusDto toBusinessPartnerIdentityStatusDto(
+        BusinessPartnerIdentityStatus status
     ) {
-        return registryIds
-            .stream()
-            .map(r -> new BusinessPartnerIdentity.RegistryId(r.type(), r.value()))
-            .toList();
-    }
-
-    private static List<BusinessPartnerIdentity.RegistryId> toRegistryIdsFromIdentityV2Details(
-        List<IdentityV2Details.RegistryId> registryIds
-    ) {
-        return registryIds
-            .stream()
-            .map(r -> new BusinessPartnerIdentity.RegistryId(r.type(), r.value()))
-            .toList();
+        return switch (status) {
+            case ACTIVE -> BusinessPartnerIdentityStatusDto.ACTIVE;
+            case DEACTIVATED -> BusinessPartnerIdentityStatusDto.DEACTIVATED;
+        };
     }
 }

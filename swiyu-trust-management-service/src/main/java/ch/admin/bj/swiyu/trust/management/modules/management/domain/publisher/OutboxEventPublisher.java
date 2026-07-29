@@ -141,4 +141,48 @@ public class OutboxEventPublisher {
             event
         );
     }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void publishBusinessPartnerIdentityActivatedEvent(@NonNull TiBusinessPartnerIdentityActivatedEvent event) {
+        var topicName = TiBusinessPartnerIdentityActivatedEvent.TypeRef.DEFAULT_TOPIC;
+        sendEvent(
+            topicName,
+            BeanReferenceMessageKey.newBuilder()
+                .setNamespace(TiBusinessPartnerIdentityActivatedEvent.TypeRef.SYSTEM_NAME)
+                .setName(topicName)
+                .setId(event.getPayload().getBusinessPartnerIdentityId().toString())
+                .build(),
+            event
+        );
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void publishBusinessPartnerIdentityDeactivatedEvent(
+        @NonNull TiBusinessPartnerIdentityDeactivatedEvent event
+    ) {
+        var topicName = TiBusinessPartnerIdentityDeactivatedEvent.TypeRef.DEFAULT_TOPIC;
+        sendEvent(
+            topicName,
+            BeanReferenceMessageKey.newBuilder()
+                .setNamespace(TiBusinessPartnerIdentityDeactivatedEvent.TypeRef.SYSTEM_NAME)
+                .setName(topicName)
+                .setId(event.getPayload().getBusinessPartnerIdentityId().toString())
+                .build(),
+            event
+        );
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void publishBusinessPartnerIdentityUpdatedEvent(@NonNull TiBusinessPartnerIdentityUpdatedEvent event) {
+        var topicName = TiBusinessPartnerIdentityUpdatedEvent.TypeRef.DEFAULT_TOPIC;
+        sendEvent(
+            topicName,
+            BeanReferenceMessageKey.newBuilder()
+                .setNamespace(TiBusinessPartnerIdentityUpdatedEvent.TypeRef.SYSTEM_NAME)
+                .setName(topicName)
+                .setId(event.getPayload().getBusinessPartnerIdentityId().toString())
+                .build(),
+            event
+        );
+    }
 }

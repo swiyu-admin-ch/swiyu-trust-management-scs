@@ -159,6 +159,7 @@ class TrustAddDidTaskServiceIT {
         // then
         var task = trustAddDidTaskRepository.findById(saved.getId()).orElseThrow();
         assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
+        assertThat(task.getDueAt()).isNull();
 
         verify(outboxEventPublisher).publishTrustAddDidSubmissionAcceptedEvent(any());
     }
@@ -181,6 +182,7 @@ class TrustAddDidTaskServiceIT {
         // then
         var task = trustAddDidTaskRepository.findById(saved.getId()).orElseThrow();
         assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.REJECTED);
+        assertThat(task.getDueAt()).isNull();
         verify(outboxEventPublisher).publishTrustAddDidSubmissionRejectedEvent(any());
     }
 

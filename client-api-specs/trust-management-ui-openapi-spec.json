@@ -436,6 +436,17 @@
             }
           },
           {
+            "name": "taskType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "description": "Zero-based page index (0..N)",
@@ -858,9 +869,6 @@
       "RequestMoreInformationTaskAction": {
         "type": "object",
         "properties": {
-          "declineReason": {
-            "$ref": "#/components/schemas/TrustOnboardingDeclineReason"
-          },
           "partnerNote": {
             "type": "string"
           },
@@ -869,18 +877,7 @@
           }
         },
         "required": [
-          "declineReason",
           "partnerNote"
-        ]
-      },
-      "TrustOnboardingDeclineReason": {
-        "type": "string",
-        "enum": [
-          "MISSING_DOCUMENTS",
-          "UNAUTHORIZED_SIGNATORIES",
-          "INCORRECT_COMPANY_INFORMATION",
-          "INCORRECT_DECLARATION_OF_INTENT",
-          "OTHER"
         ]
       },
       "RejectTaskAction": {
@@ -1076,6 +1073,10 @@
               "$ref": "#/components/schemas/TrustOnboardingTaskAction"
             },
             "uniqueItems": true
+          },
+          "timesResubmitted": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "required": [
@@ -1088,7 +1089,8 @@
           "id",
           "partnerType",
           "state",
-          "submittedAt"
+          "submittedAt",
+          "timesResubmitted"
         ]
       },
       "TrustOnboardingTaskAction": {

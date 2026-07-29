@@ -11,19 +11,19 @@ import org.junit.jupiter.api.Test;
 class BusinessPartnerIdentityMapperTest {
 
     @Test
-    void toBusinessPartnerIdentity_onboarding_preservesCbsDefaultEntry() {
+    void toGetBusinessPartnerIdentity_onboarding_preservesCbsDefaultEntry() {
         var submission = TrustOnboardingTestData.trustOnboardingSubmissionDto();
 
         var identity = BusinessPartnerIdentityMapper.toBusinessPartnerIdentity(submission);
 
-        assertThat(identity.entityName()).isEqualTo(submission.getName());
-        assertThat(identity.entityName()).containsEntry("default", "Migros");
+        assertThat(identity.getEntityName()).isEqualTo(submission.getName());
+        assertThat(identity.getEntityName()).containsEntry("default", "Migros");
     }
 
     @Test
     // EID-6303
     @SuppressWarnings("java:S5738")
-    void toLocalizedEntityName_addDid_legacyStatementWithoutDefault_fallsBackToFirstLocale() {
+    void toLocalizedGetEntityName_addDid_legacyStatementWithoutDefault_fallsBackToFirstLocale() {
         var details = new IdentityV1Details(
             Map.of(IdentityV1Details.Language.DE_CH, "Acme DE", IdentityV1Details.Language.EN, "Acme EN"),
             false,

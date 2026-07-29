@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.33.1
+
+### Added
+
+- Adapt classes & provide backend functionality (Identity)
+- 
+## 3.33.0
+
+### Added
+
+- Trust onboarding task resubmission workflow
+- Overdue filter and highlighting for trust onboarding tasks
+- Task type filter for the trust onboarding task list
+
+### Changed
+
+- Trust onboarding task list filters now apply automatically and were reordered (submission date, status, task type, assignee)
+
 ## 3.32.2
 
 ### Changed

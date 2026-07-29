@@ -36,7 +36,7 @@ public class TrustOnboardingSubmissionEventProcessor {
             var trustOnboardingSubmission = this.trustOnboardingSubmissionApi.getTrustOnboardingSubmission(
                 event.getPayload().getTrustOnboardingSubmissionId()
             );
-            var taskId = this.taskService.createTaskByTrustOnboardingSubmission(
+            var taskId = this.taskService.createOrResubmitTaskByTrustOnboardingSubmission(
                 trustOnboardingSubmission,
                 getCurrentUserName()
             );

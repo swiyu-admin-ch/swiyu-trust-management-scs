@@ -17,7 +17,13 @@ class TrustTaskStatusValidatorTest {
         );
         TrustTaskStatusValidator.validateNewStatus(TrustTaskStatus.OPENED, TrustTaskStatus.INFORMATION_REQUESTED);
         TrustTaskStatusValidator.validateNewStatus(TrustTaskStatus.OPENED, TrustTaskStatus.REJECTED);
-        TrustTaskStatusValidator.validateNewStatus(TrustTaskStatus.INFORMATION_REQUESTED, TrustTaskStatus.OPENED);
+        TrustTaskStatusValidator.validateNewStatus(TrustTaskStatus.INFORMATION_REQUESTED, TrustTaskStatus.RESUBMITTED);
         TrustTaskStatusValidator.validateNewStatus(TrustTaskStatus.INFORMATION_REQUESTED, TrustTaskStatus.REJECTED);
+        TrustTaskStatusValidator.validateNewStatus(TrustTaskStatus.RESUBMITTED, TrustTaskStatus.INFORMATION_REQUESTED);
+        TrustTaskStatusValidator.validateNewStatus(TrustTaskStatus.RESUBMITTED, TrustTaskStatus.ACCEPTED);
+        TrustTaskStatusValidator.validateNewStatus(TrustTaskStatus.RESUBMITTED, TrustTaskStatus.REJECTED);
+        assertThrows(TrustOnboardingTaskStatusValidationException.class, () ->
+            TrustTaskStatusValidator.validateNewStatus(TrustTaskStatus.INFORMATION_REQUESTED, TrustTaskStatus.OPENED)
+        );
     }
 }

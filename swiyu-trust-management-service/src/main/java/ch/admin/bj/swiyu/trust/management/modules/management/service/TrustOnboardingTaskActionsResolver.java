@@ -17,6 +17,15 @@ public class TrustOnboardingTaskActionsResolver {
         String currentAssignee,
         String currentUserFullName
     ) {
+        return resolvePossibleActions(currentStatus, currentAssignee, currentUserFullName, true);
+    }
+
+    public static Set<TrustOnboardingTaskActionDto> resolvePossibleActions(
+        TrustTaskStatus currentStatus,
+        String currentAssignee,
+        String currentUserFullName,
+        boolean canRequestMoreInformation
+    ) {
         var actions = new HashSet<TrustOnboardingTaskActionDto>();
         for (var action : TrustOnboardingTaskActionDto.values()) {
             switch (action) {
@@ -31,7 +40,10 @@ public class TrustOnboardingTaskActionsResolver {
                     }
                 }
                 case REQUEST_MORE_INFORMATION -> {
-                    if (isValidNewStatus(currentStatus, TrustTaskStatus.INFORMATION_REQUESTED)) {
+                    if (
+                        isValidNewStatus(currentStatus, TrustTaskStatus.INFORMATION_REQUESTED) &&
+                        canRequestMoreInformation
+                    ) {
                         actions.add(action);
                     }
                 }

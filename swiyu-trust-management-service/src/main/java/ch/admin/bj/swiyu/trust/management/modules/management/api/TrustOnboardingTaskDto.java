@@ -30,7 +30,8 @@ public record TrustOnboardingTaskDto(
     @NotNull LanguageDto correspondenceLanguage,
     @NotNull List<ContactDto> contacts,
     @NotNull List<DidDto> dids,
-    @NotNull Set<TrustOnboardingTaskActionDto> allowedActions
+    @NotNull Set<TrustOnboardingTaskActionDto> allowedActions,
+    int timesResubmitted
 ) {
     @RequiredArgsConstructor
     @Schema(name = "Language", enumAsRef = true)

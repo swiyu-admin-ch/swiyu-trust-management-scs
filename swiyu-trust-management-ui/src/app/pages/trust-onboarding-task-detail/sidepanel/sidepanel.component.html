@@ -51,25 +51,14 @@
         }
         @if (panelData()?.action === TrustOnboardingTaskAction.RequestMoreInformation) {
           <div>
+            <ob-alert type="info">
+              {{ "app.trust-onboarding-task.sidepanel.request-additional-information-warning" | translate }}
+            </ob-alert>
             <h6>{{ "app.trust-onboarding-task.sidepanel.message" | translate }}</h6>
-            <mat-form-field>
-              <mat-label>{{ "app.trust-onboarding-task.sidepanel.reject-reason" | translate }}</mat-label>
-              <mat-select
-                name="declineReason"
-                required
-                [(ngModel)]="formData().declineReason"
-                data-cy="selectMoreInfoReason"
-              >
-                @for (reason of declineReasons; track reason) {
-                  <mat-option [value]="reason">
-                    {{ "app.trust-onboarding-task.sidepanel.decline-reason.type." + reason | translate }}
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
             <mat-form-field>
               <mat-label>{{ "app.trust-onboarding-task.sidepanel.message.reject.body" | translate }}</mat-label>
               <textarea
+                id="partnerMessage"
                 matInput
                 name="partnerMessageBody"
                 [(ngModel)]="formData().partnerMessageBody"

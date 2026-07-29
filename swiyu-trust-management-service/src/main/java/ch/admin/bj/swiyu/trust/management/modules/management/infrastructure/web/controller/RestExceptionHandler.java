@@ -1,5 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityBadRequestException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemProxyException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.TrustStatementValidationFailedException;
@@ -46,6 +47,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public SimpleErrors handleTrustStatementValidationFailedException(TrustStatementValidationFailedException e) {
         return e.getValidationIssues();
+    }
+
+    @ExceptionHandler(BusinessPartnerIdentityBadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleBusinessPartnerIdentityBadRequestException(
+        BusinessPartnerIdentityBadRequestException e
+    ) {
+        log.debug(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatusCode.valueOf(400));
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)

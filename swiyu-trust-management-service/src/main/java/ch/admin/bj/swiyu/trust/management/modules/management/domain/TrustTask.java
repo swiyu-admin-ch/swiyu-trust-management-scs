@@ -40,7 +40,6 @@ public abstract class TrustTask {
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, @NotBlank String> partnerName;
 
-    @NotNull
     private Instant dueAt;
 
     @NotNull
@@ -77,9 +76,20 @@ public abstract class TrustTask {
         this.assignee = assignee;
     }
 
+    public void setDueAt(Instant dueAt) {
+        this.dueAt = dueAt;
+    }
+
     public void changeStatus(TrustTaskStatus newStatus) {
         validateNewStatus(this.status, newStatus);
         this.status = newStatus;
+        if (
+            newStatus == TrustTaskStatus.ACCEPTED ||
+            newStatus == TrustTaskStatus.REJECTED ||
+            newStatus == TrustTaskStatus.INFORMATION_REQUESTED
+        ) {
+            this.dueAt = null;
+        }
     }
 
     protected void overwriteBaseFields(TrustTask source) {

@@ -26,7 +26,6 @@ public class TrustStatementPartnerLinkValidator {
         validateTimeRangeIsInOrder(issues, partnerLink);
         if (
             partnerLink.getDetails() instanceof IdentityV1Details ||
-            partnerLink.getDetails() instanceof IdentityV2Details ||
             partnerLink.getDetails() instanceof ProtectedVerificationAuthorizationV2Details ||
             partnerLink.getDetails() instanceof ProtectedIssuanceAuthorizationV2Details
         ) {

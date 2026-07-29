@@ -14,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service for event internal to the TMS.
+ */
 @Service
 @RequiredArgsConstructor
 public class DomainEventService {
@@ -78,6 +81,13 @@ public class DomainEventService {
                 partnerNote,
                 internalNote
             )
+        );
+    }
+
+    @Transactional
+    public void trustOnboardingSubmissionResubmitted(UUID trustTaskId, String triggeredBy) {
+        domainEventLogRepository.save(
+            DomainEventLog.createTrustTaskDomainEventLog(TRUST_ONBOARDING_RESUBMITTED, triggeredBy, trustTaskId)
         );
     }
 

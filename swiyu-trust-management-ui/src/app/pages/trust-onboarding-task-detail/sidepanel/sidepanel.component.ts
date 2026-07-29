@@ -9,18 +9,12 @@ import {MatButton} from '@angular/material/button';
 import {MatFormField, MatHint, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {MatOption, MatSelect} from '@angular/material/select';
-import {ObButtonDirective} from '@oblique/oblique';
-import {
-  TrustOnboardingDeclineReason,
-  TrustOnboardingRejectReason,
-  TrustOnboardingTaskAction,
-  TrustOnboardingTaskApi
-} from '../../../api/generated';
+import {ObAlertComponent, ObButtonDirective} from '@oblique/oblique';
+import {TrustOnboardingRejectReason, TrustOnboardingTaskAction, TrustOnboardingTaskApi} from '../../../api/generated';
 
 interface FormData {
   partnerMessageBody: string;
   rejectReason?: TrustOnboardingRejectReason;
-  declineReason?: TrustOnboardingDeclineReason;
   internalMessageBody: string;
   declarationAccepted: boolean;
 }
@@ -38,7 +32,8 @@ interface FormData {
     MatOption,
     FormsModule,
     ObButtonDirective,
-    MatButton
+    MatButton,
+    ObAlertComponent
   ],
   templateUrl: './sidepanel.component.html',
   styleUrl: './sidepanel.component.scss'
@@ -51,7 +46,6 @@ export class SidepanelComponent {
   TrustOnboardingTaskAction = TrustOnboardingTaskAction;
 
   rejectReasons = Object.values(TrustOnboardingRejectReason);
-  declineReasons = Object.values(TrustOnboardingDeclineReason);
 
   formData = signal(this.initialForm());
   panelData = signal<PanelData | null>(null);
@@ -127,8 +121,7 @@ export class SidepanelComponent {
             taskId: this.panelData()?.task?.id as string,
             request: {
               internalNote: this.formData().internalMessageBody,
-              partnerNote: this.formData().partnerMessageBody,
-              declineReason: this.formData().declineReason! // can never be null when submitting
+              partnerNote: this.formData().partnerMessageBody
             }
           })
           .subscribe(() => {
@@ -182,14 +175,6 @@ export class SidepanelComponent {
     this.translateService.get('app.trust-onboarding-task.sidepanel.message.hint.it-CH');
     this.translateService.get('app.trust-onboarding-task.sidepanel.message.hint.rm-CH');
 
-    this.translateService.get('app.trust-onboarding-task.sidepanel.decline-reason.type.MISSING_DOCUMENTS');
-    this.translateService.get('app.trust-onboarding-task.sidepanel.decline-reason.type.UNAUTHORIZED_SIGNATORIES');
-    this.translateService.get('app.trust-onboarding-task.sidepanel.decline-reason.type.INCORRECT_COMPANY_INFORMATION');
-    this.translateService.get(
-      'app.trust-onboarding-task.sidepanel.decline-reason.type.INCORRECT_DECLARATION_OF_INTENT'
-    );
-    this.translateService.get('app.trust-onboarding-task.sidepanel.decline-reason.type.OTHER');
-
     this.translateService.get('app.trust-onboarding-task.sidepanel.reject-reason.type.INCOMPLETE_INFORMATION');
     this.translateService.get('app.trust-onboarding-task.sidepanel.reject-reason.type.INACCURATE_INFORMATION');
     this.translateService.get('app.trust-onboarding-task.sidepanel.reject-reason.type.OUTDATED_INFORMATION');
@@ -206,7 +191,6 @@ export class SidepanelComponent {
     return {
       partnerMessageBody: '',
       rejectReason: undefined,
-      declineReason: undefined,
       internalMessageBody: '',
       declarationAccepted: false
     };

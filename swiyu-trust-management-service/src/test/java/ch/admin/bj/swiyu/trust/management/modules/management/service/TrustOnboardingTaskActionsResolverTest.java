@@ -50,4 +50,26 @@ class TrustOnboardingTaskActionsResolverTest {
         // THEN
         assertThat(actions).containsExactlyInAnyOrder(REJECT, APPROVE, ADD_INTERNAL_NOTE, ASSIGN_SELF);
     }
+
+    @Test
+    void resolvePossibleActions_Resubmitted() {
+        // GIVEN / WHEN
+        var actions = resolvePossibleActions(RESUBMITTED, ASSIGNEE, CURRENT_USER_FULLNAME);
+        // THEN
+        assertThat(actions).containsExactlyInAnyOrder(
+            REJECT,
+            APPROVE,
+            REQUEST_MORE_INFORMATION,
+            ADD_INTERNAL_NOTE,
+            ASSIGN_SELF
+        );
+    }
+
+    @Test
+    void resolvePossibleActions_Resubmitted_ResubmissionCapReached() {
+        // GIVEN / WHEN
+        var actions = resolvePossibleActions(RESUBMITTED, ASSIGNEE, CURRENT_USER_FULLNAME, false);
+        // THEN
+        assertThat(actions).containsExactlyInAnyOrder(REJECT, APPROVE, ADD_INTERNAL_NOTE, ASSIGN_SELF);
+    }
 }

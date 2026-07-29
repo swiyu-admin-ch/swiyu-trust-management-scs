@@ -51,6 +51,7 @@ public class TrustOnboardingTaskController {
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueEndDate,
         @RequestParam(required = false) List<String> state,
         @RequestParam(required = false) String assignee,
+        @RequestParam(required = false) List<String> taskType,
         @SortDefault(sort = "submittedAt", direction = Sort.Direction.DESC) @Parameter(
             hidden = true
         ) final Pageable pageable
@@ -63,7 +64,8 @@ public class TrustOnboardingTaskController {
                 dueStartDate,
                 dueEndDate,
                 state,
-                assignee
+                assignee,
+                taskType
             )
         );
     }

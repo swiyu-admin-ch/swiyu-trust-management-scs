@@ -5,4 +5,5 @@ public enum TrustTaskStatus {
     ACCEPTED,
     OPENED,
     INFORMATION_REQUESTED,
+    RESUBMITTED,
 }

@@ -25,7 +25,12 @@ public class TrustTaskStatusValidator {
                 TrustTaskStatus.REJECTED
             );
             case INFORMATION_REQUESTED -> Set.of(
-                TrustTaskStatus.OPENED,
+                TrustTaskStatus.RESUBMITTED,
+                TrustTaskStatus.ACCEPTED,
+                TrustTaskStatus.REJECTED
+            );
+            case RESUBMITTED -> Set.of(
+                TrustTaskStatus.INFORMATION_REQUESTED,
                 TrustTaskStatus.ACCEPTED,
                 TrustTaskStatus.REJECTED
             );

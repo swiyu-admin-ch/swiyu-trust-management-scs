@@ -38,12 +38,9 @@ public class DomainEventLog {
     private String triggeredBy;
 
     private UUID trustTaskId;
-
     private UUID nonCompliantActorId;
     private UUID protectedIssuanceEntryId;
-
     private String partnerNote;
-
     private String internalNote;
 
     public static DomainEventLog createTrustTaskDomainEventLog(

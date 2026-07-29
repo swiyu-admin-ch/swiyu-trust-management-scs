@@ -64,6 +64,7 @@ export interface GetTasksRequestParams {
   dueEndDate?: string;
   state?: Array<string>;
   assignee?: string;
+  taskType?: Array<string>;
   /** Zero-based page index (0..N) */
   page?: number;
   /** The size of the page to be returned */
@@ -561,6 +562,7 @@ export class TrustOnboardingTaskApi extends BaseService {
     const dueEndDate = requestParameters?.dueEndDate;
     const state = requestParameters?.state;
     const assignee = requestParameters?.assignee;
+    const taskType = requestParameters?.taskType;
     const page = requestParameters?.page;
     const size = requestParameters?.size;
     const sort = requestParameters?.sort;
@@ -611,6 +613,14 @@ export class TrustOnboardingTaskApi extends BaseService {
       localVarQueryParameters,
       'assignee',
       <any>assignee,
+      QueryParamStyle.Form,
+      true
+    );
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'taskType',
+      <any>taskType,
       QueryParamStyle.Form,
       true
     );

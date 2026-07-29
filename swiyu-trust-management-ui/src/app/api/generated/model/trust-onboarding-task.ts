@@ -32,5 +32,6 @@ export interface TrustOnboardingTask {
   contacts: Array<Contact>;
   dids: Array<Did>;
   allowedActions: Set<TrustOnboardingTaskAction>;
+  timesResubmitted: number;
 }
 export namespace TrustOnboardingTask {}

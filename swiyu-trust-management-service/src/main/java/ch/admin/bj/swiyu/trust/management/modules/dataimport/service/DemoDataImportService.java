@@ -37,10 +37,12 @@ public class DemoDataImportService {
         domainEventLogRepository.deleteAllByTrustTaskPartnerId(CoreDemoData.CORE_ID_BP_WANTS_TO_BE_TRUSTED);
         domainEventLogRepository.deleteAllByTrustTaskPartnerId(CoreDemoData.CORE_ID_BP_GOV);
         domainEventLogRepository.deleteAllByTrustTaskPartnerId(CoreDemoData.CORE_ID_BP_BASE_ONBOARDING_ONLY);
+        domainEventLogRepository.deleteAllByTrustTaskPartnerId(CoreDemoData.CORE_ID_BP_OVERDUE);
         trustOnboardingTaskRepository.deleteAllByPartnerId(CoreDemoData.CORE_ID_BP_DEFAULT);
         trustOnboardingTaskRepository.deleteAllByPartnerId(CoreDemoData.CORE_ID_BP_WANTS_TO_BE_TRUSTED);
         trustOnboardingTaskRepository.deleteAllByPartnerId(CoreDemoData.CORE_ID_BP_GOV);
         trustOnboardingTaskRepository.deleteAllByPartnerId(CoreDemoData.CORE_ID_BP_BASE_ONBOARDING_ONLY);
+        trustOnboardingTaskRepository.deleteAllByPartnerId(CoreDemoData.CORE_ID_BP_OVERDUE);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -88,6 +90,16 @@ public class DemoDataImportService {
             CoreDemoData.CORE_ID_TOS_SUBMITTED,
             Instant.now().plus(1000, ChronoUnit.DAYS),
             Instant.now().minus(1, ChronoUnit.DAYS)
+        );
+        data.add(task);
+
+        task = new TrustOnboardingTask(
+            TmsDemoData.TMS_ID_TOT_OVERDUE,
+            CoreDemoData.CORE_ID_BP_OVERDUE,
+            CoreDemoData.CORE_ID_BP_OVERDUE_NAMES,
+            CoreDemoData.CORE_ID_TOS_OVERDUE,
+            Instant.now().minus(3, ChronoUnit.DAYS),
+            Instant.now().minus(10, ChronoUnit.DAYS)
         );
         data.add(task);
         for (var d : data) {

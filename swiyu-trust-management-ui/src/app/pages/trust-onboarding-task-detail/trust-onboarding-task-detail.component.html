@@ -5,6 +5,11 @@
     </ob-alert>
   </div>
 } @else if (task().id) {
+  @if (task().timesResubmitted > 1) {
+    <ob-alert data-cy="taskResubmittedWarning" type="info">
+      {{ "app.trust-onboarding-task.warning.additional-information" | translate }}
+    </ob-alert>
+  }
   <div class="sw-flex-space-between">
     <h1>{{ task().entityName | localize }}</h1>
     <button [matMenuTriggerFor]="menu" data-cy="btnTaskDetailMore" mat-icon-button obButton="secondary">
