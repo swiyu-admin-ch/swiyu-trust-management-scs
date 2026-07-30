@@ -10,13 +10,13 @@
             Attention: when ever you update this version, check whether we can remove a CVE-OVERRIDE
             from the dependencyManagement section
          -->
-        <version>33.11.0</version>
+        <version>37.6.0</version>
         <relativePath/>
     </parent>
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>3.32.2-SNAPSHOT</version>
+    <version>3.34.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -32,7 +32,6 @@
         <nimbus-jose-jwt.version>10.9.1</nimbus-jose-jwt.version>
         <sd-jwt.version>1.9</sd-jwt.version>
         <jackson-databind-nullable.version>0.2.10</jackson-databind-nullable.version>
-        <jackson-databind-jsr310.version>2.22.1</jackson-databind-jsr310.version>
         <openapi-generator-maven-plugin.version>7.23.0</openapi-generator-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
@@ -77,31 +76,6 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
                 <version>1.5.38</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>2.21.5</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotation</artifactId>
-                <version>2.21.5</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>2.21.5</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-core</artifactId>
-                <version>10.1.56</version>
-            </dependency>
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>42.7.12</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents.core5</groupId>

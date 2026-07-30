@@ -6,7 +6,6 @@ import ch.admin.bj.swiyu.trust.management.modules.common.exception.IssuanceExcep
 import ch.admin.bj.swiyu.trust.management.modules.management.config.issuer.SignerContext;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.statements.DefaultStatementProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.*;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor

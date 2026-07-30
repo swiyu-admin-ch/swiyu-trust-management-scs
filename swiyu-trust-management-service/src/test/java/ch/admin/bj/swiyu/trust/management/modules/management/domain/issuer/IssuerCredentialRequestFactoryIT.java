@@ -6,18 +6,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -31,7 +31,7 @@ class IssuerCredentialRequestFactoryIT {
     private ObjectMapper objectMapper;
 
     @Test
-    void createIssuerCredentialRequest_IdentityV1() throws JsonProcessingException {
+    void createIssuerCredentialRequest_IdentityV1() throws JacksonException {
         // Given
         var partnerLink = identityV1("subject123");
 
@@ -64,7 +64,7 @@ class IssuerCredentialRequestFactoryIT {
     }
 
     @Test
-    void createIssuerCredentialRequest_IssuanceV1() throws JsonProcessingException {
+    void createIssuerCredentialRequest_IssuanceV1() throws JacksonException {
         // Given
         var partnerLink = issuanceV1("subject123");
 
@@ -95,7 +95,7 @@ class IssuerCredentialRequestFactoryIT {
     }
 
     @Test
-    void createIssuerCredentialRequest_VerificationV1() throws JsonProcessingException {
+    void createIssuerCredentialRequest_VerificationV1() throws JacksonException {
         // Given
         var partnerLink = verificationV1("subject123");
 
@@ -125,11 +125,11 @@ class IssuerCredentialRequestFactoryIT {
         );
     }
 
-    private JsonNode toJson(Object object) throws JsonProcessingException {
+    private JsonNode toJson(Object object) throws JacksonException {
         return toJson(objectMapper.writeValueAsString(object));
     }
 
-    private JsonNode toJson(String jsonString) throws JsonProcessingException {
+    private JsonNode toJson(String jsonString) throws JacksonException {
         return objectMapper.readTree(jsonString);
     }
 }

@@ -1,6 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.common.registry;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.VcSchemaUrlValidationFailedException;
 import java.net.URI;

@@ -1,12 +1,12 @@
 package ch.admin.bj.swiyu.trust.management.modules.common.health;
 
-import static org.springframework.boot.actuate.health.Status.UP;
+import static org.springframework.boot.health.contributor.Status.UP;
 
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

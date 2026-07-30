@@ -14,8 +14,6 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.IssuerVcStatus;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.DatastoreStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.StatementDto;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotNull;
 import java.util.EnumMap;
 import java.util.List;
@@ -24,6 +22,8 @@ import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @UtilityClass
 public class TrustStatementMapper {

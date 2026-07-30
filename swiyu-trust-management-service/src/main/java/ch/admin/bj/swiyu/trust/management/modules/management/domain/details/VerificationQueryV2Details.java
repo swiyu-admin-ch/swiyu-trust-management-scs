@@ -1,6 +1,5 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain.details;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Represents the details of a trust statement of type VerificationQueryPublicStatement.

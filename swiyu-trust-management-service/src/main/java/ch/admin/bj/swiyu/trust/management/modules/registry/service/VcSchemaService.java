@@ -10,13 +10,13 @@ import ch.admin.bj.swiyu.trust.management.modules.registry.api.VcSchemaDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.VcSchemaStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.VcSchema;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.VcSchemaRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Service
@@ -54,7 +54,7 @@ public class VcSchemaService {
         JsonNode vcSchema;
         try {
             vcSchema = objectMapper.readTree(file);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new VcSchemaPublicationFailedException("File of vc schema submission is invalid json");
         }
         String vct;

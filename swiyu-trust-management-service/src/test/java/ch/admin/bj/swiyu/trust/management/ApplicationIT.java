@@ -20,7 +20,8 @@ import java.util.Date;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.actuate.health.Status;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.springframework.boot.health.contributor.Status;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
@@ -54,13 +55,17 @@ class ApplicationIT {
     }
 
     @Test
-    void testHealth() throws URISyntaxException, IOException, InterruptedException {
+    void testHealth() throws URISyntaxException, IOException, InterruptedException, org.json.JSONException {
         try (var client = HttpClient.newHttpClient()) {
             var url = "http://localhost:%s/actuator/health".formatted(port);
             var request = HttpRequest.newBuilder().uri(new URI(url)).GET().build();
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertThat(response.statusCode()).isEqualTo(200);
-            assertThat(response.body()).isEqualTo("{\"status\":\"UP\",\"groups\":[\"liveness\",\"readiness\"]}");
+            JSONAssert.assertEquals(
+                "{\"status\":\"UP\",\"groups\":[\"liveness\",\"readiness\"]}",
+                response.body(),
+                true
+            );
         }
     }
 

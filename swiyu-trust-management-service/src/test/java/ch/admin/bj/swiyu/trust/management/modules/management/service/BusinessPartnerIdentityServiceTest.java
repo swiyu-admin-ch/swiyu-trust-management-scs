@@ -11,6 +11,7 @@ import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityBadRequestException;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV1RequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV2RequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.DefaultIdentityProperties;
@@ -38,6 +39,7 @@ class BusinessPartnerIdentityServiceTest {
     private static final Instant INSTANT_IN_3_YEARS = Instant.parse("2029-12-31T15:00:00Z");
     private static final Instant INSTANT_IN_6_MONTHS = Instant.parse("2027-06-30T15:00:00Z");
     private static final UUID DEFAULT_BPI_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private static final UUID DEFAULT_BPI_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
     @Mock
     private BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
@@ -352,7 +354,6 @@ class BusinessPartnerIdentityServiceTest {
     @Test
     void renewTrustStatements_shouldSendBusinessPartnerIdentityUpdatedEvent() {
         var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        bpi.setLastActivated(INSTANT_NOW);
         when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
 
         businessPartnerIdentityService.renewTrustStatements(DEFAULT_BPI_ID);
@@ -378,6 +379,58 @@ class BusinessPartnerIdentityServiceTest {
         assertThat(payload.getEntityName()).containsAllEntriesOf(defaultEntityName());
     }
 
+    @Test
+    void syncWithInvalidBpiId_shouldThrow() {
+        assertThatThrownBy(() -> businessPartnerIdentityService.sync(DEFAULT_BPI_ID))
+            .isInstanceOfAny(ResourceNotFoundException.class)
+            .hasMessageMatching("No business partner identity found for id 00000000-0000-0000-0000-000000000000");
+    }
+
+    @Test
+    void sync_shouldEmitBpiUpdateEvent() {
+        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
+        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+
+        businessPartnerIdentityService.sync(DEFAULT_BPI_ID);
+
+        var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityUpdatedEvent.class);
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityUpdatedEvent(captor.capture());
+        var event = captor.getValue();
+
+        assertThat(event.getIdentity()).isNotNull();
+        assertThat(event.getType()).isNotNull();
+        assertThat(event.getType().getName()).isEqualTo("TiBusinessPartnerIdentityUpdatedEvent");
+        assertThat(event.getType().getVersion()).isEqualTo("2.0.0");
+        assertThat(event.getPublisher().getService()).isEqualTo("swiyu-trust-management-service");
+
+        var payload = event.getPayload();
+        assertThat(payload).isNotNull();
+        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(DEFAULT_BPI_ID);
+        assertThat(payload.getValidUntil()).isEqualTo(INSTANT_IN_3_YEARS);
+        assertThat(payload.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
+        assertThat(payload.getLastActivated()).isEqualTo(INSTANT_NOW);
+        assertThat(payload.getUid()).isEqualTo("CHE-123-456-789");
+        assertThat(payload.getEntityName()).containsAllEntriesOf(defaultEntityName());
+    }
+
+    @Test
+    void syncAllWith2Bpi_shouldEmit2Events() {
+        var bpi1 = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
+        var bpi2 = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
+        bpi2.setId(DEFAULT_BPI_ID_2);
+        when(businessPartnerIdentityRepository.findAll()).thenReturn(List.of(bpi1, bpi2));
+
+        businessPartnerIdentityService.syncAll();
+
+        var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityUpdatedEvent.class);
+        verify(outboxEventPublisher, times(2)).publishBusinessPartnerIdentityUpdatedEvent(captor.capture());
+        var events = captor.getAllValues();
+        assertThat(events).hasSize(2);
+        assertThat(events)
+            .extracting(event -> event.getPayload().getBusinessPartnerIdentityId())
+            .containsExactlyInAnyOrder(DEFAULT_BPI_ID, DEFAULT_BPI_ID_2);
+    }
+
     private @NonNull BusinessPartnerIdentity defaultPartnerIdentity(BusinessPartnerIdentityStatus status) {
         var bpi = new BusinessPartnerIdentity(
             DEFAULT_BPI_ID,
@@ -392,6 +445,7 @@ class BusinessPartnerIdentityServiceTest {
             null
         );
         bpi.setVersion(0L);
+        bpi.setLastActivated(status == BusinessPartnerIdentityStatus.ACTIVE ? INSTANT_NOW : null);
         return bpi;
     }
 

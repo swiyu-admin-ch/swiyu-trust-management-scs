@@ -27,6 +27,13 @@ public class IssuerJwtConfig {
 
     private final IssuerJwtProperties issuerJwtProperties;
 
+    // swiyu-jws-signature-service still requires a Jackson 2 ObjectMapper; Spring Boot 4 only
+    // auto-configures Jackson 3 (tools.jackson). Remove once the library migrates to Jackson 3.
+    @Bean
+    com.fasterxml.jackson.databind.ObjectMapper jwsSignatureServiceObjectMapper() {
+        return new com.fasterxml.jackson.databind.ObjectMapper();
+    }
+
     @Bean
     SignerContext publicTransparencyIssuer(JwsSignatureService jwsSignatureService)
         throws KeyStrategyException, JOSEException {

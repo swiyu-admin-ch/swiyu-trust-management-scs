@@ -2,7 +2,6 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer;
 
 import ch.admin.bj.swiyu.trust.client.issuer.management.api.CredentialApi;
 import ch.admin.bj.swiyu.trust.client.issuer.oid4vci.api.IssuerOid4VciApi;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
@@ -17,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 @RequiredArgsConstructor

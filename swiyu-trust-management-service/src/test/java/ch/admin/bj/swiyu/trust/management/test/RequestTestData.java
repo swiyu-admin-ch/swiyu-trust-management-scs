@@ -1,11 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.test;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.Valid;
 import java.time.Duration;
 import java.time.Instant;
@@ -14,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.experimental.UtilityClass;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @UtilityClass
 public class RequestTestData {
@@ -23,9 +21,9 @@ public class RequestTestData {
     public static final String SUBJECT_A =
         "did:tdw:DEADBEEF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000:test-identifier-data.service:api:v1:did:00000000-0000-0000-0000-000000000000";
 
-    public static final ObjectMapper objectMapper = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    public static final ObjectMapper objectMapper = tools.jackson.databind.json.JsonMapper.builder()
+        .findAndAddModules()
+        .build();
 
     public static IdentityV1RequestDto tsIdentityV1RequestDto() {
         return tsIdentityV1RequestDto(SUBJECT_A);

@@ -3,8 +3,7 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 import static ch.admin.bj.swiyu.trust.management.modules.common.persistence.TransactionManagerNames.MANAGEMENT_TRANSACTION_MANAGER;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V1;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V2;
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.toRegistryIdDtoV1List;
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.toRegistryIdDtoV2List;
+import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementMapper.mapPageableWithValidSortProperties;
 
 import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
@@ -21,7 +20,10 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.Ou
 import com.querydsl.core.BooleanBuilder;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.time.*;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.Period;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -153,6 +155,26 @@ public class BusinessPartnerIdentityService {
         return toBusinessPartnerIdentityDto(businessPartnerIdentity);
     }
 
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public void sync(UUID businessPartnerIdentityId) {
+        var bpi = businessPartnerIdentityRepository
+            .findById(businessPartnerIdentityId)
+            .orElseThrow(businessPartnerIdentityNotFound(businessPartnerIdentityId));
+
+        var event = TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build();
+        outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(event);
+    }
+
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public void syncAll() {
+        var bpis = businessPartnerIdentityRepository.findAll();
+
+        for (var bpi : bpis) {
+            var event = TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build();
+            outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(event);
+        }
+    }
+
     private void issueAllIdTSForTrustedIdentifiers(BusinessPartnerIdentity bpi) {
         List<TrustStatementPartnerLink> partnerLinks = partnerLinkRepository.findAllByPartnerIdAndTypeInAndStatus(
             bpi.getId(),
@@ -216,9 +238,5 @@ public class BusinessPartnerIdentityService {
 
     private static Supplier<ResourceNotFoundException> businessPartnerIdentityNotFound(UUID id) {
         return () -> new ResourceNotFoundException("No business partner identity found for id %s".formatted(id));
-    }
-
-    private BusinessPartnerIdentityDto toBusinessPartnerIdentityDto(BusinessPartnerIdentity businessPartnerIdentity) {
-        return BusinessPartnerIdentityMapper.toBusinessPartnerIdentityDto(businessPartnerIdentity);
     }
 }

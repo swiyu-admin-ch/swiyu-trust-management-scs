@@ -29,7 +29,6 @@ public class TrustStatementPartnerLink {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotNull
     private UUID partnerId;
 
     @Enumerated(EnumType.STRING)

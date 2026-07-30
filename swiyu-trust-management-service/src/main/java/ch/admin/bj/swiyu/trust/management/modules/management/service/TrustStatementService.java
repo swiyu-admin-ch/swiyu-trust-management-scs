@@ -26,7 +26,6 @@ import ch.admin.bj.swiyu.trust.management.modules.registry.api.DatastoreDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.DatastoreStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.StatementTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.TrustRegistryService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.BooleanBuilder;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -41,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Service

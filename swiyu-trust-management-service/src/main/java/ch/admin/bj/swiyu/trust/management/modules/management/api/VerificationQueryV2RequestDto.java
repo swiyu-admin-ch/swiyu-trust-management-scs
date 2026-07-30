@@ -1,7 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.api;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.i18n.ValidLocalizedMap;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +12,7 @@ import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import tools.jackson.databind.JsonNode;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)

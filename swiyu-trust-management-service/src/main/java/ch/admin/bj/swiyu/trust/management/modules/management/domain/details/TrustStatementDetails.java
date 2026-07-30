@@ -4,6 +4,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.EqualsAndHashCode;
@@ -57,6 +58,7 @@ public abstract sealed class TrustStatementDetails
 
     private final TrustStatementPartnerLinkType type;
 
+    @JsonCreator
     protected TrustStatementDetails(TrustStatementPartnerLinkType type) {
         this.type = type;
     }

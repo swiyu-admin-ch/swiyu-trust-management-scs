@@ -2,13 +2,14 @@ package ch.admin.bj.swiyu.trust.management.modules.registry.service;
 
 import com.authlete.sd.Disclosure;
 import com.authlete.sd.SDJWT;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +32,7 @@ public class JsonJwtDeserializer {
             var payload = (ObjectNode) objectMapper.readTree(serializedPayload);
             var header = (ObjectNode) objectMapper.readTree(serializedHeader);
             return payload.setAll(header);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to decode encoded JWT payload", e);
         }
     }
@@ -44,10 +45,9 @@ public class JsonJwtDeserializer {
      */
     public JsonNode decodeSdjwtPayload(String serializedSdJwt) {
         // Create JSON Mapper for further JSON manipulation
-        ObjectMapper mapper = new ObjectMapper();
-        mapper
-            .getFactory()
-            .configure(com.fasterxml.jackson.core.json.JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature(), true);
+        ObjectMapper mapper = JsonMapper.builder()
+            .enable(tools.jackson.core.json.JsonWriteFeature.ESCAPE_NON_ASCII)
+            .build();
 
         // Parse into SD JWT library
         var token = SDJWT.parse(serializedSdJwt);
@@ -63,7 +63,7 @@ public class JsonJwtDeserializer {
             }
 
             return payloadJson;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to decode encoded SD-JWT payload", e);
         }
     }

@@ -7,7 +7,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.registry.domain;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMetadata;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -16,6 +15,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A VcEntity represents a VC of different formats and types in our data store.

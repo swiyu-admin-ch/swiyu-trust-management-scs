@@ -22,9 +22,6 @@ import ch.admin.bj.swiyu.trust.management.modules.registry.domain.StatementRepos
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.JsonJwtDeserializer;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.TrustRegistryService;
 import ch.admin.bj.swiyu.trust.management.test.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,13 +29,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -120,7 +120,7 @@ class TrustStatementServiceIT {
         assertThat(jwtCaptor.getValue()).isEqualTo(expectedJwt);
     }
 
-    private JsonNode toJson(String jsonString) throws JsonProcessingException {
+    private JsonNode toJson(String jsonString) throws JacksonException {
         return objectMapper.readTree(jsonString);
     }
 
@@ -197,7 +197,7 @@ class TrustStatementServiceIT {
     }
 
     @Test
-    void createIdentityV1Submission() throws JsonProcessingException {
+    void createIdentityV1Submission() throws JacksonException {
         // GIVEN
         var request = RequestTestData.tsIdentityV1RequestDto();
         var partnerId = UUID.randomUUID();
@@ -236,7 +236,7 @@ class TrustStatementServiceIT {
     }
 
     @Test
-    void createIssuanceV1Submission() throws JsonProcessingException {
+    void createIssuanceV1Submission() throws JacksonException {
         // GIVEN
         var request = RequestTestData.tsIssuanceV1RequestDto();
         var partnerId = UUID.randomUUID();
@@ -258,7 +258,7 @@ class TrustStatementServiceIT {
     }
 
     @Test
-    void createVerficationV1Submission() throws JsonProcessingException {
+    void createVerficationV1Submission() throws JacksonException {
         // GIVEN
         var request = RequestTestData.tsVerificationV1RequestDto();
         var partnerId = UUID.randomUUID();

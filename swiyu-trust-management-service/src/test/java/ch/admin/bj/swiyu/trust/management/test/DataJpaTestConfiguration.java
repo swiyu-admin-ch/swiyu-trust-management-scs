@@ -18,7 +18,6 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.Issue
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.registry.TrustRegistryClient;
 import ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.persistence.ManagementPersistenceConfig;
 import ch.admin.bj.swiyu.trust.management.modules.registry.infrastructure.persistence.RegistryPersistenceConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,6 +31,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Holds all necessary configurations for sliced @DataJpaTest integration tests which are common to all.

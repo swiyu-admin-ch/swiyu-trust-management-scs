@@ -3,14 +3,14 @@ package ch.admin.bj.swiyu.trust.management.modules.registry.service;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.NonCompliantActorsDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.NonComplianceList;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.NonComplianceListRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Service
@@ -30,7 +30,7 @@ public class NonComplianceListService {
     private String toJsonPayload(NonCompliantActorsDto nonCompliantActors) {
         try {
             return this.objectMapper.writeValueAsString(nonCompliantActors);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize non-compliant actors", e);
         }
     }

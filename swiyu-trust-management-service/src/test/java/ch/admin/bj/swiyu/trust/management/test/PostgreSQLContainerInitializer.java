@@ -5,18 +5,18 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @Slf4j
 public class PostgreSQLContainerInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static PostgreSQLContainer<?> managementDatabase;
-    private static PostgreSQLContainer<?> registryDatabase;
+    private static PostgreSQLContainer managementDatabase;
+    private static PostgreSQLContainer registryDatabase;
 
-    private static PostgreSQLContainer<?> getManagementDatabase() {
+    private static PostgreSQLContainer getManagementDatabase() {
         if (managementDatabase == null) {
-            managementDatabase = new PostgreSQLContainer<>(
+            managementDatabase = new PostgreSQLContainer(
                 DockerImageName.parse("docker-hub.nexus.bit.admin.ch/postgres:17.8").asCompatibleSubstituteFor(
                     "postgres:17.8"
                 )
@@ -26,9 +26,9 @@ public class PostgreSQLContainerInitializer implements ApplicationContextInitial
         return managementDatabase;
     }
 
-    private static PostgreSQLContainer<?> getRegistryDatabase() {
+    private static PostgreSQLContainer getRegistryDatabase() {
         if (registryDatabase == null) {
-            registryDatabase = new PostgreSQLContainer<>(
+            registryDatabase = new PostgreSQLContainer(
                 DockerImageName.parse("docker-hub.nexus.bit.admin.ch/postgres:17.8").asCompatibleSubstituteFor(
                     "postgres:17.8"
                 )

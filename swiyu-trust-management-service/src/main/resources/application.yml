@@ -7,10 +7,11 @@ spring:
   application:
     name: swiyu-trust-management-scs
   http:
-    client:
+    clients:
       connect-timeout: 10000 # 10 seconds
       read-timeout: 30000 # 30 seconds
-      factory: jdk
+      imperative:
+        factory: jdk
   mvc:
     contentnegotiation:
       default-content-type: application/json
@@ -21,6 +22,11 @@ spring:
         physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         default_schema: data
         hbm2ddl.auto: validate
+        # Without this, Hibernate auto-detects the legacy Jackson 2 mapper (com.fasterxml.jackson.databind
+        # is still on the classpath transitively via swiyu-jws-signature-service), which cannot deserialize
+        # our JSON-mapped entity fields typed as tools.jackson.databind.JsonNode (Jackson 3).
+        type:
+          json_format_mapper: jackson3
   datasource:
     management-db:
       type: com.zaxxer.hikari.HikariDataSource
@@ -63,6 +69,10 @@ spring:
             jwk-set-uri: ${AUTH_SWIYU_STATUS_REGISTRY_API_JWK_SET_URI:}
             authorization-uri: ${AUTH_SWIYU_STATUS_REGISTRY_API_AUTHORIZATION_URI:}
             token-uri: ${AUTH_SWIYU_STATUS_REGISTRY_API_TOKEN_URI:}
+  jackson:
+    deserialization:
+      # TODO: Jackson 3 changed FAIL_ON_NULL_FOR_PRIMITIVES default to true - evaluate if you want stricter null-for-primitives validation
+      fail-on-null-for-primitives: false
 
 jeap:
   audit:

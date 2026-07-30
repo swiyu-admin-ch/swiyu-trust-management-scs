@@ -5,12 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.34.1
+
+### Added
+
+- Auto-renewal: add BPI sync
+
+## 3.34.0
+
+### Changed
+
+- Migrate to Spring Boot 4 / Spring Security 7 / Hibernate 7 / Jackson 3 (EID-6392)
+- Force Hibernate's JSON column mapper to Jackson 3 (`hibernate.type.json_format_mapper: jackson3`), since it otherwise defaults to Jackson 2 whenever Jackson 2 is present on the classpath at all
+- Add a new Flyway migration for the `deferred_message.sampled` column added by the updated jeap-messaging-outbox
+- Add `spring-boot-security-test` test dependency, required since Spring Boot 4 moved MockMvc's Spring Security test wiring into its own module
+
 ## 3.33.1
 
 ### Added
 
 - Adapt classes & provide backend functionality (Identity)
-- 
+
 ## 3.33.0
 
 ### Added

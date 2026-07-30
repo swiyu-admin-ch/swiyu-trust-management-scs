@@ -18,10 +18,10 @@ import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.flyway.autoconfigure.FlywayMigrationStrategy;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
+import org.springframework.boot.jpa.autoconfigure.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -67,7 +67,13 @@ public class ManagementPersistenceConfig {
         return new DataSourceProperties();
     }
 
-    @Bean(name = "managementDataSource")
+    // Also aliased as "dataSource" so jeap-messaging-idempotence's unqualified DataSource injection
+    // resolves to this one by exact bean-name match. Do NOT use @Primary here instead: with two
+    // DataSource beans present, marking one @Primary makes Spring's ConditionalOnSingleCandidate-based
+    // resolution collapse "registryDataSource" onto this same instance, silently breaking the registry
+    // datasource everywhere it's injected (surfaces at runtime as
+    // "IllegalTransactionStateException: Pre-bound JDBC Connection found!" on registryTransactionManager).
+    @Bean(name = { "managementDataSource", "dataSource" })
     public DataSource managementDataSource(DataSourceProperties managementDataSourceProperties) {
         var config = new HikariConfig();
         config.setJdbcUrl(managementDataSourceProperties.getUrl());

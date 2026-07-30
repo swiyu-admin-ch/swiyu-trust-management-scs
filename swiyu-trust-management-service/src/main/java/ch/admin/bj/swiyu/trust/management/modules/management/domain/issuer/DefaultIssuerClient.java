@@ -5,13 +5,13 @@ import ch.admin.bj.swiyu.trust.client.issuer.management.model.CreateCredentialRe
 import ch.admin.bj.swiyu.trust.client.issuer.management.model.CredentialStatusTypeDto;
 import ch.admin.bj.swiyu.trust.client.issuer.oid4vci.api.IssuerOid4VciApi;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.IssuanceException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.loader.net.util.UrlDecoder;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @AllArgsConstructor
@@ -56,7 +56,7 @@ public class DefaultIssuerClient implements IssuerClient {
                 .get("urn:ietf:params:oauth:grant-type:pre-authorized_code")
                 .get("pre-authorized_code")
                 .asText();
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IssuanceException("Failed to extract pre-authorization code from credential offer.", e);
         }
 
@@ -97,7 +97,7 @@ public class DefaultIssuerClient implements IssuerClient {
         CredentialResponseDto response;
         try {
             response = jsonMapper.readValue(result, CredentialResponseDto.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Invalid CredentialResponse from oid4vci API ", e);
         }
         return response;
@@ -107,7 +107,7 @@ public class DefaultIssuerClient implements IssuerClient {
         try {
             var json = this.jsonMapper.writeValueAsString(request);
             log.trace("Issuance: credential request {}", json);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("failed to serialize CreateCredentialRequest to json", e);
         }
     }
