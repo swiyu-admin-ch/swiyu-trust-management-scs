@@ -1,7 +1,5 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
-import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V1;
-import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V2;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -184,9 +182,8 @@ class BusinessPartnerIdentityServiceTest {
         when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
 
         when(
-            trustStatementPartnerLinkRepository.findAllByPartnerIdAndTypeInAndStatus(
+            trustStatementPartnerLinkRepository.findAllByPartnerIdAndStatus(
                 DEFAULT_BPI_ID,
-                List.of(TRUST_STATEMENT_IDENTITY_V1, TRUST_STATEMENT_IDENTITY_V2),
                 TrustStatementPartnerLinkStatus.ACTIVE
             )
         ).thenReturn(
@@ -199,7 +196,7 @@ class BusinessPartnerIdentityServiceTest {
 
         businessPartnerIdentityService.deactivateTrustStatement(DEFAULT_BPI_ID, "time to be deactivated");
 
-        verify(trustStatementService, times(2)).deactivateTrustStatement(any(), any());
+        verify(trustStatementService, times(3)).deactivateTrustStatement(any(), any());
     }
 
     @Test
@@ -225,18 +222,10 @@ class BusinessPartnerIdentityServiceTest {
     }
 
     @Test
-    void issueTrustStatement_shouldCallIssueAndPublishV1WithTheRightValues() {
+    void issueTrustStatement_shouldCallIssueAndPublishIdTSV1WithTheRightValues() {
         var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
         bpi.getTrustedIdentifier().add("subject1V1");
         when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
-
-        when(
-            trustStatementPartnerLinkRepository.findAllByPartnerIdAndTypeInAndStatus(
-                DEFAULT_BPI_ID,
-                List.of(TRUST_STATEMENT_IDENTITY_V1, TRUST_STATEMENT_IDENTITY_V2),
-                TrustStatementPartnerLinkStatus.ACTIVE
-            )
-        ).thenReturn(List.of(partnerLinkIdentityV1("subject1V1")));
 
         when(defaultStatementProperties.timeToLive()).thenReturn(Period.ofMonths(6));
 
@@ -256,19 +245,11 @@ class BusinessPartnerIdentityServiceTest {
     }
 
     @Test
-    void issueTrustStatementWithBpiValidUntil1DayLater_shouldIssueAndPublishV1WithStatementValidUntil1DayLater() {
+    void issueTrustStatementWithBpiValidUntil1DayLater_shouldIssueAndPublishIdTSV1WithStatementValidUntil1DayLater() {
         var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
         bpi.setValidUntil(INSTANT_IN_1_DAY);
         bpi.getTrustedIdentifier().add("subject1V1");
         when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
-
-        when(
-            trustStatementPartnerLinkRepository.findAllByPartnerIdAndTypeInAndStatus(
-                DEFAULT_BPI_ID,
-                List.of(TRUST_STATEMENT_IDENTITY_V1, TRUST_STATEMENT_IDENTITY_V2),
-                TrustStatementPartnerLinkStatus.ACTIVE
-            )
-        ).thenReturn(List.of(partnerLinkIdentityV1("subject1V1")));
 
         when(defaultStatementProperties.timeToLive()).thenReturn(Period.ofMonths(6));
 
@@ -282,18 +263,10 @@ class BusinessPartnerIdentityServiceTest {
     }
 
     @Test
-    void issueTrustStatement_shouldCallIssueAndPublishV2WithTheRightValues() {
+    void issueTrustStatement_shouldCallIssueAndPublishIdTSV2WithTheRightValues() {
         var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
         bpi.getTrustedIdentifier().add("subject1V2");
         when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
-
-        when(
-            trustStatementPartnerLinkRepository.findAllByPartnerIdAndTypeInAndStatus(
-                DEFAULT_BPI_ID,
-                List.of(TRUST_STATEMENT_IDENTITY_V1, TRUST_STATEMENT_IDENTITY_V2),
-                TrustStatementPartnerLinkStatus.ACTIVE
-            )
-        ).thenReturn(List.of(partnerLinkIdentityV1("subject1V2")));
 
         when(defaultStatementProperties.timeToLive()).thenReturn(Period.ofMonths(6));
 
@@ -313,19 +286,11 @@ class BusinessPartnerIdentityServiceTest {
     }
 
     @Test
-    void issueTrustStatementWithBpiValidUntil1DayLater_shouldIssueAndPublishV2WithStatementValidUntil1DayLater() {
+    void issueTrustStatementWithBpiValidUntil1DayLater_shouldIssueAndPublishIdTSV2WithStatementValidUntil1DayLater() {
         var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
         bpi.setValidUntil(INSTANT_IN_1_DAY);
         bpi.getTrustedIdentifier().add("subject1V2");
         when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
-
-        when(
-            trustStatementPartnerLinkRepository.findAllByPartnerIdAndTypeInAndStatus(
-                DEFAULT_BPI_ID,
-                List.of(TRUST_STATEMENT_IDENTITY_V1, TRUST_STATEMENT_IDENTITY_V2),
-                TrustStatementPartnerLinkStatus.ACTIVE
-            )
-        ).thenReturn(List.of(partnerLinkIdentityV1("subject1V2")));
 
         when(defaultStatementProperties.timeToLive()).thenReturn(Period.ofMonths(6));
 

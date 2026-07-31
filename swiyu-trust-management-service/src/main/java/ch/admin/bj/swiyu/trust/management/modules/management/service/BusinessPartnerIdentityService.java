@@ -1,8 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.persistence.TransactionManagerNames.MANAGEMENT_TRANSACTION_MANAGER;
-import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V1;
-import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V2;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementMapper.mapPageableWithValidSortProperties;
 
@@ -29,7 +27,6 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -81,18 +78,14 @@ public class BusinessPartnerIdentityService {
             .findById(businessPartnerId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
 
-        List<TrustStatementPartnerLink> partnerLinks = partnerLinkRepository.findAllByPartnerIdAndTypeInAndStatus(
+        List<TrustStatementPartnerLink> partnerLinks = partnerLinkRepository.findAllByPartnerIdAndStatus(
             bpi.getId(),
-            List.of(TRUST_STATEMENT_IDENTITY_V1, TRUST_STATEMENT_IDENTITY_V2),
             TrustStatementPartnerLinkStatus.ACTIVE
         );
-        for (var trustedDid : bpi.getTrustedIdentifier()) {
-            var filteredPartnerLinks = filterPartnerLinksByDid(trustedDid, partnerLinks);
 
-            for (var partnerLink : filteredPartnerLinks) {
-                var req = new DeactivationRequestDto(reason);
-                trustStatementService.deactivateTrustStatement(partnerLink.getId(), req);
-            }
+        for (var partnerLink : partnerLinks) {
+            var req = new DeactivationRequestDto(reason);
+            trustStatementService.deactivateTrustStatement(partnerLink.getId(), req);
         }
     }
 
@@ -176,40 +169,32 @@ public class BusinessPartnerIdentityService {
     }
 
     private void issueAllIdTSForTrustedIdentifiers(BusinessPartnerIdentity bpi) {
-        List<TrustStatementPartnerLink> partnerLinks = partnerLinkRepository.findAllByPartnerIdAndTypeInAndStatus(
-            bpi.getId(),
-            List.of(TRUST_STATEMENT_IDENTITY_V1, TRUST_STATEMENT_IDENTITY_V2),
-            TrustStatementPartnerLinkStatus.ACTIVE
-        );
         for (var trustedDid : bpi.getTrustedIdentifier()) {
-            var filteredPartnerLinks = filterPartnerLinksByDid(trustedDid, partnerLinks);
-            for (var partnerLink : filteredPartnerLinks) {
-                var statementValidUntil = calculateValidUntilForStatement(
-                    bpi.getValidUntil(),
-                    defaultStatementProperties.timeToLive()
-                );
+            var statementValidUntil = calculateValidUntilForStatement(
+                bpi.getValidUntil(),
+                defaultStatementProperties.timeToLive()
+            );
 
-                var reqV1 = new IdentityV1RequestDto(
-                    trustedDid,
-                    Instant.now(clock),
-                    statementValidUntil,
-                    bpi.getEntityName(),
-                    bpi.getIsStateActor(),
-                    toRegistryIdDtoV1List(bpi.getUid())
-                );
-                trustStatementService.issueAndPublishIdentityV1TrustStatement(partnerLink.getId(), reqV1);
+            var reqV1 = new IdentityV1RequestDto(
+                trustedDid,
+                Instant.now(clock),
+                statementValidUntil,
+                bpi.getEntityName(),
+                bpi.getIsStateActor(),
+                toRegistryIdDtoV1List(bpi.getUid())
+            );
+            trustStatementService.issueAndPublishIdentityV1TrustStatement(bpi.getId(), reqV1);
 
-                var reqV2 = new IdentityV2RequestDto(
-                    bpi.getId(),
-                    trustedDid,
-                    Instant.now(clock),
-                    statementValidUntil,
-                    bpi.getEntityName(),
-                    bpi.getIsStateActor(),
-                    toRegistryIdDtoV2List(bpi.getUid())
-                );
-                trustStatementService.issueAndPublishIdentityV2TrustStatement(reqV2);
-            }
+            var reqV2 = new IdentityV2RequestDto(
+                bpi.getId(),
+                trustedDid,
+                Instant.now(clock),
+                statementValidUntil,
+                bpi.getEntityName(),
+                bpi.getIsStateActor(),
+                toRegistryIdDtoV2List(bpi.getUid())
+            );
+            trustStatementService.issueAndPublishIdentityV2TrustStatement(reqV2);
         }
     }
 
@@ -220,20 +205,6 @@ public class BusinessPartnerIdentityService {
     private Instant calculateValidUntilForStatement(Instant bpiValidUntil, Period statementValidity) {
         var statementValidUntil = calculateValidUntilFromNow(statementValidity);
         return statementValidUntil.isBefore(bpiValidUntil) ? statementValidUntil : bpiValidUntil;
-    }
-
-    private static @NonNull List<TrustStatementPartnerLink> filterPartnerLinksByDid(
-        String trustedDid,
-        List<TrustStatementPartnerLink> partnerLinks
-    ) {
-        return partnerLinks
-            .stream()
-            .filter(partnerLink -> partnerLink.getSubject().equals(trustedDid))
-            .filter(partnerLink -> partnerLink.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE)
-            .filter(partnerLink ->
-                List.of(TRUST_STATEMENT_IDENTITY_V1, TRUST_STATEMENT_IDENTITY_V2).contains(partnerLink.getType())
-            )
-            .toList();
     }
 
     private static Supplier<ResourceNotFoundException> businessPartnerIdentityNotFound(UUID id) {

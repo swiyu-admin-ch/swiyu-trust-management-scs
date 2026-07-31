@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @Tag(name = "BusinessPartnerIdentity")
 @RestController
-@RequestMapping("/api/v1/business-partner-identity")
+@RequestMapping("/ui-api/v1/business-partner-identity")
 public class BusinessPartnerIdentityController {
 
     private final BusinessPartnerIdentityService businessPartnerIdentityService;
