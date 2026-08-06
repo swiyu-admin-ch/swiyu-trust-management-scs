@@ -15,8 +15,6 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV2Reque
 import ch.admin.bj.swiyu.trust.management.modules.management.config.DefaultIdentityProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.statements.DefaultStatementProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV2Details;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
 import jakarta.validation.constraints.NotBlank;
 import java.time.*;
@@ -424,16 +422,7 @@ class BusinessPartnerIdentityServiceTest {
             subject,
             Instant.now(clock),
             Instant.parse("2027-03-31T15:00:00Z"),
-            Map.of(
-                IdentityV1Details.Language.DE_CH,
-                "Compagny-de",
-                IdentityV1Details.Language.FR_CH,
-                "Company-fr",
-                IdentityV1Details.Language.IT_CH,
-                "Company-it",
-                IdentityV1Details.Language.RM_CH,
-                "Company-rm"
-            ),
+            defaultEntityName(),
             Collections.emptyList(),
             false
         );
@@ -452,16 +441,7 @@ class BusinessPartnerIdentityServiceTest {
             subject,
             Instant.now(clock),
             Instant.parse("2027-03-31T15:00:00Z"),
-            Map.of(
-                IdentityV2Details.Language.DE_CH,
-                "Compagny-de",
-                IdentityV2Details.Language.FR_CH,
-                "Company-fr",
-                IdentityV2Details.Language.IT_CH,
-                "Company-it",
-                IdentityV2Details.Language.RM_CH,
-                "Company-rm"
-            ),
+            defaultEntityName(),
             Collections.emptyList(),
             false,
             null

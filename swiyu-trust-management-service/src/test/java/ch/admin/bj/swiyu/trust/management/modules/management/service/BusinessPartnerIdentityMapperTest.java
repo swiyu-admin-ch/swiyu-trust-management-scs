@@ -21,14 +21,8 @@ class BusinessPartnerIdentityMapperTest {
     }
 
     @Test
-    // EID-6303
-    @SuppressWarnings("java:S5738")
     void toLocalizedGetEntityName_addDid_legacyStatementWithoutDefault_fallsBackToFirstLocale() {
-        var details = new IdentityV1Details(
-            Map.of(IdentityV1Details.Language.DE_CH, "Acme DE", IdentityV1Details.Language.EN, "Acme EN"),
-            false,
-            List.of()
-        );
+        var details = new IdentityV1Details(Map.of("de-CH", "Acme DE", "en", "Acme EN"), false, List.of());
 
         var entityName = BusinessPartnerIdentityMapper.toLocalizedEntityName(details);
 

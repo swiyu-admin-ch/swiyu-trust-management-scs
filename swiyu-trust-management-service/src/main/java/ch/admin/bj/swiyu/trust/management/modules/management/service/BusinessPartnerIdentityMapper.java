@@ -124,10 +124,10 @@ public class BusinessPartnerIdentityMapper {
         switch (details) {
             case IdentityV1Details identity -> identity
                 .getEntityName()
-                .forEach((language, text) -> putLocalizedEntry(localized, language.getJsonValue(), text));
+                .forEach((language, text) -> putLocalizedEntry(localized, language, text));
             case IdentityV2Details identity -> identity
                 .getEntityName()
-                .forEach((language, text) -> putLocalizedEntry(localized, language.getLanguageCode(), text));
+                .forEach((language, text) -> putLocalizedEntry(localized, language, text));
             default -> throw new IllegalArgumentException(
                 "Cannot derive entity name from trust statement details: " + details.getClass().getSimpleName()
             );
@@ -189,8 +189,7 @@ public class BusinessPartnerIdentityMapper {
         if (text == null || text.isBlank()) {
             return;
         }
-        // IdentityV1/V2 details store the "default" translation under the empty language code.
-        target.put(languageCode.isEmpty() ? DEFAULT_VALUE_KEY : languageCode, text);
+        target.put(languageCode, text);
     }
 
     private static BusinessPartnerIdentityStatusDto toBusinessPartnerIdentityStatusDto(

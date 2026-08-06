@@ -1,7 +1,14 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.DEFAULT_VALUE_KEY;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.DE_CH;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.EN;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.FR_CH;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.IT_CH;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.RM_CH;
+
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.NonComplianceV2Details;
-import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.experimental.UtilityClass;
@@ -24,31 +31,28 @@ public class NonCompliantActorMapper {
             .toList();
     }
 
-    @SuppressWarnings("java:S5738") // EID-6303
-    private static Map<NonComplianceV2Details.Language, String> toNonComplianceV2DetailsActorReason(
-        NonCompliantReasonText reason
-    ) {
-        var ret = new EnumMap<NonComplianceV2Details.Language, String>(NonComplianceV2Details.Language.class);
+    private static Map<String, String> toNonComplianceV2DetailsActorReason(NonCompliantReasonText reason) {
+        var ret = new LinkedHashMap<String, String>();
 
         if (reason.getReasonRm() != null && !reason.getReasonRm().isBlank()) {
-            ret.put(NonComplianceV2Details.Language.RM_CH, reason.getReasonRm());
-            ret.put(NonComplianceV2Details.Language.DEFAULT, reason.getReasonRm());
+            ret.put(RM_CH, reason.getReasonRm());
+            ret.put(DEFAULT_VALUE_KEY, reason.getReasonRm());
         }
         if (reason.getReasonIt() != null && !reason.getReasonIt().isBlank()) {
-            ret.put(NonComplianceV2Details.Language.IT_CH, reason.getReasonIt());
-            ret.put(NonComplianceV2Details.Language.DEFAULT, reason.getReasonIt());
+            ret.put(IT_CH, reason.getReasonIt());
+            ret.put(DEFAULT_VALUE_KEY, reason.getReasonIt());
         }
         if (reason.getReasonFr() != null && !reason.getReasonFr().isBlank()) {
-            ret.put(NonComplianceV2Details.Language.FR_CH, reason.getReasonFr());
-            ret.put(NonComplianceV2Details.Language.DEFAULT, reason.getReasonFr());
+            ret.put(FR_CH, reason.getReasonFr());
+            ret.put(DEFAULT_VALUE_KEY, reason.getReasonFr());
         }
         if (reason.getReasonEn() != null && !reason.getReasonEn().isBlank()) {
-            ret.put(NonComplianceV2Details.Language.EN, reason.getReasonEn());
-            ret.put(NonComplianceV2Details.Language.DEFAULT, reason.getReasonEn());
+            ret.put(EN, reason.getReasonEn());
+            ret.put(DEFAULT_VALUE_KEY, reason.getReasonEn());
         }
         if (reason.getReasonDe() != null && !reason.getReasonDe().isBlank()) {
-            ret.put(NonComplianceV2Details.Language.DE_CH, reason.getReasonDe());
-            ret.put(NonComplianceV2Details.Language.DEFAULT, reason.getReasonDe());
+            ret.put(DE_CH, reason.getReasonDe());
+            ret.put(DEFAULT_VALUE_KEY, reason.getReasonDe());
         }
 
         return ret;

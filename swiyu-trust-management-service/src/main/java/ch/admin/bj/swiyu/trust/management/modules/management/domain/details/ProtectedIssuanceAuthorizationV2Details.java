@@ -3,7 +3,6 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain.details;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.Map;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -30,24 +29,9 @@ public final class ProtectedIssuanceAuthorizationV2Details extends TrustStatemen
         this.canIssue = canIssue;
     }
 
-    @AllArgsConstructor
-    public enum Language {
-        DEFAULT(""),
-        @Deprecated(forRemoval = true, since = "3.29.1") // Remove in EID-6303
-        EN("en"),
-        EN_CH("en-CH"),
-        DE_CH("de-CH"),
-        FR_CH("fr-CH"),
-        IT_CH("it-CH"),
-        RM_CH("rm-CH");
-
-        @Getter
-        private final String languageCode;
-    }
-
     public record ProtectedIssuanceAuthorization(
         @NotBlank String vct,
-        Map<Language, @NotBlank String> vctName,
-        Map<Language, @NotBlank String> reason
+        Map<String, @NotBlank String> vctName,
+        Map<String, @NotBlank String> reason
     ) {}
 }

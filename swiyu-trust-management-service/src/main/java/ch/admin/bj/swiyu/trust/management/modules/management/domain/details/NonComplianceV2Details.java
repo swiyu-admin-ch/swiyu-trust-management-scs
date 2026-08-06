@@ -3,7 +3,6 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain.details;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -28,20 +27,5 @@ public final class NonComplianceV2Details extends TrustStatementDetails {
         this.nonCompliantActors = nonCompliantActors;
     }
 
-    @AllArgsConstructor
-    public enum Language {
-        DEFAULT(""),
-        @Deprecated(forRemoval = true, since = "3.29.1") // Remove in EID-6303
-        EN("en"),
-        EN_CH("de-CH"),
-        DE_CH("de-CH"),
-        FR_CH("fr-CH"),
-        IT_CH("it-CH"),
-        RM_CH("rm-CH");
-
-        @Getter
-        private final String languageCode;
-    }
-
-    public record NonCompliantActor(String actor, Instant flaggedAt, Map<Language, String> reason) {}
+    public record NonCompliantActor(String actor, Instant flaggedAt, Map<String, String> reason) {}
 }

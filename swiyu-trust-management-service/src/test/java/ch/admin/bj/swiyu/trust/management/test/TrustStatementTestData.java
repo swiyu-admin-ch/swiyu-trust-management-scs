@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public class TrustStatementTestData {
 
-    @SuppressWarnings("java:S5738") // EID-6303
     public static TrustStatementPartnerLink identityV1(String subject) {
         return TrustStatementPartnerLink.createIdentityV1(
             UUID.randomUUID(),
@@ -18,15 +17,15 @@ public class TrustStatementTestData {
             Instant.parse("2025-01-01T00:00:00Z"),
             Instant.parse("2026-01-01T00:00:00Z"),
             Map.of(
-                IdentityV1Details.Language.DE_CH,
+                "de-CH",
                 "Entity Name DE",
-                IdentityV1Details.Language.EN,
+                "en",
                 "Entity Name EN",
-                IdentityV1Details.Language.FR_CH,
+                "fr-CH",
                 "Nom de l'entité FR",
-                IdentityV1Details.Language.IT_CH,
+                "it-CH",
                 "Nome dell'entità IT",
-                IdentityV1Details.Language.RM_CH,
+                "rm-CH",
                 "Numn da l'entità RM"
             ),
             List.of(

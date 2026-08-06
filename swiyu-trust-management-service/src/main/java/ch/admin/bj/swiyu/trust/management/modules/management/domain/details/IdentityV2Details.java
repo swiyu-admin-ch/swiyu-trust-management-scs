@@ -3,7 +3,6 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain.details;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -18,7 +17,7 @@ import org.springframework.util.StringUtils;
 @Getter
 public final class IdentityV2Details extends TrustStatementDetails {
 
-    private Map<Language, String> entityName;
+    private Map<String, String> entityName;
     private Boolean isStateActor;
     private List<RegistryId> registryIds;
 
@@ -26,7 +25,7 @@ public final class IdentityV2Details extends TrustStatementDetails {
         super(TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V2);
     }
 
-    public IdentityV2Details(Map<Language, String> entityName, Boolean isStateActor, List<RegistryId> registryIds) {
+    public IdentityV2Details(Map<String, String> entityName, Boolean isStateActor, List<RegistryId> registryIds) {
         this();
         this.entityName = entityName;
         this.isStateActor = isStateActor;
@@ -38,21 +37,6 @@ public final class IdentityV2Details extends TrustStatementDetails {
         return (
             entityName != null && !entityName.isEmpty() && entityName.values().stream().anyMatch(StringUtils::hasText)
         );
-    }
-
-    @AllArgsConstructor
-    public enum Language {
-        DEFAULT(""),
-        @Deprecated(forRemoval = true, since = "3.29.1") // Remove in EID-6303
-        EN("en"),
-        EN_CH("en-CH"),
-        DE_CH("de-CH"),
-        FR_CH("fr-CH"),
-        IT_CH("it-CH"),
-        RM_CH("rm-CH");
-
-        @Getter
-        private final String languageCode;
     }
 
     public record RegistryId(String type, String value) {}

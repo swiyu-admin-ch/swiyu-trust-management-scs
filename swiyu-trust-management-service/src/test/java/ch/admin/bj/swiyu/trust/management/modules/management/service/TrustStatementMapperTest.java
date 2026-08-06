@@ -2,79 +2,93 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV2Details;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.ProtectedIssuanceAuthorizationV2Details;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.VerificationQueryV2Details;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class TrustStatementMapperTest {
 
     @Test
-    // EID-6303
-    @SuppressWarnings("java:S5738")
     void toIdentityV1LanguageMap_doesNotMapDefaultKey() {
         var source = Map.of("default", "val_default", "de-CH", "val_de", "en", "val_en");
 
         var result = TrustStatementMapper.toIdentityV1LanguageMap(source);
 
-        assertThat(result)
-            .hasSize(2)
-            .containsEntry(IdentityV1Details.Language.DE_CH, "val_de")
-            .containsEntry(IdentityV1Details.Language.EN, "val_en");
+        assertThat(result).hasSize(2).containsEntry("de-CH", "val_de").containsEntry("en", "val_en");
     }
 
     @Test
-    // EID-6303
-    @SuppressWarnings("java:S5738")
     void toIdentityV1LanguageMap_mapsDefaultKeyOnlyIfNoOtherData() {
         var source = Map.of("default", "val_default");
 
         var result = TrustStatementMapper.toIdentityV1LanguageMap(source);
 
-        assertThat(result).hasSize(1).containsEntry(IdentityV1Details.Language.DE_CH, "val_default");
+        assertThat(result).hasSize(1).containsEntry("de-CH", "val_default");
     }
 
     @Test
-    @SuppressWarnings("java:S5738")
-    // EID-6303
-    void toProtectedIssuanceAuthorizationV2DetailsLanguageMap_mapsDefaultKeyToDefaultLanguage() {
+    void toProtectedIssuanceAuthorizationV2DetailsLanguageMap_mapsAnyLocaleStringAsIs() {
         var source = Map.of("de-CH", "val_de", "default", "val_default", "en", "val_en");
 
         var result = TrustStatementMapper.toProtectedIssuanceAuthorizationV2DetailsLanguageMap(source);
 
         assertThat(result)
-            .containsEntry(ProtectedIssuanceAuthorizationV2Details.Language.DEFAULT, "val_default")
-            .containsEntry(ProtectedIssuanceAuthorizationV2Details.Language.DE_CH, "val_de")
-            .containsEntry(ProtectedIssuanceAuthorizationV2Details.Language.EN, "val_en");
+            .containsEntry("default", "val_default")
+            .containsEntry("de-CH", "val_de")
+            .containsEntry("en", "val_en");
     }
 
     @Test
-    // EID-6303
-    @SuppressWarnings("java:S5738")
-    void toVerificationQueryV2LanguageMap_mapsDefaultKeyToDefaultLanguage() {
+    void toVerificationQueryV2LanguageMap_mapsAnyLocaleStringAsIs() {
         var source = Map.of("default", "val_default", "de-CH", "val_de", "en", "val_en");
 
         var result = TrustStatementMapper.toVerificationQueryV2LanguageMap(source);
 
         assertThat(result)
-            .containsEntry(VerificationQueryV2Details.Language.DEFAULT, "val_default")
-            .containsEntry(VerificationQueryV2Details.Language.DE_CH, "val_de")
-            .containsEntry(VerificationQueryV2Details.Language.EN, "val_en");
+            .containsEntry("default", "val_default")
+            .containsEntry("de-CH", "val_de")
+            .containsEntry("en", "val_en");
     }
 
     @Test
-    // EID-6303
-    @SuppressWarnings("java:S5738")
-    void toIdentityV2LanguageMap_mapsDefaultKeyToDefaultLanguage() {
+    void toVerificationQueryV2LanguageMap_keepsBareLocaleCodesAsIs() {
+        var source = Map.of("default", "val_default", "fr", "val_fr", "it", "val_it", "rm", "val_rm");
+
+        var result = TrustStatementMapper.toVerificationQueryV2LanguageMap(source);
+
+        assertThat(result)
+            .containsEntry("default", "val_default")
+            .containsEntry("fr", "val_fr")
+            .containsEntry("it", "val_it")
+            .containsEntry("rm", "val_rm");
+    }
+
+    @Test
+    void toIdentityV2LanguageMap_mapsAnyLocaleStringAsIs() {
         var source = Map.of("default", "val_default", "de-CH", "val_de", "en", "val_en");
 
         var result = TrustStatementMapper.toIdentityV2LanguageMap(source);
 
         assertThat(result)
-            .containsEntry(IdentityV2Details.Language.DEFAULT, "val_default")
-            .containsEntry(IdentityV2Details.Language.DE_CH, "val_de")
-            .containsEntry(IdentityV2Details.Language.EN, "val_en");
+            .containsEntry("default", "val_default")
+            .containsEntry("de-CH", "val_de")
+            .containsEntry("en", "val_en");
+    }
+
+    @Test
+    void toIdentityV2LanguageMap_keepsBareLocaleCodeAsIs() {
+        var source = Map.of("default", "val_default", "fr", "val_fr");
+
+        var result = TrustStatementMapper.toIdentityV2LanguageMap(source);
+
+        assertThat(result).containsEntry("default", "val_default").containsEntry("fr", "val_fr");
+    }
+
+    @Test
+    void toProtectedIssuanceAuthorizationV2DetailsLanguageMap_keepsBareLocaleCodeAsIs() {
+        var source = Map.of("default", "val_default", "fr", "val_fr");
+
+        var result = TrustStatementMapper.toProtectedIssuanceAuthorizationV2DetailsLanguageMap(source);
+
+        assertThat(result).containsEntry("default", "val_default").containsEntry("fr", "val_fr");
     }
 }

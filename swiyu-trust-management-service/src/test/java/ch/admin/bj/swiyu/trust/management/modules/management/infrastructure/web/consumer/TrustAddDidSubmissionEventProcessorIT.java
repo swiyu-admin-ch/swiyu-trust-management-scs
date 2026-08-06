@@ -11,7 +11,6 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProofOfPosses
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustAdditionalDidsSubmissionInternalDtoDto;
 import ch.admin.bj.swiyu.trust.client.issuer.management.model.CredentialStatusTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.IssuerClient;
@@ -65,7 +64,6 @@ class TrustAddDidSubmissionEventProcessorIT {
     @Autowired
     AsyncTestConfig asyncTestConfig;
 
-    @SuppressWarnings("java:S5738") // EID-6303
     private void createActiveIdentityTrustStatement(UUID partnerId, String permissionDid) {
         var statement = TrustStatementPartnerLink.createIdentityV1(
             partnerId,
@@ -73,15 +71,15 @@ class TrustAddDidSubmissionEventProcessorIT {
             Instant.now().minusSeconds(3600),
             Instant.now().plusSeconds(3600 * 24 * 365),
             Map.of(
-                IdentityV1Details.Language.DE_CH,
+                "de-CH",
                 "Test Partner DE",
-                IdentityV1Details.Language.FR_CH,
+                "fr-CH",
                 "Test Partner FR",
-                IdentityV1Details.Language.IT_CH,
+                "it-CH",
                 "Test Partner IT",
-                IdentityV1Details.Language.EN,
+                "en",
                 "Test Partner EN",
-                IdentityV1Details.Language.RM_CH,
+                "rm-CH",
                 "Test Partner RM"
             ),
             List.of(),

@@ -54,10 +54,7 @@ public class JwtStatementDomainService {
         payload.subject(partnerLink.getSubject());
         payload.claim("is_state_actor", details.getIsStateActor());
         payload.claim("registry_ids", details.getRegistryIds());
-        var entityNames = JsonLocalizationSerializer.fromLocalizedIdentityV2DetailsLanguage(
-            "entity_name",
-            details.getEntityName()
-        );
+        var entityNames = JsonLocalizationSerializer.toLocalizedClaims("entity_name", details.getEntityName());
         for (var entityName : entityNames.entrySet()) {
             payload.claim(entityName.getKey(), entityName.getValue());
         }
@@ -127,18 +124,8 @@ public class JwtStatementDomainService {
 
         var canIssue = new HashMap<String, String>();
         canIssue.put("vct", details.getCanIssue().vct());
-        canIssue.putAll(
-            JsonLocalizationSerializer.fromLocalizedProtectedIssuanceAuthorizationV2DetailsLanguage(
-                "reason",
-                details.getCanIssue().reason()
-            )
-        );
-        canIssue.putAll(
-            JsonLocalizationSerializer.fromLocalizedProtectedIssuanceAuthorizationV2DetailsLanguage(
-                "vct_name",
-                details.getCanIssue().vctName()
-            )
-        );
+        canIssue.putAll(JsonLocalizationSerializer.toLocalizedClaims("reason", details.getCanIssue().reason()));
+        canIssue.putAll(JsonLocalizationSerializer.toLocalizedClaims("vct_name", details.getCanIssue().vctName()));
         payload.claim("can_issue", canIssue);
 
         return sign(header.build(), payload.build(), trustIssuer.signer()).serialize();
@@ -172,9 +159,7 @@ public class JwtStatementDomainService {
                     var actorMap = new HashMap<String, String>();
                     actorMap.put("actor", a.actor());
                     actorMap.put("flagged_at", DateTimeFormatter.ISO_INSTANT.format(a.flaggedAt()));
-                    actorMap.putAll(
-                        JsonLocalizationSerializer.fromLocalizedNonComplianceV2DetailsLanguage("reason", a.reason())
-                    );
+                    actorMap.putAll(JsonLocalizationSerializer.toLocalizedClaims("reason", a.reason()));
                     return actorMap;
                 })
                 .toList()
@@ -236,13 +221,13 @@ public class JwtStatementDomainService {
             )
         );
 
-        for (var e : JsonLocalizationSerializer.fromLocalizedVerificationQueryV2DetailsLanguage(
+        for (var e : JsonLocalizationSerializer.toLocalizedClaims(
             "purpose_name",
             details.getPurposeName()
         ).entrySet()) {
             payload.claim(e.getKey(), e.getValue());
         }
-        for (var e : JsonLocalizationSerializer.fromLocalizedVerificationQueryV2DetailsLanguage(
+        for (var e : JsonLocalizationSerializer.toLocalizedClaims(
             "purpose_description",
             details.getPurposeDescription()
         ).entrySet()) {

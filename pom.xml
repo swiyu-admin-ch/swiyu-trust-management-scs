@@ -16,7 +16,7 @@
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>3.34.2-SNAPSHOT</version>
+    <version>3.34.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>

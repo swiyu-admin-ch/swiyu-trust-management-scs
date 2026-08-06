@@ -15,7 +15,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.Issue
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.DatastoreStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.StatementDto;
 import jakarta.validation.constraints.NotNull;
-import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.experimental.UtilityClass;
@@ -77,58 +77,38 @@ public class TrustStatementMapper {
         );
     }
 
-    public static Map<IdentityV1Details.Language, String> toIdentityV1LanguageMap(Map<String, String> source) {
+    public static Map<String, String> toIdentityV1LanguageMap(Map<String, String> source) {
         if (source == null) {
             return emptyMap();
         }
-        var result = new EnumMap<IdentityV1Details.Language, String>(IdentityV1Details.Language.class);
+        var result = new LinkedHashMap<String, String>();
         source.forEach((locale, text) -> {
             // V1 does not know about a default language
             if (!LocalizedMapConstants.DEFAULT_VALUE_KEY.equals(locale)) {
-                result.put(IdentityV1Details.Language.fromJsonValue(locale), text);
+                result.put(locale, text);
             }
         });
         // Edge case: only "default" language is the only one set,
         // and we do not know which language that would be.
         // We assume de-CH is the default language.
         if (result.isEmpty() && source.containsKey(LocalizedMapConstants.DEFAULT_VALUE_KEY)) {
-            result.put(IdentityV1Details.Language.DE_CH, source.get(LocalizedMapConstants.DEFAULT_VALUE_KEY));
+            result.put(LocalizedMapConstants.DE_CH, source.get(LocalizedMapConstants.DEFAULT_VALUE_KEY));
         }
         return result;
     }
 
-    public static Map<IdentityV2Details.Language, String> toIdentityV2LanguageMap(Map<String, String> source) {
+    public static Map<String, String> toIdentityV2LanguageMap(Map<String, String> source) {
         if (source == null) {
             return emptyMap();
         }
-        var result = new EnumMap<IdentityV2Details.Language, String>(IdentityV2Details.Language.class);
-        source.forEach((locale, text) -> {
-            if (LocalizedMapConstants.DEFAULT_VALUE_KEY.equals(locale)) {
-                result.put(IdentityV2Details.Language.DEFAULT, text);
-            } else {
-                result.put(toIdentityV2Language(locale), text);
-            }
-        });
-        return result;
+        return new LinkedHashMap<>(source);
     }
 
-    public static Map<VerificationQueryV2Details.Language, String> toVerificationQueryV2LanguageMap(
-        Map<String, String> source
-    ) {
+    public static Map<String, String> toVerificationQueryV2LanguageMap(Map<String, String> source) {
         if (source == null) {
             return emptyMap();
         }
-        var result = new EnumMap<VerificationQueryV2Details.Language, String>(
-            VerificationQueryV2Details.Language.class
-        );
-        source.forEach((locale, text) -> {
-            if (LocalizedMapConstants.DEFAULT_VALUE_KEY.equals(locale)) {
-                result.put(VerificationQueryV2Details.Language.DEFAULT, text);
-            } else {
-                result.put(toVerificationQueryV2Language(locale), text);
-            }
-        });
-        return result;
+        return new LinkedHashMap<>(source);
     }
 
     public static VerificationQueryV2Details.VerificationRequestObject toVerificationQueryV2VerificationRequestObject(
@@ -137,24 +117,11 @@ public class TrustStatementMapper {
         return new VerificationQueryV2Details.VerificationRequestObject(source.type(), source.scope(), source.query());
     }
 
-    public static Map<
-        ProtectedIssuanceAuthorizationV2Details.Language,
-        String
-    > toProtectedIssuanceAuthorizationV2DetailsLanguageMap(Map<String, String> source) {
+    public static Map<String, String> toProtectedIssuanceAuthorizationV2DetailsLanguageMap(Map<String, String> source) {
         if (source == null) {
             return emptyMap();
         }
-        var result = new EnumMap<ProtectedIssuanceAuthorizationV2Details.Language, String>(
-            ProtectedIssuanceAuthorizationV2Details.Language.class
-        );
-        source.forEach((locale, text) -> {
-            if (LocalizedMapConstants.DEFAULT_VALUE_KEY.equals(locale)) {
-                result.put(ProtectedIssuanceAuthorizationV2Details.Language.DEFAULT, text);
-            } else {
-                result.put(toProtectedIssuanceAuthorizationV2Language(locale), text);
-            }
-        });
-        return result;
+        return new LinkedHashMap<>(source);
     }
 
     public static TrustStatementTypeDto toTrustStatementTypeDto(TrustStatementPartnerLinkType type) {
@@ -330,35 +297,6 @@ public class TrustStatementMapper {
             toProtectedIssuanceAuthorizationV2DetailsLanguageMap(source.vctName()),
             toProtectedIssuanceAuthorizationV2DetailsLanguageMap(source.reason())
         );
-    }
-
-    private static IdentityV2Details.Language toIdentityV2Language(String locale) {
-        for (var lang : IdentityV2Details.Language.values()) {
-            if (lang.getLanguageCode().equals(locale)) {
-                return lang;
-            }
-        }
-        throw new IllegalArgumentException("Unsupported locale: " + locale);
-    }
-
-    private static VerificationQueryV2Details.Language toVerificationQueryV2Language(String locale) {
-        for (var lang : VerificationQueryV2Details.Language.values()) {
-            if (lang.getLanguageCode().equals(locale)) {
-                return lang;
-            }
-        }
-        throw new IllegalArgumentException("Unsupported locale: " + locale);
-    }
-
-    private static ProtectedIssuanceAuthorizationV2Details.Language toProtectedIssuanceAuthorizationV2Language(
-        String locale
-    ) {
-        for (var lang : ProtectedIssuanceAuthorizationV2Details.Language.values()) {
-            if (lang.getLanguageCode().equals(locale)) {
-                return lang;
-            }
-        }
-        throw new IllegalArgumentException("Unsupported locale: " + locale);
     }
 
     private static Map<String, Object> toAdditionalPropertiesMap(

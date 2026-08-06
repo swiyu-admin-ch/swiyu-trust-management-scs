@@ -102,7 +102,7 @@ public class TrustStatementPartnerLink {
         String subject,
         Instant validFrom,
         Instant validUntil,
-        Map<IdentityV1Details.Language, String> entityName,
+        Map<String, String> entityName,
         List<IdentityV1Details.RegistryId> registryIds,
         Boolean isStateActor
     ) {
@@ -123,7 +123,7 @@ public class TrustStatementPartnerLink {
         String subject,
         Instant validFrom,
         Instant validUntil,
-        Map<IdentityV2Details.Language, String> entityName,
+        Map<String, String> entityName,
         List<IdentityV2Details.RegistryId> registryIds,
         Boolean isStateActor,
         StatusListEntry newStatusListEntry
@@ -145,8 +145,8 @@ public class TrustStatementPartnerLink {
         String subject,
         Instant validFrom,
         Instant validUntil,
-        Map<VerificationQueryV2Details.Language, String> purposeName,
-        Map<VerificationQueryV2Details.Language, String> purposeDescription,
+        Map<String, String> purposeName,
+        Map<String, String> purposeDescription,
         VerificationQueryV2Details.VerificationRequestObject request
     ) {
         var type = TrustStatementPartnerLinkType.PUBLIC_STATEMENT_VERIFICATION_QUERY_V2;
