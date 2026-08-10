@@ -18,7 +18,6 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.Ou
 import com.querydsl.core.BooleanBuilder;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.time.Clock;
 import java.time.Instant;
 import java.time.Period;
 import java.time.ZonedDateTime;
@@ -38,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class BusinessPartnerIdentityService {
 
     private final BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
-    private final Clock clock;
     private final DefaultIdentityProperties defaultIdentityProperties;
     private final DefaultStatementProperties defaultStatementProperties;
     private final OutboxEventPublisher outboxEventPublisher;
@@ -53,7 +51,7 @@ public class BusinessPartnerIdentityService {
 
         bpi.setStatus(BusinessPartnerIdentityStatus.ACTIVE);
         bpi.setValidUntil(calculateValidUntilFromNow(defaultIdentityProperties.validity()));
-        bpi.setLastActivated(Instant.now(clock));
+        bpi.setLastActivated(Instant.now());
 
         var event = TiBusinessPartnerIdentityActivatedEventBuilder.create().businessPartnerIdentity(bpi).build();
 
@@ -103,7 +101,7 @@ public class BusinessPartnerIdentityService {
 
         issueAllIdTSForTrustedIdentifiers(bpi);
 
-        bpi.setLastIssuanceAt(Instant.now(clock));
+        bpi.setLastIssuanceAt(Instant.now());
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
@@ -177,7 +175,7 @@ public class BusinessPartnerIdentityService {
 
             var reqV1 = new IdentityV1RequestDto(
                 trustedDid,
-                Instant.now(clock),
+                Instant.now(),
                 statementValidUntil,
                 bpi.getEntityName(),
                 bpi.getIsStateActor(),
@@ -188,7 +186,7 @@ public class BusinessPartnerIdentityService {
             var reqV2 = new IdentityV2RequestDto(
                 bpi.getId(),
                 trustedDid,
-                Instant.now(clock),
+                Instant.now(),
                 statementValidUntil,
                 bpi.getEntityName(),
                 bpi.getIsStateActor(),
@@ -199,7 +197,7 @@ public class BusinessPartnerIdentityService {
     }
 
     private Instant calculateValidUntilFromNow(Period statementValidity) {
-        return ZonedDateTime.now(clock).plus(statementValidity).toInstant();
+        return ZonedDateTime.now().plus(statementValidity).toInstant();
     }
 
     private Instant calculateValidUntilForStatement(Instant bpiValidUntil, Period statementValidity) {

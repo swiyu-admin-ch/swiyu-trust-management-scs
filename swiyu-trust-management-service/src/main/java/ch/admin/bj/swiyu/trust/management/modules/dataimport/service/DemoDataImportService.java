@@ -1,20 +1,24 @@
 package ch.admin.bj.swiyu.trust.management.modules.dataimport.service;
 
-import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.*;
+import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserName;
 
-import ch.admin.bj.swiyu.trust.management.modules.common.security.*;
+import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
+import ch.admin.bj.swiyu.trust.management.modules.common.security.SystemUserAuthentication;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.*;
-import ch.admin.bj.swiyu.trust.management.modules.management.service.*;
-import java.time.*;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.service.DomainEventService;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
-import lombok.*;
-import lombok.extern.slf4j.*;
-import org.springframework.context.annotation.*;
-import org.springframework.security.core.context.*;
-import org.springframework.stereotype.*;
-import org.springframework.transaction.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @SuppressWarnings({ "java:S1192", "java:S5803", "java:S1854" })
 @Component
@@ -23,6 +27,7 @@ import org.springframework.transaction.annotation.*;
 @Slf4j
 public class DemoDataImportService {
 
+    private final BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
     private final TrustOnboardingTaskRepository trustOnboardingTaskRepository;
     private final DomainEventLogRepository domainEventLogRepository;
     private final DomainEventService domainEventService;
@@ -43,6 +48,62 @@ public class DemoDataImportService {
         trustOnboardingTaskRepository.deleteAllByPartnerId(CoreDemoData.CORE_ID_BP_GOV);
         trustOnboardingTaskRepository.deleteAllByPartnerId(CoreDemoData.CORE_ID_BP_BASE_ONBOARDING_ONLY);
         trustOnboardingTaskRepository.deleteAllByPartnerId(CoreDemoData.CORE_ID_BP_OVERDUE);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteBusinessPartnerIdentities() {
+        businessPartnerIdentityRepository.deleteById(CoreDemoData.CORE_ID_BP_DEFAULT);
+        businessPartnerIdentityRepository.deleteById(CoreDemoData.CORE_ID_BP_WANTS_TO_BE_TRUSTED);
+        businessPartnerIdentityRepository.deleteById(CoreDemoData.CORE_ID_BP_GOV);
+        businessPartnerIdentityRepository.deleteById(CoreDemoData.CORE_ID_BP_BASE_ONBOARDING_ONLY);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void loadBusinessPartnerIdentities() {
+        List<BusinessPartnerIdentity> bpis = new ArrayList<>();
+
+        var lastActivated = Instant.now().minus(10, ChronoUnit.DAYS);
+        bpis.add(
+            new BusinessPartnerIdentity(
+                CoreDemoData.CORE_ID_BP_DEFAULT,
+                CoreDemoData.CORE_ID_BP_DEFAULT_NAMES,
+                lastActivated,
+                null,
+                false,
+                CoreDemoData.CORE_ID_BP_DEFAULT_CORRESPONDING_LANG,
+                BusinessPartnerIdentityStatus.ACTIVE,
+                false,
+                lastActivated.atZone(ZoneId.of("Europe/Zurich")).plusYears(3).toInstant(),
+                lastActivated
+            )
+        );
+
+        lastActivated = Instant.now().minus(10, ChronoUnit.DAYS);
+        bpis.add(
+            new BusinessPartnerIdentity(
+                CoreDemoData.CORE_ID_BP_GOV_TRUSTED,
+                CoreDemoData.CORE_ID_BP_GOV_TRUSTED_NAMES,
+                lastActivated,
+                null,
+                false,
+                CoreDemoData.CORE_ID_BP_GOV_TRUSTED_CORRESPONDING_LANG,
+                BusinessPartnerIdentityStatus.ACTIVE,
+                true,
+                lastActivated.atZone(ZoneId.of("Europe/Zurich")).plusYears(3).toInstant(),
+                lastActivated
+            )
+        );
+
+        for (var bpi : bpis) {
+            var optDbEntity = businessPartnerIdentityRepository.findById(bpi.getId());
+            if (optDbEntity.isPresent()) {
+                var dbEntity = optDbEntity.get();
+                dbEntity.overwriteFrom(bpi);
+                businessPartnerIdentityRepository.saveAndFlush(dbEntity);
+            } else {
+                businessPartnerIdentityRepository.save(bpi);
+            }
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

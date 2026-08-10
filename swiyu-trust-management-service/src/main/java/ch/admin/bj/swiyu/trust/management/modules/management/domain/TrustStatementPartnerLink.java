@@ -30,11 +30,7 @@ public class TrustStatementPartnerLink {
     private UUID id;
 
     /**
-     * The id of the business partner. Currently nullable only because:
-     * <ol>
-     *      <li>TrustStatementMetadataV1 do not have a referencing partnerid</li>*
-     * </ol>
-     * <p>
+     * The id of the business partner. Currently nullable only because of migration in EID-6609
      * Once this limitation is removed we can make it NOT NULL.
      */
     private UUID partnerId;

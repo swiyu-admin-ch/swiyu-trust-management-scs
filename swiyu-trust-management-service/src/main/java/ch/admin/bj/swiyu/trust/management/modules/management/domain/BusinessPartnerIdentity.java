@@ -3,6 +3,7 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMetadata;
 import ch.admin.bj.swiyu.trust.management.modules.common.i18n.ValidLocalizedMap;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -95,5 +96,19 @@ public class BusinessPartnerIdentity {
         this.isStateActor = isStateActor;
         this.validUntil = validUntil;
         this.lastIssuanceAt = lastIssuanceAt;
+    }
+
+    @VisibleForTesting
+    public void overwriteFrom(BusinessPartnerIdentity source) {
+        this.id = source.id;
+        this.entityName = source.entityName;
+        this.lastActivated = source.lastActivated;
+        this.uid = source.uid;
+        this.isRegisteredInCommercialRegister = source.isRegisteredInCommercialRegister;
+        this.correspondingLanguage = source.correspondingLanguage;
+        this.status = source.status;
+        this.isStateActor = source.isStateActor;
+        this.validUntil = source.validUntil;
+        this.lastIssuanceAt = source.lastIssuanceAt;
     }
 }
