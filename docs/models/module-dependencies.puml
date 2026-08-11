@@ -1,0 +1,28 @@
+@startuml module-dependencies
+!pragma layout smetana
+
+skinparam componentStyle rectangle
+skinparam ComponentBackgroundColor White
+skinparam ComponentBorderColor Black
+skinparam ArrowColor Black
+skinparam defaultFontName Arial
+
+component "Common" as common
+component "Registry"  as registry
+component "Management"  as management
+component "DataImport"  as dataimport
+component "Jobs"  as jobs
+component "UI"  as ui
+
+registry --> common
+management --> common
+management --> registry
+jobs --> common
+jobs --> management
+dataimport --> common
+dataimport --> management
+ui --> common
+ui --> management
+
+@enduml
+

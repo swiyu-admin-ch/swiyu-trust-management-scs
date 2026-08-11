@@ -1,0 +1,308 @@
+@startuml domain-model
+!pragma layout smetana
+title Domain Model — swiyu-trust-management-service
+
+' ==================== COMMON VALUE OBJECTS ====================
+package "Common Value Objects" #EEEEFF {
+  class AuditMetadata <<embeddable>> {
+    + Instant createdAt
+    + String createdBy
+    + Instant lastModifiedAt
+    + String lastModifiedBy
+  }
+
+  class NonCompliantReasonText <<embeddable>> {
+    + String reasonDe
+    + String reasonFr
+    + String reasonIt
+    + String reasonEn
+    + String reasonRm
+  }
+}
+
+' ==================== MANAGEMENT ====================
+package "Management" #E8F5E9 {
+
+  entity BusinessPartnerIdentity <<entity>> {
+    + UUID id
+    --
+    + String uid
+    + Boolean isRegisteredInCommercialRegister
+    + Boolean isStateActor
+    + String correspondingLanguage
+    + Instant lastActivated
+    + Instant lastIssuanceAt
+    + Instant validUntil
+    + Long version
+    -- jsonb --
+    + Map<String,String> entityName
+    + Set<String> trustedIdentifier
+    -- embedded --
+    + AuditMetadata audit
+  }
+
+  enum BusinessPartnerIdentityStatus <<external>> {
+    ACTIVE
+    DEACTIVATED
+  }
+
+  entity TrustTask <<entity>> {
+    + UUID id
+    --
+    + UUID partnerId
+    + Instant dueAt
+    + Instant submittedAt
+    + String assignee
+    + Long version
+    -- jsonb --
+    + Map<String,String> partnerName
+    -- embedded --
+    + AuditMetadata audit
+  }
+
+  entity TrustOnboardingTask <<entity>> {
+    + UUID trustOnboardingSubmissionId
+    + Instant rejectionEnforcedAt
+    + int timesResubmitted
+  }
+
+  entity TrustAddDidTask <<entity>> {
+    + UUID trustAddDidSubmissionId
+    + String permissionDid
+  }
+
+  enum TrustTaskStatus {
+    REJECTED
+    ACCEPTED
+    OPENED
+    INFORMATION_REQUESTED
+    RESUBMITTED
+  }
+
+  enum TrustTaskType {
+    ONBOARDING
+    ADD_DID
+  }
+
+  entity TrustStatementPartnerLink <<entity>> {
+    + UUID id
+    --
+    + UUID partnerId
+    + String subject
+    + Instant validFrom
+    + Instant validUntil
+    + UUID trustRegistryEntryId
+    + UUID trustIssuerCredentialId
+    + UUID statusListMetadataId
+    + Integer statusListIndex
+    -- jsonb --
+    + TrustStatementDetails details
+    -- embedded --
+    + AuditMetadata audit
+  }
+
+  enum TrustStatementPartnerLinkStatus {
+    CONFIRMED
+    ACTIVE
+    INACTIVE
+  }
+
+  enum TrustStatementPartnerLinkType {
+    TRUST_STATEMENT_IDENTITY_V1
+    TRUST_STATEMENT_ISSUANCE_V1
+    TRUST_STATEMENT_VERIFICATION_V1
+    TRUST_STATEMENT_IDENTITY_V2
+    TRUST_STATEMENT_PROTECTED_VERIFICATION_AUTHORIZATION_V2
+    TRUST_STATEMENT_PROTECTED_ISSUANCE_AUTHORIZATION_V2
+    TRUST_LIST_STATEMENT_NON_COMPLIANCE_V2
+    TRUST_LIST_STATEMENT_PROTECTED_ISSUANCE_V2
+    PUBLIC_STATEMENT_VERIFICATION_QUERY_V2
+  }
+
+  entity StatusListMetadata <<entity>> {
+    + UUID id
+    --
+    + int maxSize
+    + Instant lastPublishedAt
+    + String statusRegistryUrl
+    -- embedded --
+    + AuditMetadata audit
+  }
+
+  enum StatusListMetadataStatus {
+    ACTIVE
+    FULL
+    DEACTIVATED
+  }
+
+  entity NonCompliantActor <<entity>> {
+    + UUID id
+    --
+    + String did
+    + Instant flaggedAsNonCompliantAt
+    + Long version
+    -- embedded --
+    + NonCompliantReasonText reason
+    + AuditMetadata audit
+  }
+
+  entity ProtectedIssuanceEntry <<entity>> {
+    + UUID id
+    --
+    + String vct
+    + Instant protectedAt
+    -- embedded --
+    + AuditMetadata audit
+  }
+
+  entity VcSchemaPartnerLink <<entity>> {
+    + UUID id
+    --
+    + UUID vcSchemaId
+    + UUID vcSchemaSubmissionId
+    + UUID partnerId
+    -- embedded --
+    + AuditMetadata auditMetadata
+  }
+
+  entity DomainEventLog <<entity>> {
+    + UUID id
+    --
+    + Instant triggeredAt
+    + String triggeredBy
+    + UUID trustTaskId
+    + UUID nonCompliantActorId
+    + UUID protectedIssuanceEntryId
+    + String partnerNote
+    + String internalNote
+    -- embedded --
+    + AuditMetadata auditMetadata
+  }
+
+  enum DomainEventType {
+    BUSINESS_PARTNER_IDENTITY_ACTIVATED
+    BUSINESS_PARTNER_IDENTITY_DEACTIVATED
+    BUSINESS_PARTNER_IDENTITY_UPDATED
+    TRUST_ONBOARDING_SUBMISSION_RECEIVED
+    TRUST_ONBOARDING_SUCCEEDED
+    TRUST_ONBOARDING_REJECTED
+    TRUST_ONBOARDING_MORE_INFORMATION_REQUESTED
+    TRUST_ONBOARDING_RESUBMITTED
+    TRUST_ONBOARDING_TASK_NOTE_ADDED
+    TRUST_ONBOARDING_TASK_ASSIGNED
+    TRUST_ADD_DID_SUBMISSION_RECEIVED
+    TRUST_ADD_DID_SUCCEEDED
+    TRUST_ADD_DID_REJECTED
+    NON_COMPLIANT_ACTOR_ADDED
+    NON_COMPLIANT_ACTOR_REMOVED
+    PROTECTED_ISSUANCE_ENTRY_ADDED
+    PROTECTED_ISSUANCE_ENTRY_REMOVED
+  }
+
+  enum StatementType {
+    IDENTITY_TRUST_STATEMENT_V2
+    VERIFICATION_QUERY_PUBLIC_STATEMENT_V2
+    PROTECTED_VERIFICATION_AUTHORIZATION_TRUST_STATEMENT_V2
+    PROTECTED_ISSUANCE_AUTHORIZATION_TRUST_STATEMENT_V2
+    PROTECTED_ISSUANCE_TRUST_LIST_STATEMENT_V2
+    NON_COMPLIANCE_TRUST_LIST_STATEMENT_V2
+  }
+
+  ' Relationships within Management
+  BusinessPartnerIdentity --> BusinessPartnerIdentityStatus : status
+  TrustTask --> TrustTaskStatus : status
+  TrustTask --> TrustTaskType : taskType
+  TrustOnboardingTask --|> TrustTask
+  TrustAddDidTask --|> TrustTask
+  TrustStatementPartnerLink --> TrustStatementPartnerLinkStatus : status
+  TrustStatementPartnerLink --> TrustStatementPartnerLinkType : type
+  StatusListMetadata --> StatusListMetadataStatus : status
+  DomainEventLog --> DomainEventType : eventType
+}
+
+' ==================== REGISTRY ====================
+package "Registry" #EFEBE9 {
+
+  entity DatastoreEntity <<entity>> {
+    + UUID id
+    -- embedded --
+    + AuditMetadata auditMetadata
+  }
+
+  enum DatastoreStatus {
+    ACTIVE
+    DEACTIVATED
+    DISABLED
+    SETUP
+  }
+
+  entity NonComplianceList <<entity>> {
+    + UUID id
+    --
+    + Instant publishedAt
+    + Long version
+    -- jsonb --
+    + String payload
+    -- embedded --
+    + AuditMetadata auditMetadata
+  }
+
+  entity Statement <<entity>> {
+    + UUID id
+    --
+    + boolean isSoftDeleted
+    + boolean isActiveInStatuslist
+    + String serialized
+    -- jsonb --
+    + JsonNode data
+    -- embedded --
+    + AuditMetadata audit
+  }
+
+  enum StatementType {
+    IDENTITY_TRUST_STATEMENT_V2
+    VERIFICATION_QUERY_PUBLIC_STATEMENT_V2
+    PROTECTED_VERIFICATION_AUTHORIZATION_TRUST_STATEMENT_V2
+    PROTECTED_ISSUANCE_AUTHORIZATION_TRUST_STATEMENT_V2
+    PROTECTED_ISSUANCE_TRUST_LIST_STATEMENT_V2
+    NON_COMPLIANCE_TRUST_LIST_STATEMENT_V2
+  }
+
+  entity VcEntity <<entity>> {
+    + Long id
+    --
+    + UUID datastoreEntityId
+    + String rawVc
+    -- jsonb --
+    + JsonNode vcPayload
+    -- embedded --
+    + AuditMetadata audit
+  }
+
+  entity VcSchema <<entity>> {
+    + UUID id
+    --
+    + String path
+    + String file
+    -- embedded --
+    + AuditMetadata audit
+  }
+
+  enum VcSchemaStatus {
+    ACTIVATED
+    DEACTIVATED
+  }
+
+  ' Relationships within Registry
+  DatastoreEntity --> DatastoreStatus : status
+  Statement --> StatementType : type
+  VcEntity }o--|| DatastoreEntity : "datastoreEntityId"
+  VcSchema --> VcSchemaStatus : status
+}
+
+' ==================== CROSS-MODULE RELATIONSHIPS ====================
+TrustStatementPartnerLink }o--o| StatusListMetadata : "statusListMetadataId"
+VcSchemaPartnerLink }o--|| VcSchema : "vcSchemaId"
+
+@enduml
+
