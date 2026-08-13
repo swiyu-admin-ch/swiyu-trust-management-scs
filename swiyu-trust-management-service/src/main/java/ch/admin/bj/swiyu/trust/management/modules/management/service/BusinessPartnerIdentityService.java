@@ -1,8 +1,9 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.persistence.TransactionManagerNames.MANAGEMENT_TRANSACTION_MANAGER;
+import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.*;
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementMapper.mapPageableWithValidSortProperties;
+import static ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationAuthorizationMapper.mapPageableWithValidSortProperties;
 
 import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityBadRequestException;
@@ -39,7 +40,9 @@ public class BusinessPartnerIdentityService {
     private final BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
     private final DefaultIdentityProperties defaultIdentityProperties;
     private final DefaultStatementProperties defaultStatementProperties;
+    private final DomainEventService domainEventService;
     private final OutboxEventPublisher outboxEventPublisher;
+    private final ProtectedVerificationRepository protectedVerificationRepository;
     private final TrustStatementPartnerLinkRepository partnerLinkRepository;
     private final TrustStatementService trustStatementService;
 
@@ -49,9 +52,7 @@ public class BusinessPartnerIdentityService {
             .findById(businessPartnerId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
 
-        bpi.setStatus(BusinessPartnerIdentityStatus.ACTIVE);
-        bpi.setValidUntil(calculateValidUntilFromNow(defaultIdentityProperties.validity()));
-        bpi.setLastActivated(Instant.now());
+        bpi.activate(defaultIdentityProperties.validity());
 
         var event = TiBusinessPartnerIdentityActivatedEventBuilder.create().businessPartnerIdentity(bpi).build();
 
@@ -64,14 +65,14 @@ public class BusinessPartnerIdentityService {
             .findById(businessPartnerId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
 
-        bpi.setStatus(BusinessPartnerIdentityStatus.DEACTIVATED);
+        bpi.deactivate();
 
         var event = TiBusinessPartnerIdentityDeactivatedEventBuilder.create().businessPartnerIdentity(bpi).build();
         outboxEventPublisher.publishBusinessPartnerIdentityDeactivatedEvent(event);
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
-    public void deactivateTrustStatement(UUID businessPartnerId, String reason) {
+    public void deactivateTrustStatements(UUID businessPartnerId, String reason) {
         var bpi = businessPartnerIdentityRepository
             .findById(businessPartnerId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
@@ -100,8 +101,9 @@ public class BusinessPartnerIdentityService {
         }
 
         issueAllIdTSForTrustedIdentifiers(bpi);
+        issueAllPvaTSForTrustedIdentifiers(bpi);
 
-        bpi.setLastIssuanceAt(Instant.now());
+        bpi.updateLastIssuance();
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
@@ -116,8 +118,9 @@ public class BusinessPartnerIdentityService {
             );
         }
 
-        var event = TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build();
-        outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(event);
+        outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(
+            TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build()
+        );
     }
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
@@ -134,36 +137,136 @@ public class BusinessPartnerIdentityService {
             where.and(q.audit.createdBy.like(filters.createdBy()));
         }
         return businessPartnerIdentityRepository
-            .findAll(where, mapPageableWithValidSortProperties(pageable))
+            .findAll(where, mapBusinessPartnerIdentityPageableWithValidSortProperties(pageable))
             .map(BusinessPartnerIdentityMapper::toBusinessPartnerIdentityDto);
     }
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
-    public BusinessPartnerIdentityDto getBusinessPartnerIdentity(@Valid @NotNull UUID businessPartnerIdentityId) {
+    public BusinessPartnerIdentity getBusinessPartnerIdentity(@Valid @NotNull UUID businessPartnerIdentityId) {
+        return businessPartnerIdentityRepository
+            .findById(businessPartnerIdentityId)
+            .orElseThrow(businessPartnerIdentityNotFound(businessPartnerIdentityId));
+    }
+
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public BusinessPartnerIdentityDto getBusinessPartnerIdentityDto(@Valid @NotNull UUID businessPartnerIdentityId) {
         var businessPartnerIdentity = businessPartnerIdentityRepository
             .findById(businessPartnerIdentityId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerIdentityId));
         return toBusinessPartnerIdentityDto(businessPartnerIdentity);
     }
 
-    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void sync(UUID businessPartnerIdentityId) {
         var bpi = businessPartnerIdentityRepository
             .findById(businessPartnerIdentityId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerIdentityId));
 
-        var event = TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build();
-        outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(event);
+        outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(
+            TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build()
+        );
     }
 
-    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void syncAll() {
         var bpis = businessPartnerIdentityRepository.findAll();
 
         for (var bpi : bpis) {
-            var event = TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build();
-            outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(event);
+            outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(
+                TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build()
+            );
         }
+    }
+
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public Page<ProtectedVerificationAuthorizationDto> getProtectedVerificationAuthorizationsPaged(
+        ProtectedVerificationAuthorizationFilterDto filters,
+        Pageable pageable
+    ) {
+        var q = QProtectedVerificationAuthorization.protectedVerificationAuthorization;
+        var where = new BooleanBuilder();
+        if (filters.businessPartnerIdentityId() != null) {
+            where.and(q.businessPartnerIdentityId.eq(filters.businessPartnerIdentityId()));
+        }
+        if (filters.createdBy() != null) {
+            where.and(q.audit.createdBy.like(filters.createdBy()));
+        }
+        if (filters.lastModifiedBy() != null) {
+            where.and(q.audit.lastModifiedBy.like(filters.lastModifiedBy()));
+        }
+        return protectedVerificationRepository
+            .findAll(where, mapPageableWithValidSortProperties(pageable))
+            .map(BusinessPartnerIdentityMapper::toProtectedVerificationAuthorizationDto);
+    }
+
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public ProtectedVerificationAuthorizationDto getProtectedVerificationAuthorizationDto(
+        @Valid @NotNull UUID protectedVerificationAuthorizationId
+    ) {
+        var pva = protectedVerificationRepository
+            .findById(protectedVerificationAuthorizationId)
+            .orElseThrow(protectedVerificationAuthorizationNotFound(protectedVerificationAuthorizationId));
+        return toProtectedVerificationAuthorizationDto(pva);
+    }
+
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public ProtectedVerificationAuthorizationDto addProtectedVerificationAuthorization(
+        @Valid @NotNull ProtectedVerificationAuthorizationRequestDto request
+    ) {
+        var field = BusinessPartnerIdentityMapper.toProtectedVerificationField(request.protectedField());
+
+        // Uniqueness is enforced at the DB level (unique DID), but we also check here to provide a
+        // friendly 400 error instead of a low-level constraint violation.
+        var existingEntry =
+            protectedVerificationRepository.findAllByBusinessPartnerIdentityIdAndProtectedVerificationField(
+                request.businessPartnerIdentityId(),
+                field
+            );
+        if (!existingEntry.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Validation failed: protected verification authorization already exists for field '%s' and business partner identity id '%s'.".formatted(
+                    field,
+                    request.businessPartnerIdentityId()
+                )
+            );
+        }
+
+        var bpi = getBusinessPartnerIdentity(request.businessPartnerIdentityId());
+
+        var pva = protectedVerificationRepository.save(
+            new ProtectedVerificationAuthorization(UUID.randomUUID(), bpi.getId(), field)
+        );
+
+        this.domainEventService.protectedVerificationAuthorizationAdded(pva.getId(), getCurrentUserFullName());
+
+        outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(
+            TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build()
+        );
+
+        return toProtectedVerificationAuthorizationDto(pva);
+    }
+
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public void removeProtectedVerificationAuthorization(@Valid @NotNull UUID protectedVerificationAuthorizationId) {
+        var pva = protectedVerificationRepository
+            .findById(protectedVerificationAuthorizationId)
+            .orElseThrow(protectedVerificationAuthorizationNotFound(protectedVerificationAuthorizationId));
+        var bpi = getBusinessPartnerIdentity(pva.getBusinessPartnerIdentityId());
+
+        protectedVerificationRepository.delete(pva);
+
+        outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(
+            TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build()
+        );
+    }
+
+    private static Supplier<ResourceNotFoundException> businessPartnerIdentityNotFound(UUID id) {
+        return () -> new ResourceNotFoundException("No business partner identity found for id %s".formatted(id));
+    }
+
+    private static Supplier<ResourceNotFoundException> protectedVerificationAuthorizationNotFound(UUID id) {
+        return () ->
+            new ResourceNotFoundException("Protected Verification Authorization found for id %s".formatted(id));
     }
 
     private void issueAllIdTSForTrustedIdentifiers(BusinessPartnerIdentity bpi) {
@@ -196,6 +299,32 @@ public class BusinessPartnerIdentityService {
         }
     }
 
+    private void issueAllPvaTSForTrustedIdentifiers(BusinessPartnerIdentity bpi) {
+        var pvas = protectedVerificationRepository.findAllByBusinessPartnerIdentityId(bpi.getId());
+
+        for (var trustedDid : bpi.getTrustedIdentifier()) {
+            var statementValidUntil = calculateValidUntilForStatement(
+                bpi.getValidUntil(),
+                defaultStatementProperties.timeToLive()
+            );
+
+            for (var pva : pvas) {
+                var req = new ProtectedVerificationAuthorizationV2RequestDto(
+                    bpi.getId(),
+                    trustedDid,
+                    Instant.now(),
+                    statementValidUntil,
+                    List.of(
+                        BusinessPartnerIdentityMapper.toProtectedVerificationAuthorizationV2AuthorizedFieldDto(
+                            pva.getProtectedVerificationField()
+                        )
+                    )
+                );
+                trustStatementService.issueAndPublishProtectedVerificationAuthorizationV2TrustStatement(req);
+            }
+        }
+    }
+
     private Instant calculateValidUntilFromNow(Period statementValidity) {
         return ZonedDateTime.now().plus(statementValidity).toInstant();
     }
@@ -203,9 +332,5 @@ public class BusinessPartnerIdentityService {
     private Instant calculateValidUntilForStatement(Instant bpiValidUntil, Period statementValidity) {
         var statementValidUntil = calculateValidUntilFromNow(statementValidity);
         return statementValidUntil.isBefore(bpiValidUntil) ? statementValidUntil : bpiValidUntil;
-    }
-
-    private static Supplier<ResourceNotFoundException> businessPartnerIdentityNotFound(UUID id) {
-        return () -> new ResourceNotFoundException("No business partner identity found for id %s".formatted(id));
     }
 }

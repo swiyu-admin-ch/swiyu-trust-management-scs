@@ -1,5 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper.today;
+
 import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMetadata;
 import ch.admin.bj.swiyu.trust.management.modules.common.i18n.ValidLocalizedMap;
@@ -9,13 +11,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.Period;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -30,7 +32,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Valid
 @NoArgsConstructor
 @Getter
-@Setter
 @ToString
 public class BusinessPartnerIdentity {
 
@@ -98,8 +99,31 @@ public class BusinessPartnerIdentity {
         this.lastIssuanceAt = lastIssuanceAt;
     }
 
+    public void activate(Period statementValidity) {
+        status = BusinessPartnerIdentityStatus.ACTIVE;
+        validUntil = calculateValidUntilFromNow(statementValidity);
+        lastActivated = Instant.now();
+    }
+
+    public void deactivate() {
+        status = BusinessPartnerIdentityStatus.DEACTIVATED;
+    }
+
+    public void updateLastIssuance() {
+        lastIssuanceAt = Instant.now();
+    }
+
+    private Instant calculateValidUntilFromNow(Period statementValidity) {
+        return today().plus(statementValidity).toInstant();
+    }
+
+    @VisibleForTesting // only used for unit test
+    public void setVersion(long version) {
+        this.version = version;
+    }
+
     @VisibleForTesting
-    public void overwriteFrom(BusinessPartnerIdentity source) {
+    public void overrideFrom(BusinessPartnerIdentity source) {
         this.id = source.id;
         this.entityName = source.entityName;
         this.lastActivated = source.lastActivated;

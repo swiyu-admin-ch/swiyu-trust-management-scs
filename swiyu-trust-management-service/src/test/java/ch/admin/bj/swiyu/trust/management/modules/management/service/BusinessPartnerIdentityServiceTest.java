@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
-import static ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper.today;
+import static ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedVerificationAuthorizationV2RequestDto.AuthorizableFieldDto.AHV_NUMBER;
+import static ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData.BUSINESS_PARTNER_NAME;
 import static java.time.Duration.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,19 +11,20 @@ import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
+import ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityBadRequestException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV1RequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV2RequestDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedVerificationAuthorizationV2RequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.DefaultIdentityProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.statements.DefaultStatementProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
-import jakarta.validation.constraints.NotBlank;
+import ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData;
 import java.time.Instant;
 import java.time.Period;
 import java.util.*;
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,9 +34,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class BusinessPartnerIdentityServiceTest {
-
-    private static final UUID DEFAULT_BPI_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-    private static final UUID DEFAULT_BPI_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
     @Mock
     private BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
@@ -46,7 +45,13 @@ class BusinessPartnerIdentityServiceTest {
     private DefaultStatementProperties defaultStatementProperties;
 
     @Mock
+    private DomainEventService domainEventService;
+
+    @Mock
     private OutboxEventPublisher outboxEventPublisher;
+
+    @Mock
+    private ProtectedVerificationRepository protectedVerificationRepository;
 
     @Mock
     private TrustStatementPartnerLinkRepository trustStatementPartnerLinkRepository;
@@ -62,7 +67,9 @@ class BusinessPartnerIdentityServiceTest {
             businessPartnerIdentityRepository,
             defaultIdentityProperties,
             defaultStatementProperties,
+            domainEventService,
             outboxEventPublisher,
+            protectedVerificationRepository,
             trustStatementPartnerLinkRepository,
             trustStatementService
         );
@@ -70,12 +77,14 @@ class BusinessPartnerIdentityServiceTest {
 
     @Test
     void activate_shouldSendActivateEvent() {
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(
-            Optional.of(defaultPartnerIdentity(BusinessPartnerIdentityStatus.DEACTIVATED))
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.DEACTIVATED
         );
+        bpi.setVersion(0);
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
         when(defaultIdentityProperties.validity()).thenReturn(Period.ofYears(3));
 
-        businessPartnerIdentityService.activate(DEFAULT_BPI_ID);
+        businessPartnerIdentityService.activate(bpi.getId());
 
         var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityActivatedEvent.class);
         verify(outboxEventPublisher).publishBusinessPartnerIdentityActivatedEvent(captor.capture());
@@ -84,72 +93,87 @@ class BusinessPartnerIdentityServiceTest {
         assertThat(event.getIdentity()).isNotNull();
         assertThat(event.getType()).isNotNull();
         assertThat(event.getType().getName()).isEqualTo("TiBusinessPartnerIdentityActivatedEvent");
-        assertThat(event.getType().getVersion()).isEqualTo("2.0.0");
         assertThat(event.getPublisher().getService()).isEqualTo("swiyu-trust-management-service");
 
         var payload = event.getPayload();
         assertThat(payload).isNotNull();
-        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(DEFAULT_BPI_ID);
-        assertThat(payload.getValidUntil()).isCloseTo(in3Years(), within(ofDays(1)));
+        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(bpi.getId());
+        assertThat(payload.getValidUntil()).isEqualTo(DateTimeHelper.today().plusYears(3).toInstant());
+        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(bpi.getId());
+        assertThat(payload.getValidUntil()).isCloseTo(
+            DateTimeHelper.today().plusYears(3).toInstant(),
+            within(ofDays(1))
+        );
         assertThat(payload.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
         assertThat(payload.getLastActivated()).isCloseTo(Instant.now(), within(ofSeconds(1)));
         assertThat(payload.getUid()).isEqualTo("CHE-123-456-789");
-        assertThat(payload.getEntityName()).containsAllEntriesOf(defaultEntityName());
+        assertThat(payload.getEntityName()).containsAllEntriesOf(BUSINESS_PARTNER_NAME);
     }
 
     @Test
     void activate_updateStatus() {
-        var bpiId = DEFAULT_BPI_ID;
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.DEACTIVATED);
-        when(businessPartnerIdentityRepository.findById(bpiId)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.DEACTIVATED
+        );
+        bpi.setVersion(0);
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
         when(defaultIdentityProperties.validity()).thenReturn(Period.ofYears(3));
 
-        businessPartnerIdentityService.activate(bpiId);
+        businessPartnerIdentityService.activate(bpi.getId());
 
         assertThat(bpi.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
     }
 
     @Test
     void activate_updateValidUntil() {
-        var bpiId = DEFAULT_BPI_ID;
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.DEACTIVATED);
-        when(businessPartnerIdentityRepository.findById(bpiId)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.DEACTIVATED
+        );
+        bpi.setVersion(0);
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
         when(defaultIdentityProperties.validity()).thenReturn(Period.ofMonths(1));
 
-        businessPartnerIdentityService.activate(bpiId);
+        businessPartnerIdentityService.activate(bpi.getId());
 
-        assertThat(bpi.getValidUntil()).isCloseTo(in1Month(), within(ofDays(1)));
+        assertThat(bpi.getValidUntil()).isCloseTo(DateTimeHelper.today().plusMonths(1).toInstant(), within(ofDays(1)));
     }
 
     @Test
     void activate_updateLastActivated() {
-        var bpiId = DEFAULT_BPI_ID;
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.DEACTIVATED);
-        when(businessPartnerIdentityRepository.findById(bpiId)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.DEACTIVATED
+        );
+        bpi.setVersion(0);
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
         when(defaultIdentityProperties.validity()).thenReturn(Period.ofYears(3));
 
-        businessPartnerIdentityService.activate(bpiId);
+        businessPartnerIdentityService.activate(bpi.getId());
 
         assertThat(bpi.getLastActivated()).isCloseTo(Instant.now(), within(ofSeconds(1)));
     }
 
     @Test
     void deactivate_shouldUpdateStatus() {
-        var bpiId = DEFAULT_BPI_ID;
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        when(businessPartnerIdentityRepository.findById(bpiId)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi.setVersion(0);
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
-        businessPartnerIdentityService.deactivate(bpiId);
+        businessPartnerIdentityService.deactivate(bpi.getId());
 
         assertThat(bpi.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.DEACTIVATED);
     }
 
     @Test
     void deactivate_shouldSendDeactivatedEvent() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi.setVersion(0);
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
-        businessPartnerIdentityService.deactivate(DEFAULT_BPI_ID);
+        businessPartnerIdentityService.deactivate(bpi.getId());
 
         var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityDeactivatedEvent.class);
         verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(captor.capture());
@@ -163,157 +187,216 @@ class BusinessPartnerIdentityServiceTest {
 
         var payload = event.getPayload();
         assertThat(payload).isNotNull();
-        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(DEFAULT_BPI_ID);
+        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(bpi.getId());
         assertThat(payload.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.DEACTIVATED);
     }
 
     @Test
     void deactivateTrustStatementWith2TrustedIdentifier_shouldDeactivateOnlyThose2() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        bpi.getTrustedIdentifier().addAll(List.of("subject1V1", "subject1V2"));
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi.getTrustedIdentifier().addAll(List.of("subject1V1", "Some-did"));
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
         when(
             trustStatementPartnerLinkRepository.findAllByPartnerIdAndStatus(
-                DEFAULT_BPI_ID,
+                bpi.getId(),
                 TrustStatementPartnerLinkStatus.ACTIVE
             )
         ).thenReturn(
             List.of(
-                partnerLinkIdentityV1("subject1V1"),
-                partnerLinkIdentityV1("subject2V1"),
-                partnerLinkIdentityV2("subject1V2")
+                BusinessPartnerIdentityTestData.partnerLinkIdentityV1("subject1V1"),
+                BusinessPartnerIdentityTestData.partnerLinkIdentityV1("subject2V1"),
+                BusinessPartnerIdentityTestData.partnerLinkIdentityV2("Some-did")
             )
         );
 
-        businessPartnerIdentityService.deactivateTrustStatement(DEFAULT_BPI_ID, "time to be deactivated");
+        businessPartnerIdentityService.deactivateTrustStatements(bpi.getId(), "time to be deactivated");
 
         verify(trustStatementService, times(3)).deactivateTrustStatement(any(), any());
     }
 
     @Test
     void issueTrustStatement_shouldFailIfBpiIsNotActive() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.DEACTIVATED);
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.DEACTIVATED
+        );
+        var bpiId = bpi.getId();
+        when(businessPartnerIdentityRepository.findById(bpiId)).thenReturn(Optional.of(bpi));
 
-        assertThatThrownBy(() -> businessPartnerIdentityService.issueTrustStatements(DEFAULT_BPI_ID))
+        assertThatThrownBy(() -> businessPartnerIdentityService.issueTrustStatements(bpiId))
             .isInstanceOf(BusinessPartnerIdentityBadRequestException.class)
-            .hasMessageMatching(
-                "Business partner identity for id '00000000-0000-0000-0000-000000000000' is not active"
-            );
+            .hasMessageMatching("Business partner identity for id '%s' is not active".formatted(bpiId));
     }
 
     @Test
     void issueTrustStatement_shouldSetLastIssuanceToNow() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
-        businessPartnerIdentityService.issueTrustStatements(DEFAULT_BPI_ID);
+        businessPartnerIdentityService.issueTrustStatements(bpi.getId());
 
         assertThat(bpi.getLastIssuanceAt()).isCloseTo(Instant.now(), within(ofSeconds(1)));
     }
 
     @Test
     void issueTrustStatement_shouldCallIssueAndPublishIdTSV1WithTheRightValues() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        bpi.getTrustedIdentifier().add("subject1V1");
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
         when(defaultStatementProperties.timeToLive()).thenReturn(Period.ofMonths(6));
 
-        businessPartnerIdentityService.issueTrustStatements(DEFAULT_BPI_ID);
+        businessPartnerIdentityService.issueTrustStatements(bpi.getId());
 
         var captor = ArgumentCaptor.forClass(IdentityV1RequestDto.class);
-        verify(trustStatementService).issueAndPublishIdentityV1TrustStatement(any(), captor.capture());
+        verify(trustStatementService).issueAndPublishIdentityV1TrustStatement(eq(bpi.getId()), captor.capture());
         var request = captor.getValue();
 
-        assertThat(request.getEntityName()).containsExactlyEntriesOf(defaultEntityName());
+        assertThat(request.getEntityName()).containsExactlyEntriesOf(BUSINESS_PARTNER_NAME);
         assertThat(request.getIsStateActor()).isFalse();
         assertThat(request.getRegistryIds()).hasSize(1);
         assertThat(request.getRegistryIds().getFirst().type()).isEqualTo("UID");
         assertThat(request.getRegistryIds().getFirst().value()).isEqualTo("CHE-123-456-789");
         assertThat(request.getValidFrom()).isCloseTo(Instant.now(), within(ofSeconds(1)));
-        assertThat(request.getValidUntil()).isCloseTo(in6Months(), within(ofDays(1)));
+        assertThat(request.getValidUntil()).isCloseTo(
+            DateTimeHelper.today().plusMonths(6).toInstant(),
+            within(ofDays(1))
+        );
     }
 
     @Test
-    void issueTrustStatementWithBpiValidUntil1DayLater_shouldIssueAndPublishIdTSV1WithStatementValidUntil1DayLater() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        bpi.setValidUntil(in1Day());
-        bpi.getTrustedIdentifier().add("subject1V1");
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+    void issueTrustStatementWithBpiValidUntil1MonthLater_shouldIssueAndPublishIdTSV1WithStatementValidUntil1MonthLater() {
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi.activate(Period.ofMonths(1));
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
         when(defaultStatementProperties.timeToLive()).thenReturn(Period.ofMonths(6));
 
-        businessPartnerIdentityService.issueTrustStatements(DEFAULT_BPI_ID);
+        businessPartnerIdentityService.issueTrustStatements(bpi.getId());
 
         var captor = ArgumentCaptor.forClass(IdentityV1RequestDto.class);
         verify(trustStatementService).issueAndPublishIdentityV1TrustStatement(any(), captor.capture());
         var request = captor.getValue();
 
-        assertThat(request.getValidUntil()).isCloseTo(in1Day(), within(ofMinutes(1)));
+        assertThat(request.getValidUntil()).isCloseTo(
+            DateTimeHelper.today().plusMonths(1).toInstant(),
+            within(ofDays(1))
+        );
     }
 
     @Test
     void issueTrustStatement_shouldCallIssueAndPublishIdTSV2WithTheRightValues() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        bpi.getTrustedIdentifier().add("subject1V2");
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
         when(defaultStatementProperties.timeToLive()).thenReturn(Period.ofMonths(6));
 
-        businessPartnerIdentityService.issueTrustStatements(DEFAULT_BPI_ID);
+        businessPartnerIdentityService.issueTrustStatements(bpi.getId());
 
         var captor = ArgumentCaptor.forClass(IdentityV2RequestDto.class);
         verify(trustStatementService).issueAndPublishIdentityV2TrustStatement(captor.capture());
         var request = captor.getValue();
 
-        assertThat(request.getEntityName()).containsExactlyEntriesOf(defaultEntityName());
+        assertThat(request.getEntityName()).containsExactlyEntriesOf(BUSINESS_PARTNER_NAME);
         assertThat(request.getIsStateActor()).isFalse();
         assertThat(request.getRegistryIds()).hasSize(1);
         assertThat(request.getRegistryIds().getFirst().type()).isEqualTo("UID");
         assertThat(request.getRegistryIds().getFirst().value()).isEqualTo("CHE-123-456-789");
         assertThat(request.getValidFrom()).isCloseTo(Instant.now(), within(ofMinutes(1)));
-        assertThat(request.getValidUntil()).isCloseTo(in6Months(), within(ofHours(24)));
+        assertThat(request.getValidUntil()).isCloseTo(
+            DateTimeHelper.today().plusMonths(6).toInstant(),
+            within(ofHours(24))
+        );
     }
 
     @Test
     void issueTrustStatementWithBpiValidUntil1DayLater_shouldIssueAndPublishIdTSV2WithStatementValidUntil1DayLater() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        bpi.setValidUntil(in1Day());
-        bpi.getTrustedIdentifier().add("subject1V2");
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi.activate(Period.ofMonths(1));
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
         when(defaultStatementProperties.timeToLive()).thenReturn(Period.ofMonths(6));
 
-        businessPartnerIdentityService.issueTrustStatements(DEFAULT_BPI_ID);
+        businessPartnerIdentityService.issueTrustStatements(bpi.getId());
 
         var captor = ArgumentCaptor.forClass(IdentityV2RequestDto.class);
         verify(trustStatementService).issueAndPublishIdentityV2TrustStatement(captor.capture());
         var request = captor.getValue();
 
-        assertThat(request.getValidUntil()).isCloseTo(in1Day(), within(ofMinutes(1)));
+        assertThat(request.getValidUntil()).isCloseTo(
+            DateTimeHelper.today().plusMonths(1).toInstant(),
+            within(ofDays(1))
+        );
+    }
+
+    @Test
+    void issueTrustStatement_shouldCallIssueAndPublishPvaSV2WithTheRightValues() {
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
+        when(protectedVerificationRepository.findAllByBusinessPartnerIdentityId(bpi.getId())).thenReturn(
+            List.of(
+                new ProtectedVerificationAuthorization(
+                    UUID.randomUUID(),
+                    bpi.getId(),
+                    ProtectedVerificationField.AHV_NUMBER
+                )
+            )
+        );
+
+        when(defaultStatementProperties.timeToLive()).thenReturn(Period.ofMonths(6));
+
+        businessPartnerIdentityService.issueTrustStatements(bpi.getId());
+
+        var captor = ArgumentCaptor.forClass(ProtectedVerificationAuthorizationV2RequestDto.class);
+        verify(trustStatementService).issueAndPublishProtectedVerificationAuthorizationV2TrustStatement(
+            captor.capture()
+        );
+        var request = captor.getValue();
+
+        assertThat(request.getSubject()).isEqualTo("Some-did");
+        assertThat(request.getAuthorizedFields()).containsOnly(AHV_NUMBER);
+        assertThat(request.getValidFrom()).isCloseTo(Instant.now(), within(ofMinutes(1)));
+        assertThat(request.getValidUntil()).isCloseTo(
+            DateTimeHelper.today().plusMonths(6).toInstant(),
+            within(ofDays(1))
+        );
     }
 
     @Test
     void renewTrustStatementsDeactivated_shouldThrow() {
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(
-            Optional.of(defaultPartnerIdentity(BusinessPartnerIdentityStatus.DEACTIVATED))
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.DEACTIVATED
         );
+        var bpiId = bpi.getId();
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
-        assertThatThrownBy(() -> businessPartnerIdentityService.renewTrustStatements(DEFAULT_BPI_ID))
+        assertThatThrownBy(() -> businessPartnerIdentityService.renewTrustStatements(bpiId))
             .isInstanceOf(BusinessPartnerIdentityBadRequestException.class)
-            .hasMessageMatching(
-                "Business partner identity for id '00000000-0000-0000-0000-000000000000' is not active"
-            );
+            .hasMessageMatching("Business partner identity for id '%s' is not active".formatted(bpi.getId()));
     }
 
     @Test
     void renewTrustStatements_shouldSendBusinessPartnerIdentityUpdatedEvent() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi.setVersion(0);
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
-        businessPartnerIdentityService.renewTrustStatements(DEFAULT_BPI_ID);
+        businessPartnerIdentityService.renewTrustStatements(bpi.getId());
 
         var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityUpdatedEvent.class);
         verify(outboxEventPublisher).publishBusinessPartnerIdentityUpdatedEvent(captor.capture());
@@ -323,32 +406,38 @@ class BusinessPartnerIdentityServiceTest {
         assertThat(event.getIdentity()).isNotNull();
         assertThat(event.getType()).isNotNull();
         assertThat(event.getType().getName()).isEqualTo("TiBusinessPartnerIdentityUpdatedEvent");
-        assertThat(event.getType().getVersion()).isEqualTo("2.0.0");
         assertThat(event.getPublisher().getService()).isEqualTo("swiyu-trust-management-service");
 
         var payload = event.getPayload();
         assertThat(payload).isNotNull();
-        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(DEFAULT_BPI_ID);
-        assertThat(payload.getValidUntil()).isCloseTo(in3Years(), within(ofDays(1)));
+        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(bpi.getId());
+        assertThat(payload.getValidUntil()).isCloseTo(
+            DateTimeHelper.today().plusYears(3).toInstant(),
+            within(ofDays(1))
+        );
         assertThat(payload.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
         assertThat(payload.getLastActivated()).isCloseTo(Instant.now(), within(ofMinutes(1)));
         assertThat(payload.getUid()).isEqualTo("CHE-123-456-789");
-        assertThat(payload.getEntityName()).containsAllEntriesOf(defaultEntityName());
+        assertThat(payload.getEntityName()).containsAllEntriesOf(BUSINESS_PARTNER_NAME);
     }
 
     @Test
     void syncWithInvalidBpiId_shouldThrow() {
-        assertThatThrownBy(() -> businessPartnerIdentityService.sync(DEFAULT_BPI_ID))
+        var invalidId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        assertThatThrownBy(() -> businessPartnerIdentityService.sync(invalidId))
             .isInstanceOfAny(ResourceNotFoundException.class)
             .hasMessageMatching("No business partner identity found for id 00000000-0000-0000-0000-000000000000");
     }
 
     @Test
     void sync_shouldEmitBpiUpdateEvent() {
-        var bpi = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        when(businessPartnerIdentityRepository.findById(DEFAULT_BPI_ID)).thenReturn(Optional.of(bpi));
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi.setVersion(0);
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
-        businessPartnerIdentityService.sync(DEFAULT_BPI_ID);
+        businessPartnerIdentityService.sync(bpi.getId());
 
         var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityUpdatedEvent.class);
         verify(outboxEventPublisher).publishBusinessPartnerIdentityUpdatedEvent(captor.capture());
@@ -357,24 +446,31 @@ class BusinessPartnerIdentityServiceTest {
         assertThat(event.getIdentity()).isNotNull();
         assertThat(event.getType()).isNotNull();
         assertThat(event.getType().getName()).isEqualTo("TiBusinessPartnerIdentityUpdatedEvent");
-        assertThat(event.getType().getVersion()).isEqualTo("2.0.0");
         assertThat(event.getPublisher().getService()).isEqualTo("swiyu-trust-management-service");
 
         var payload = event.getPayload();
         assertThat(payload).isNotNull();
-        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(DEFAULT_BPI_ID);
-        assertThat(payload.getValidUntil()).isCloseTo(in3Years(), within(ofDays(1)));
+        assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(bpi.getId());
+        assertThat(payload.getValidUntil()).isCloseTo(
+            DateTimeHelper.today().plusYears(3).toInstant(),
+            within(ofDays(1))
+        );
         assertThat(payload.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
         assertThat(payload.getLastActivated()).isCloseTo(Instant.now(), within(ofSeconds(1)));
         assertThat(payload.getUid()).isEqualTo("CHE-123-456-789");
-        assertThat(payload.getEntityName()).containsAllEntriesOf(defaultEntityName());
+        assertThat(payload.getEntityName()).containsAllEntriesOf(BUSINESS_PARTNER_NAME);
     }
 
     @Test
     void syncAllWith2Bpi_shouldEmit2Events() {
-        var bpi1 = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        var bpi2 = defaultPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE);
-        bpi2.setId(DEFAULT_BPI_ID_2);
+        var bpi1 = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi1.setVersion(0);
+        var bpi2 = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi2.setVersion(0);
         when(businessPartnerIdentityRepository.findAll()).thenReturn(List.of(bpi1, bpi2));
 
         businessPartnerIdentityService.syncAll();
@@ -385,83 +481,6 @@ class BusinessPartnerIdentityServiceTest {
         assertThat(events).hasSize(2);
         assertThat(events)
             .extracting(event -> event.getPayload().getBusinessPartnerIdentityId())
-            .containsExactlyInAnyOrder(DEFAULT_BPI_ID, DEFAULT_BPI_ID_2);
-    }
-
-    private @NonNull BusinessPartnerIdentity defaultPartnerIdentity(BusinessPartnerIdentityStatus status) {
-        var bpi = new BusinessPartnerIdentity(
-            DEFAULT_BPI_ID,
-            defaultEntityName(),
-            null,
-            "CHE-123-456-789",
-            false,
-            "de-CH",
-            status,
-            false,
-            in3Years(),
-            null
-        );
-        bpi.setVersion(0L);
-        bpi.setLastActivated(status == BusinessPartnerIdentityStatus.ACTIVE ? Instant.now() : null);
-        return bpi;
-    }
-
-    private static @NonNull Map<String, @NotBlank String> defaultEntityName() {
-        return Map.of("de-CH", "Compagny-de", "fr-CH", "Company-fr", "it-CH", "Company-it", "rm-CH", "Company-rm");
-    }
-
-    private @NonNull TrustStatementPartnerLink partnerLinkIdentityV1(String subject) {
-        var partnerLlink = TrustStatementPartnerLink.createIdentityV1(
-            DEFAULT_BPI_ID,
-            subject,
-            Instant.now(),
-            Instant.parse("2027-03-31T15:00:00Z"),
-            defaultEntityName(),
-            Collections.emptyList(),
-            false
-        );
-        // set status to ACTIVE
-        partnerLlink.persistReferencesAfterPublicationSucceeded(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            TrustStatementPartnerLinkStatus.ACTIVE
-        );
-        return partnerLlink;
-    }
-
-    private @NonNull TrustStatementPartnerLink partnerLinkIdentityV2(String subject) {
-        var partnerLink = TrustStatementPartnerLink.createIdentityV2(
-            DEFAULT_BPI_ID,
-            subject,
-            Instant.now(),
-            Instant.parse("2027-03-31T15:00:00Z"),
-            defaultEntityName(),
-            Collections.emptyList(),
-            false,
-            null
-        );
-        // set status to ACTIVE
-        partnerLink.persistReferencesAfterPublicationSucceeded(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            TrustStatementPartnerLinkStatus.ACTIVE
-        );
-        return partnerLink;
-    }
-
-    private static Instant in1Day() {
-        return today().plusDays(1).toInstant();
-    }
-
-    private static Instant in1Month() {
-        return today().plusMonths(1).toInstant();
-    }
-
-    private static Instant in6Months() {
-        return today().plusMonths(6).toInstant();
-    }
-
-    private static Instant in3Years() {
-        return today().plusYears(3).toInstant();
+            .containsExactlyInAnyOrder(bpi1.getId(), bpi2.getId());
     }
 }

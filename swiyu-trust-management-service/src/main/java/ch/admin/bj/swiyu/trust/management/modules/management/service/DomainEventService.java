@@ -160,6 +160,16 @@ public class DomainEventService {
         );
     }
 
+    public void protectedVerificationAuthorizationAdded(UUID pvaId, String triggeredBy) {
+        domainEventLogRepository.save(
+            DomainEventLog.createProtectedVerificationAuthorizationDomainEventLog(
+                PROTECTED_VERIFICATION_AUTHORIZATION_ADDED,
+                triggeredBy,
+                pvaId
+            )
+        );
+    }
+
     @Transactional
     public void protectedIssuanceEntryAdded(UUID protectedIssuanceEntryId, String triggeredBy) {
         domainEventLogRepository.save(

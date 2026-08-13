@@ -24,7 +24,7 @@ public class BusinessPartnerIdentityEventProcessor {
         var businessPartnerId = event.getPayload().getBusinessPartnerIdentityId();
         log.info("Retrieve Business Partner Identity Activated Event with ID: {}", businessPartnerId);
         var reason = "Business Partner Identity has been activated";
-        businessPartnerIdentityService.deactivateTrustStatement(businessPartnerId, reason);
+        businessPartnerIdentityService.deactivateTrustStatements(businessPartnerId, reason);
         businessPartnerIdentityService.issueTrustStatements(businessPartnerId);
     }
 
@@ -38,7 +38,7 @@ public class BusinessPartnerIdentityEventProcessor {
             businessPartnerId,
             reason
         );
-        businessPartnerIdentityService.deactivateTrustStatement(businessPartnerId, reason);
+        businessPartnerIdentityService.deactivateTrustStatements(businessPartnerId, reason);
     }
 
     @IdempotentMessageHandler

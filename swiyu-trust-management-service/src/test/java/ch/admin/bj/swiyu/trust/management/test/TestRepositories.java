@@ -1,9 +1,12 @@
 package ch.admin.bj.swiyu.trust.management.test;
 
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentityRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantActorRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.NonComplianceListRepository;
+import ch.admin.bj.swiyu.trust.management.modules.registry.domain.StatementRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.transaction.TestTransaction;
@@ -24,6 +27,9 @@ public class TestRepositories {
     public final DomainEventLogRepository domainEventLog;
     public final NonComplianceListRepository nonComplianceList;
     public final TrustStatementPartnerLinkRepository trustStatementPartnerLink;
+    public final BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
+    public final ProtectedVerificationRepository protectedVerificationRepository;
+    public final StatementRepository statementRepository;
 
     /**
      * Opens a new Transaction. Might be useful if there are multiple transactions are needed within a test.

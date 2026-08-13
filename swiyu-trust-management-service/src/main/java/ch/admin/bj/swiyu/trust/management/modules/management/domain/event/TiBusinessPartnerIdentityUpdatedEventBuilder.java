@@ -120,14 +120,11 @@ public class TiBusinessPartnerIdentityUpdatedEventBuilder
         if (this.businessPartnerIdentityId == null) {
             throw AvroMessageBuilderException.propertyNull("declarationPayload.businessPartnerIdentityId");
         }
-        if (this.validUntil == null) {
-            throw AvroMessageBuilderException.propertyNull("declarationPayload.validUntil");
+        if (this.trustedIdentifier == null) {
+            throw AvroMessageBuilderException.propertyNull("declarationPayload.trustedIdentifier");
         }
         if (this.status == null) {
             throw AvroMessageBuilderException.propertyNull("declarationPayload.status");
-        }
-        if (this.lastActivated == null) {
-            throw AvroMessageBuilderException.propertyNull("declarationPayload.lastActivated");
         }
         if (this.entityName == null) {
             throw AvroMessageBuilderException.propertyNull("declarationPayload.entityName");

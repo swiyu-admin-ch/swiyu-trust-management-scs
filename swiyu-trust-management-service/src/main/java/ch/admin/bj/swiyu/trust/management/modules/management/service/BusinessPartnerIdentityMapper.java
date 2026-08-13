@@ -5,15 +5,15 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMa
 import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.BusinessPartnerTypeDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerIdentityDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerIdentityStatusDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV1RequestDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV2RequestDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationAuthorization;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationField;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV2Details;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementDetails;
+import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -21,10 +21,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @UtilityClass
 public class BusinessPartnerIdentityMapper {
+
+    private final List<String> businessPartnerIdentityAllowedSortFields = List.of(
+        "createdAt",
+        "createdBy",
+        "updatedAt",
+        "updatedBy"
+    );
 
     public static BusinessPartnerIdentityDto toBusinessPartnerIdentityDto(
         BusinessPartnerIdentity businessPartnerIdentity
@@ -183,6 +192,77 @@ public class BusinessPartnerIdentityMapper {
             return List.of();
         }
         return List.of(new IdentityV2RequestDto.RegistryIdDto("UID", uid));
+    }
+
+    public static Pageable mapBusinessPartnerIdentityPageableWithValidSortProperties(Pageable pageable) {
+        // filter Pageable for invalid sort fields to not fail them silently
+        pageable
+            .getSort()
+            .stream()
+            .filter(c -> !businessPartnerIdentityAllowedSortFields.contains(c.getProperty()))
+            .findFirst()
+            .ifPresent(c -> {
+                throw new IllegalArgumentException("Invalid pagination parameters");
+            });
+
+        // Map Pageable fields to actual DB entities
+        var sort = pageable
+            .getSort()
+            .stream()
+            .map(order -> {
+                String property = order.getProperty();
+                return switch (property) {
+                    case "createdAt" -> new Sort.Order(order.getDirection(), "audit.createdAt");
+                    case "createdBy" -> new Sort.Order(order.getDirection(), "audit.createdBy");
+                    case "updatedAt" -> new Sort.Order(order.getDirection(), "audit.lastModifiedAt");
+                    case "updatedBy" -> new Sort.Order(order.getDirection(), "audit.lastModifiedBy");
+                    default -> order;
+                };
+            })
+            .toList();
+        if (pageable.isUnpaged()) {
+            return Pageable.unpaged(Sort.by(sort));
+        }
+        // Copy Pageable details over as a Pageable is immutable
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(sort));
+    }
+
+    public static ProtectedVerificationField toProtectedVerificationField(
+        @NotNull AuthorizableFieldDto authorizableFieldDto
+    ) {
+        return switch (authorizableFieldDto) {
+            case AHV_NUMBER -> ProtectedVerificationField.AHV_NUMBER;
+        };
+    }
+
+    public static ProtectedVerificationAuthorizationDto toProtectedVerificationAuthorizationDto(
+        ProtectedVerificationAuthorization src
+    ) {
+        return new ProtectedVerificationAuthorizationDto(
+            src.getId(),
+            src.getBusinessPartnerIdentityId(),
+            toProtectedVerificationFieldDto(src.getProtectedVerificationField()),
+            src.getAudit().getLastModifiedAt(),
+            src.getAudit().getLastModifiedBy(),
+            src.getAudit().getCreatedAt(),
+            src.getAudit().getCreatedBy()
+        );
+    }
+
+    public static AuthorizableFieldDto toProtectedVerificationFieldDto(
+        ProtectedVerificationField protectedVerificationField
+    ) {
+        return switch (protectedVerificationField) {
+            case AHV_NUMBER -> AuthorizableFieldDto.AHV_NUMBER;
+        };
+    }
+
+    public static ProtectedVerificationAuthorizationV2RequestDto.AuthorizableFieldDto toProtectedVerificationAuthorizationV2AuthorizedFieldDto(
+        ProtectedVerificationField protectedVerificationField
+    ) {
+        return switch (protectedVerificationField) {
+            case AHV_NUMBER -> ProtectedVerificationAuthorizationV2RequestDto.AuthorizableFieldDto.AHV_NUMBER;
+        };
     }
 
     private static void putLocalizedEntry(Map<String, String> target, String languageCode, String text) {

@@ -7,9 +7,7 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProofOfPosses
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.IssuerVcStatus;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.DatastoreStatusDto;

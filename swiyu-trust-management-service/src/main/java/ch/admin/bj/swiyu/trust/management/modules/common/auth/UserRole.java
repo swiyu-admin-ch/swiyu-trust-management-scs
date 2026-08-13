@@ -22,11 +22,6 @@ public enum UserRole implements GrantedAuthority {
         this.roleName = roleName;
     }
 
-    @Override
-    public String getAuthority() {
-        return "ROLE_" + this.getRoleName(); // role authorities have in spring the default prefix "ROLE_"
-    }
-
     public static UserRole fromRoleName(String roleName) {
         for (UserRole role : values()) {
             if (role.getRoleName().equalsIgnoreCase(roleName)) {
@@ -34,6 +29,11 @@ public enum UserRole implements GrantedAuthority {
             }
         }
         return null;
+    }
+
+    @Override
+    public String getAuthority() {
+        return "ROLE_" + this.getRoleName(); // role authorities have in spring the default prefix "ROLE_"
     }
 
     /**
@@ -52,6 +52,5 @@ public enum UserRole implements GrantedAuthority {
         public static final String HAS_ROLE_EDITOR_OR_READER =
             "hasAnyRole('" + Names.EDITOR + "', '" + Names.READER + "')";
         public static final String HAS_ROLE_EDITOR = "hasRole('" + Names.EDITOR + "')";
-        public static final String HAS_ROLE_READER = "hasRole('" + Names.READER + "')";
     }
 }

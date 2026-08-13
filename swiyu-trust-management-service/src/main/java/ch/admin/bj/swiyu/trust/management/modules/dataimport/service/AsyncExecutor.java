@@ -26,8 +26,10 @@ public class AsyncExecutor {
                 demoDataImportService.setSystemSecurityContext();
 
                 demoDataImportService.deleteTrustOnboardingTasks();
+                demoDataImportService.deleteProtectedVerificationAuthorizations();
                 demoDataImportService.deleteBusinessPartnerIdentities();
                 demoDataImportService.loadBusinessPartnerIdentities();
+                demoDataImportService.loadProtectedVerificationAuthorizations();
                 demoDataImportService.loadTrustOnboardingTasks();
 
                 log.debug("LOCAL TEST DATA INJECTION is done!");

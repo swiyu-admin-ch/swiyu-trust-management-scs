@@ -1,7 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
-import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR;
-import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_READER;
+import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.*;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerIdentityDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerIdentityFilterDto;
@@ -33,7 +32,7 @@ public class BusinessPartnerIdentityController {
     private final BusinessPartnerIdentityService businessPartnerIdentityService;
 
     @GetMapping("/")
-    @PreAuthorize(HAS_ROLE_READER)
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @Operation(summary = "Get a paginated list of business partner identity")
     @PageableAsQueryParam
     public PagedModel<BusinessPartnerIdentityDto> getBusinessPartnerIdentities(
@@ -46,12 +45,12 @@ public class BusinessPartnerIdentityController {
     }
 
     @GetMapping("/{businessPartnerIdentityId}")
-    @PreAuthorize(HAS_ROLE_READER)
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @Operation(summary = "Get a business partner identity.")
     public BusinessPartnerIdentityDto getBusinessPartnerIdentity(
         @PathVariable @Valid @NotNull UUID businessPartnerIdentityId
     ) {
-        return this.businessPartnerIdentityService.getBusinessPartnerIdentity(businessPartnerIdentityId);
+        return this.businessPartnerIdentityService.getBusinessPartnerIdentityDto(businessPartnerIdentityId);
     }
 
     @PostMapping("/{businessPartnerIdentityId}/activate")

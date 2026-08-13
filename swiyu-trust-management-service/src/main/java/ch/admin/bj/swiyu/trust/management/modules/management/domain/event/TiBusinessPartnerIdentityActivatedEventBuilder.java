@@ -129,6 +129,9 @@ public class TiBusinessPartnerIdentityActivatedEventBuilder
         if (this.validUntil == null) {
             throw AvroMessageBuilderException.propertyNull("declarationPayload.validUntil");
         }
+        if (this.trustedIdentifier == null) {
+            throw AvroMessageBuilderException.propertyNull("declarationPayload.trustedIdentifier");
+        }
         if (this.status == null) {
             throw AvroMessageBuilderException.propertyNull("declarationPayload.status");
         }
