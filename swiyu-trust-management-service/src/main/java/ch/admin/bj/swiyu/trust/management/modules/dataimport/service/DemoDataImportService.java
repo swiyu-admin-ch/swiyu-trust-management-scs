@@ -30,6 +30,8 @@ public class DemoDataImportService {
     private final DomainEventService domainEventService;
     private final ProtectedVerificationRepository protectedVerificationRepository;
     private final TrustOnboardingTaskRepository trustOnboardingTaskRepository;
+    private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
+    private final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
 
     public void setSystemSecurityContext() {
         SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
@@ -58,6 +60,30 @@ public class DemoDataImportService {
         for (var demoCase : DemoData.DemoCase.values()) {
             protectedVerificationRepository.deleteByBusinessPartnerIdentityId(demoCase.bp.id());
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteProtectedIssuanceEntriesAndAuthorizations() {
+        // Delete all Authorizations for all Demo BPs
+        for (var demoCase : DemoData.DemoCase.values()) {
+            protectedIssuanceAuthorizationRepository.deleteByBusinessPartnerIdentityId(demoCase.bp.id());
+        }
+        // Delete all Entries
+        Arrays.stream(DemoData.DemoCase.values())
+            .filter(d -> d.bp.bpi() != null)
+            .forEach(d ->
+                d.bp
+                    .bpi()
+                    .protectedIssuanceAuthorizations()
+                    .forEach(pia -> {
+                        // Delete all Authorizations for BPs connected to demo entries
+                        protectedIssuanceAuthorizationRepository.deleteByProtectedIssuanceEntryId(
+                            pia.protectedVctEntryId()
+                        );
+                        // Delete all demo entries
+                        protectedIssuanceEntryRepository.deleteById(pia.protectedVctEntryId());
+                    })
+            );
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -102,6 +128,45 @@ public class DemoDataImportService {
                 protectedVerificationRepository.save(pva);
             }
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void loadProtectedIssuanceDemoData() {
+        Arrays.stream(DemoData.DemoCase.values())
+            .filter(d -> d.bp.bpi() != null)
+            .forEach(d ->
+                d.bp
+                    .bpi()
+                    .protectedIssuanceAuthorizations()
+                    .forEach(pia -> {
+                        // Add demo entry if not present
+                        protectedIssuanceEntryRepository
+                            .findById(pia.protectedVctEntryId())
+                            .orElseGet(() ->
+                                protectedIssuanceEntryRepository.save(
+                                    new ProtectedIssuanceEntry(
+                                        pia.protectedVctEntryId(),
+                                        pia.vct(),
+                                        java.time.Instant.now(),
+                                        pia.vctName()
+                                    )
+                                )
+                            );
+                        // Add Authorization
+                        protectedIssuanceAuthorizationRepository
+                            .findById(pia.protectedVctEntryId())
+                            .orElseGet(() ->
+                                protectedIssuanceAuthorizationRepository.save(
+                                    new ProtectedIssuanceAuthorization(
+                                        pia.id(),
+                                        d.bp.id(),
+                                        pia.protectedVctEntryId(),
+                                        pia.reason()
+                                    )
+                                )
+                            );
+                    })
+            );
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

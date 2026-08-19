@@ -5,7 +5,6 @@ import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;

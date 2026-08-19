@@ -24,11 +24,7 @@ public class TrustStatementPartnerLinkValidator {
     public void validateSubmission(TrustStatementPartnerLink partnerLink) {
         var issues = new SimpleErrors(partnerLink);
         validateTimeRangeIsInOrder(issues, partnerLink);
-        if (
-            partnerLink.getDetails() instanceof IdentityV1Details ||
-            partnerLink.getDetails() instanceof ProtectedVerificationAuthorizationV2Details ||
-            partnerLink.getDetails() instanceof ProtectedIssuanceAuthorizationV2Details
-        ) {
+        if (partnerLink.getDetails() instanceof ProtectedVerificationAuthorizationV2Details) {
             validateNoOtherSubmissionWithSameSubjectIsActive(issues, partnerLink);
         }
         if (
@@ -136,36 +132,6 @@ public class TrustStatementPartnerLinkValidator {
                 partnerLink.getValidUntil(),
                 partnerLink.getValidFrom(),
                 partnerLink.getValidUntil()
-            )
-            // do not include the entity itself
-            .filter(concurringSubmission -> !concurringSubmission.getId().equals(partnerLink.getId()))
-            .forEach(concurringSubmission ->
-                issues.reject(
-                    "trust-statement.create.errors.concurrent-trust-statement",
-                    List.of(
-                        concurringSubmission.getId(),
-                        partnerLink.getValidFrom(),
-                        partnerLink.getValidUntil()
-                    ).toArray(),
-                    "There is already a valid statement partnerLink (id:%s) between %s to %s.".formatted(
-                        concurringSubmission.getId(),
-                        partnerLink.getValidFrom(),
-                        partnerLink.getValidUntil()
-                    )
-                )
-            );
-    }
-
-    private void validateNoOtherSubmissionWithSameTypeIsActive(
-        SimpleErrors issues,
-        TrustStatementPartnerLink partnerLink
-    ) {
-        trustStatementPartnerLinkRepository
-            .findAllByTypeAndStatusIsInAndValidFromLessThanEqualAndValidUntilGreaterThanEqual(
-                partnerLink.getType(),
-                List.of(TrustStatementPartnerLinkStatus.ACTIVE),
-                partnerLink.getValidUntil(),
-                partnerLink.getValidFrom()
             )
             // do not include the entity itself
             .filter(concurringSubmission -> !concurringSubmission.getId().equals(partnerLink.getId()))

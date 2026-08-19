@@ -7,12 +7,17 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMetadata;
+import ch.admin.bj.swiyu.trust.management.modules.common.i18n.ValidLocalizedMap;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -36,9 +41,15 @@ public class ProtectedIssuanceEntry {
     @Column(name = "protected_at")
     private Instant protectedAt;
 
-    public ProtectedIssuanceEntry(String vct, Instant protectedAt) {
-        this.id = UUID.randomUUID();
+    @ValidLocalizedMap
+    @Column(name = "name", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, @NotBlank String> name;
+
+    public ProtectedIssuanceEntry(UUID id, String vct, Instant protectedAt, Map<String, String> name) {
+        this.id = id;
         this.vct = vct;
         this.protectedAt = protectedAt;
+        this.name = name;
     }
 }

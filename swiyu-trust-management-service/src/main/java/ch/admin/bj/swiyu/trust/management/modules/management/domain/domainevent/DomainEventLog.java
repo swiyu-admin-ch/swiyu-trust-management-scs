@@ -40,6 +40,8 @@ public class DomainEventLog {
     private UUID trustTaskId;
     private UUID nonCompliantActorId;
     private UUID protectedIssuanceEntryId;
+    private UUID businessPartnerIdentityId;
+    private UUID protectedIssuanceAuthorizationId;
     private String partnerNote;
     private String internalNote;
     private UUID protectedVerificationAuthorizationId;
@@ -110,6 +112,21 @@ public class DomainEventLog {
         domainEventLog.triggeredAt = Instant.now();
         domainEventLog.triggeredBy = triggeredBy;
         domainEventLog.nonCompliantActorId = nonCompliantActorId;
+        return domainEventLog;
+    }
+
+    public static DomainEventLog createProtectedIssuanceAuthorizationDomainEventLog(
+        DomainEventType eventType,
+        String triggeredBy,
+        UUID protectedIssuanceAuthorizationId,
+        UUID businessPartnerIdentityId
+    ) {
+        var domainEventLog = new DomainEventLog();
+        domainEventLog.eventType = eventType;
+        domainEventLog.triggeredAt = Instant.now();
+        domainEventLog.triggeredBy = triggeredBy;
+        domainEventLog.protectedIssuanceAuthorizationId = protectedIssuanceAuthorizationId;
+        domainEventLog.businessPartnerIdentityId = businessPartnerIdentityId;
         return domainEventLog;
     }
 }

@@ -2,14 +2,11 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.DEFAULT_VALUE_KEY;
 
-import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.BusinessPartnerTypeDto;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProofOfPossessionDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationAuthorization;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationField;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV2Details;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementDetails;
@@ -20,6 +17,8 @@ import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -71,7 +70,8 @@ public class BusinessPartnerIdentityMapper {
             BusinessPartnerIdentityStatus.ACTIVE,
             submission.getBusinessPartnerType() == BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION,
             Instant.now().atZone(ZoneOffset.UTC).plusMonths(6).toInstant(), // to be adapted to the config in EID-6609
-            Instant.now()
+            Instant.now(),
+            submission.getProofOfPossessions().stream().map(ProofOfPossessionDto::getDid).collect(Collectors.toSet())
         );
     }
 
@@ -97,7 +97,8 @@ public class BusinessPartnerIdentityMapper {
                     BusinessPartnerIdentityStatus.ACTIVE,
                     details.getIsStateActor(),
                     partnerLink.getValidUntil(),
-                    Instant.now()
+                    Instant.now(),
+                    Set.of(partnerLink.getSubject())
                 );
             }
             case TRUST_STATEMENT_IDENTITY_V2 -> {
@@ -119,7 +120,8 @@ public class BusinessPartnerIdentityMapper {
                     BusinessPartnerIdentityStatus.ACTIVE,
                     details.getIsStateActor(),
                     partnerLink.getValidUntil(),
-                    Instant.now()
+                    Instant.now(),
+                    Set.of(partnerLink.getSubject())
                 );
             }
             default -> throw new IllegalArgumentException(

@@ -15,10 +15,7 @@ public class TrustOnboardingSubmissionEventConsumer {
     private final TrustOnboardingSubmissionEventProcessor processor;
     private final MessagingSecurityContext messagingSecurityContext;
 
-    @KafkaListener(
-        topics = { TiTrustOnboardingSubmissionAcceptedEvent.TypeRef.DEFAULT_TOPIC },
-        id = "TiTrustOnboardingSubmissionAcceptedEventListener"
-    )
+    @KafkaListener(topics = { TiTrustOnboardingSubmissionAcceptedEvent.TypeRef.DEFAULT_TOPIC })
     public void receive(TiTrustOnboardingSubmissionAcceptedEvent event, Acknowledgment ack) {
         messagingSecurityContext.setPreferredUser(event.getPublisher());
         processor.processTiTrustOnboardingSubmissionAcceptedEvent(event);

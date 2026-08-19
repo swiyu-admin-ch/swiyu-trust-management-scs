@@ -43,7 +43,9 @@ public class TiBusinessPartnerIdentityUpdatedEventBuilder
         this.businessPartnerIdentityId = businessPartnerIdentity.getId();
         this.validUntil = businessPartnerIdentity.getValidUntil();
         this.trustedIdentifier = new ArrayList<>(businessPartnerIdentity.getTrustedIdentifier());
-        this.status = businessPartnerIdentity.getStatus();
+        this.status = TiBusinessPartnerIdentityEventMapper.toBusinessPartnerIdentityStatus(
+            businessPartnerIdentity.getStatus()
+        );
         this.lastActivated = businessPartnerIdentity.getLastActivated();
         this.uid = businessPartnerIdentity.getUid();
         this.entityName = businessPartnerIdentity.getEntityName();
@@ -98,21 +100,6 @@ public class TiBusinessPartnerIdentityUpdatedEventBuilder
     }
 
     @Override
-    protected String getServiceName() {
-        return SERVICE_NAME;
-    }
-
-    @Override
-    protected String getSystemName() {
-        return SYSTEM_NAME;
-    }
-
-    @Override
-    protected TiBusinessPartnerIdentityUpdatedEventBuilder self() {
-        return this;
-    }
-
-    @Override
     public TiBusinessPartnerIdentityUpdatedEvent build() {
         if (!isIdempotenceIdOverwritten) {
             super.idempotenceId(UUID.randomUUID().toString());
@@ -142,5 +129,20 @@ public class TiBusinessPartnerIdentityUpdatedEventBuilder
             .build();
         setPayload(declarationPayload);
         return super.build();
+    }
+
+    @Override
+    protected String getServiceName() {
+        return SERVICE_NAME;
+    }
+
+    @Override
+    protected String getSystemName() {
+        return SYSTEM_NAME;
+    }
+
+    @Override
+    protected TiBusinessPartnerIdentityUpdatedEventBuilder self() {
+        return this;
     }
 }

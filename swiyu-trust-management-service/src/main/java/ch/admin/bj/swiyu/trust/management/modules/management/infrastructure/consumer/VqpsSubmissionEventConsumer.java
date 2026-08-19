@@ -15,10 +15,7 @@ public class VqpsSubmissionEventConsumer {
     private final VqpsSubmissionEventProcessor processor;
     private final MessagingSecurityContext messagingSecurityContext;
 
-    @KafkaListener(
-        topics = { TiVqpsSubmissionAcceptedEvent.TypeRef.DEFAULT_TOPIC },
-        id = "TiVqpsSubmissionAcceptedEventListener"
-    )
+    @KafkaListener(topics = { TiVqpsSubmissionAcceptedEvent.TypeRef.DEFAULT_TOPIC })
     public void receive(TiVqpsSubmissionAcceptedEvent event, Acknowledgment ack) {
         messagingSecurityContext.setPreferredUser(event.getPublisher());
         processor.processVqpsSubmissionAccepted(event);

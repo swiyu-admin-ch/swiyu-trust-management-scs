@@ -7,7 +7,7 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.security.Securit
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedIssuanceEntryCreateRequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedIssuanceEntryDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedIssuanceEntryFilterDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedIssuanceEntryService;
+import ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedIssuanceService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedIssuanceTrustListStatementPublicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,10 +32,10 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @Tag(name = "TrustStatement Issuance")
 @RestController
-@RequestMapping("/api/v2/protected-issuance-entry")
+@RequestMapping("/ui-api/v1/protected-issuance-entry")
 public class ProtectedIssuanceEntryController {
 
-    private final ProtectedIssuanceEntryService protectedIssuanceEntryService;
+    private final ProtectedIssuanceService protectedIssuanceService;
     private final ProtectedIssuanceTrustListStatementPublicationService protectedIssuanceTrustListStatementPublicationService;
 
     @PostMapping("")
@@ -46,7 +46,7 @@ public class ProtectedIssuanceEntryController {
     public ResponseEntity<ProtectedIssuanceEntryDto> addProtectedIssuanceEntry(
         @Valid @RequestBody ProtectedIssuanceEntryCreateRequestDto request
     ) {
-        var result = this.protectedIssuanceEntryService.createProtectedIssuanceEntry(request, getCurrentUserFullName());
+        var result = this.protectedIssuanceService.createProtectedIssuanceEntry(request, getCurrentUserFullName());
         protectedIssuanceTrustListStatementPublicationService.triggerPublicationAsync();
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
@@ -55,7 +55,7 @@ public class ProtectedIssuanceEntryController {
     @PreAuthorize(HAS_ROLE_EDITOR)
     @Operation(summary = "Delete a protected VCT.")
     public void deleteProtectedIssuanceEntry(@Valid @PathVariable UUID id) {
-        this.protectedIssuanceEntryService.deleteProtectedIssuanceEntry(id, getCurrentUserFullName());
+        this.protectedIssuanceService.deleteProtectedIssuanceEntry(id, getCurrentUserFullName());
         protectedIssuanceTrustListStatementPublicationService.triggerPublicationAsync();
     }
 
@@ -63,7 +63,7 @@ public class ProtectedIssuanceEntryController {
     @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @Operation(summary = "Get a protected VCT.")
     public ProtectedIssuanceEntryDto getProtectedIssuanceEntry(@Valid @PathVariable UUID id) {
-        return this.protectedIssuanceEntryService.getProtectedIssuanceEntry(id);
+        return this.protectedIssuanceService.getProtectedIssuanceEntry(id);
     }
 
     @GetMapping("/")
@@ -76,6 +76,6 @@ public class ProtectedIssuanceEntryController {
             hidden = true
         ) final Pageable pageable
     ) {
-        return new PagedModel<>(this.protectedIssuanceEntryService.listProtectedIssuanceEntries(filters, pageable));
+        return new PagedModel<>(this.protectedIssuanceService.listProtectedIssuanceEntries(filters, pageable));
     }
 }

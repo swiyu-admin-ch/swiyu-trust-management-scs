@@ -7,7 +7,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
@@ -59,6 +58,12 @@ class BusinessPartnerIdentityServiceTest {
     @Mock
     private TrustStatementService trustStatementService;
 
+    @Mock
+    private ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
+
+    @Mock
+    private ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
+
     private BusinessPartnerIdentityService businessPartnerIdentityService;
 
     @BeforeEach
@@ -71,7 +76,9 @@ class BusinessPartnerIdentityServiceTest {
             outboxEventPublisher,
             protectedVerificationRepository,
             trustStatementPartnerLinkRepository,
-            trustStatementService
+            trustStatementService,
+            protectedIssuanceAuthorizationRepository,
+            protectedIssuanceEntryRepository
         );
     }
 
@@ -104,7 +111,9 @@ class BusinessPartnerIdentityServiceTest {
             DateTimeHelper.today().plusYears(3).toInstant(),
             within(ofDays(1))
         );
-        assertThat(payload.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
+        assertThat(payload.getStatus()).isEqualTo(
+            ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus.ACTIVE
+        );
         assertThat(payload.getLastActivated()).isCloseTo(Instant.now(), within(ofSeconds(1)));
         assertThat(payload.getUid()).isEqualTo("CHE-123-456-789");
         assertThat(payload.getEntityName()).containsAllEntriesOf(BUSINESS_PARTNER_NAME);
@@ -188,7 +197,9 @@ class BusinessPartnerIdentityServiceTest {
         var payload = event.getPayload();
         assertThat(payload).isNotNull();
         assertThat(payload.getBusinessPartnerIdentityId()).isEqualTo(bpi.getId());
-        assertThat(payload.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.DEACTIVATED);
+        assertThat(payload.getStatus()).isEqualTo(
+            ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus.DEACTIVATED
+        );
     }
 
     @Test
@@ -415,7 +426,9 @@ class BusinessPartnerIdentityServiceTest {
             DateTimeHelper.today().plusYears(3).toInstant(),
             within(ofDays(1))
         );
-        assertThat(payload.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
+        assertThat(payload.getStatus()).isEqualTo(
+            ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus.ACTIVE
+        );
         assertThat(payload.getLastActivated()).isCloseTo(Instant.now(), within(ofMinutes(1)));
         assertThat(payload.getUid()).isEqualTo("CHE-123-456-789");
         assertThat(payload.getEntityName()).containsAllEntriesOf(BUSINESS_PARTNER_NAME);
@@ -455,7 +468,9 @@ class BusinessPartnerIdentityServiceTest {
             DateTimeHelper.today().plusYears(3).toInstant(),
             within(ofDays(1))
         );
-        assertThat(payload.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
+        assertThat(payload.getStatus()).isEqualTo(
+            ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus.ACTIVE
+        );
         assertThat(payload.getLastActivated()).isCloseTo(Instant.now(), within(ofSeconds(1)));
         assertThat(payload.getUid()).isEqualTo("CHE-123-456-789");
         assertThat(payload.getEntityName()).containsAllEntriesOf(BUSINESS_PARTNER_NAME);

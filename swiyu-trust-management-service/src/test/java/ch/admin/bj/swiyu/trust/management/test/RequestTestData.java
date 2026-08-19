@@ -1,5 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.test;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapUtil.fromLanguages;
+
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
 import jakarta.validation.Valid;
 import java.time.Duration;
@@ -290,6 +292,19 @@ public class RequestTestData {
 
         var dto = objectMapper.createObjectNode();
         dto.put("vct", vct);
+        dto.set(
+            "name",
+            objectMapper.valueToTree(
+                fromLanguages(
+                    "Test Entry " + vct + " (Default)",
+                    "Test Entry " + vct + " (de)",
+                    "Test Entry " + vct + " (fr)",
+                    "Test Entry " + vct + " (it)",
+                    "Test Entry " + vct + " (en)",
+                    "Test Entry " + vct + " (rm)"
+                )
+            )
+        );
 
         return dto;
     }

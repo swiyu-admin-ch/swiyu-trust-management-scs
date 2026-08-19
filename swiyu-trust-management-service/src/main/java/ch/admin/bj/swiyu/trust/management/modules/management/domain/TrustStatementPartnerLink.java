@@ -59,6 +59,9 @@ public class TrustStatementPartnerLink {
     @Column(name = "status_list_index")
     private Integer statusListIndex;
 
+    @Column(name = "protected_issuance_authorization_id")
+    private UUID protectedIssuanceAuthorizationId;
+
     /**
      *
      * @param partnerId       BusinessPartnerId to whom the statement belongs to
@@ -202,10 +205,11 @@ public class TrustStatementPartnerLink {
         Instant validFrom,
         Instant validUntil,
         ProtectedIssuanceAuthorizationV2Details.ProtectedIssuanceAuthorization canIssue,
-        StatusListEntry newStatusListEntry
+        StatusListEntry newStatusListEntry,
+        UUID protectedIssuanceAuthorizationId
     ) {
         var type = TrustStatementPartnerLinkType.TRUST_STATEMENT_PROTECTED_ISSUANCE_AUTHORIZATION_V2;
-        return new TrustStatementPartnerLink(
+        var link = new TrustStatementPartnerLink(
             partnerId,
             type,
             subject,
@@ -214,6 +218,8 @@ public class TrustStatementPartnerLink {
             new ProtectedIssuanceAuthorizationV2Details(canIssue),
             newStatusListEntry
         );
+        link.protectedIssuanceAuthorizationId = protectedIssuanceAuthorizationId;
+        return link;
     }
 
     public static TrustStatementPartnerLink createIssuanceV1(

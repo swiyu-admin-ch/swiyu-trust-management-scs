@@ -66,4 +66,9 @@ public interface TrustStatementPartnerLinkRepository
         UUID businessPartnerIdentityId,
         TrustStatementPartnerLinkStatus trustStatementPartnerLinkStatus
     );
+
+    List<TrustStatementPartnerLink> findAllByProtectedIssuanceAuthorizationIdAndStatus(
+        UUID protectedIssuanceAuthorizationId,
+        TrustStatementPartnerLinkStatus status
+    );
 }

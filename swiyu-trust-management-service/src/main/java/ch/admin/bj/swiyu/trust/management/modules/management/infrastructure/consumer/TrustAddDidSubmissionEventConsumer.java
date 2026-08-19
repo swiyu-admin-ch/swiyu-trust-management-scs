@@ -15,10 +15,7 @@ public class TrustAddDidSubmissionEventConsumer {
     private final TrustAddDidSubmissionEventProcessor processor;
     private final MessagingSecurityContext messagingSecurityContext;
 
-    @KafkaListener(
-        topics = { TiTrustAddDidSubmissionSubmittedEvent.TypeRef.DEFAULT_TOPIC },
-        id = "TiTrustAddDidSubmissionSubmittedEventListener"
-    )
+    @KafkaListener(topics = { TiTrustAddDidSubmissionSubmittedEvent.TypeRef.DEFAULT_TOPIC })
     public void receive(TiTrustAddDidSubmissionSubmittedEvent event, Acknowledgment ack) {
         messagingSecurityContext.setPreferredUser(event.getPublisher());
         processor.processTiTrustAddDidSubmissionSubmittedEvent(event);

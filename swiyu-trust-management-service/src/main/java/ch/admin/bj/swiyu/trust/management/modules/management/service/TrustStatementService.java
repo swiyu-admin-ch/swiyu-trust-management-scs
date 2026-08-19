@@ -47,6 +47,8 @@ import tools.jackson.databind.ObjectMapper;
 @RequiredArgsConstructor
 public class TrustStatementService {
 
+    private static final String SINGLETON_STATEMENT_REASON =
+        "Deactivate statement due to re-issuing of singleton statement.";
     private final ObjectMapper objectMapper;
     private final IssuerClient issuerClient;
     private final TrustRegistryService trustRegistryService;
@@ -60,8 +62,6 @@ public class TrustStatementService {
     private final NonCompliantActorRepository nonCompliantActorRepository;
     private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
     private final AuditPublisher auditPublisher;
-
-    private final String singletonStatementReason = "Deactivate statement due to re-issuing of singleton statement.";
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public Page<TrustStatementPartnerLinkListItemDto> getPartnerLinks(
@@ -190,7 +190,7 @@ public class TrustStatementService {
         // 3/3: since we disabled some statements, we need to re-publish the statuslist the statements are attached to
         deactivateAllStatementsOfTypeExcept(
             TRUST_LIST_STATEMENT_NON_COMPLIANCE_V2,
-            singletonStatementReason,
+            SINGLETON_STATEMENT_REASON,
             result.partnerLink().getId()
         );
         return toTrustStatementPartnerLinkDto(result.partnerLink());
@@ -218,7 +218,8 @@ public class TrustStatementService {
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER, propagation = Propagation.REQUIRES_NEW)
     public TrustStatementPartnerLinkDto issueAndPublishProtectedIssuanceAuthorizationV2TrustStatement(
-        @Valid ProtectedIssuanceAuthorizationV2RequestDto request
+        @Valid ProtectedIssuanceAuthorizationV2RequestDto request,
+        UUID protectedIssuanceAuthorizationId
     ) {
         log.debug("Creating ProtectedVIssuanceAuthorizationV2 trust statement partner link");
         var result = this.issueAndPublishTrustStatement(
@@ -228,7 +229,8 @@ public class TrustStatementService {
                 request.getValidFrom(),
                 request.getValidUntil(),
                 TrustStatementMapper.toProtectedIssuanceAuthorizationDto(request.getCanIssue()),
-                statusListDomainService.getNewStatusListEntry()
+                statusListDomainService.getNewStatusListEntry(),
+                protectedIssuanceAuthorizationId
             )
         );
         return findPartnerLinkById(result.partnerLink().getId());
@@ -291,7 +293,7 @@ public class TrustStatementService {
         log.debug("Publish deactivation of old ProtectedIssuanceV2TrustListStatements");
         deactivateAllStatementsOfTypeExcept(
             TRUST_LIST_STATEMENT_PROTECTED_ISSUANCE_V2,
-            singletonStatementReason,
+            SINGLETON_STATEMENT_REASON,
             result.partnerLink().getId()
         );
         return toTrustStatementPartnerLinkDto(result.partnerLink());
@@ -568,6 +570,11 @@ public class TrustStatementService {
         }
     }
 
+    @SuppressWarnings(
+        {
+            "java:S1172", // parameter "reason" is added for later implementation preparations
+        }
+    )
     private void deactivateTrustStatementV2(TrustStatementPartnerLink partnerLink, String reason) {
         switch (partnerLink.getType()) {
             case
@@ -600,14 +607,23 @@ public class TrustStatementService {
         }
     }
 
+    @SuppressWarnings(
+        {
+            "java:S1172", // parameter "reason" is added for later implementation preparations
+        }
+    )
     private void deactivateTrustStatementV1(TrustStatementPartnerLink partnerLink, String reason) {
         // 1/3: set vc status to revoked on issuer side
         var issuerVcStatus = lookupIssuerVcStatus(partnerLink);
         if (!issuerVcStatus.isInvalid()) {
             switch (partnerLink.getType()) {
-                case TRUST_STATEMENT_IDENTITY_V1, TRUST_STATEMENT_ISSUANCE_V1, TRUST_STATEMENT_VERIFICATION_V1 -> {
-                    issuerClient.updateCredentialStatus(partnerLink.getTrustIssuerCredentialId(), REVOKED);
-                }
+                case
+                    TRUST_STATEMENT_IDENTITY_V1,
+                    TRUST_STATEMENT_ISSUANCE_V1,
+                    TRUST_STATEMENT_VERIFICATION_V1 -> issuerClient.updateCredentialStatus(
+                    partnerLink.getTrustIssuerCredentialId(),
+                    REVOKED
+                );
                 default -> throw new IllegalArgumentException(
                     "Statements of type %s cannot be deactivated by this method.".formatted(partnerLink.getType())
                 );

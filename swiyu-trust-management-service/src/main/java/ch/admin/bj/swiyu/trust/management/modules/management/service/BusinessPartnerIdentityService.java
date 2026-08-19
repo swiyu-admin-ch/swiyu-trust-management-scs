@@ -5,7 +5,6 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.security.Securit
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationAuthorizationMapper.mapPageableWithValidSortProperties;
 
-import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityBadRequestException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
@@ -45,6 +44,8 @@ public class BusinessPartnerIdentityService {
     private final ProtectedVerificationRepository protectedVerificationRepository;
     private final TrustStatementPartnerLinkRepository partnerLinkRepository;
     private final TrustStatementService trustStatementService;
+    private final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
+    private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void activate(UUID businessPartnerId) {
@@ -102,6 +103,7 @@ public class BusinessPartnerIdentityService {
 
         issueAllIdTSForTrustedIdentifiers(bpi);
         issueAllPvaTSForTrustedIdentifiers(bpi);
+        issueAllPiaTSForTrustedIdentifiers(bpi);
 
         bpi.updateLastIssuance();
     }
@@ -161,7 +163,7 @@ public class BusinessPartnerIdentityService {
         var bpi = businessPartnerIdentityRepository
             .findById(businessPartnerIdentityId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerIdentityId));
-
+        log.debug("Invoking Sync / BusinessPartnerIdentityUpdatedEvent for {}", businessPartnerIdentityId);
         outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(
             TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build()
         );
@@ -172,6 +174,7 @@ public class BusinessPartnerIdentityService {
         var bpis = businessPartnerIdentityRepository.findAll();
 
         for (var bpi : bpis) {
+            log.debug("Invoking Sync All / BusinessPartnerIdentityUpdatedEvent for {}", bpi.getId());
             outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(
                 TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build()
             );
@@ -332,5 +335,48 @@ public class BusinessPartnerIdentityService {
     private Instant calculateValidUntilForStatement(Instant bpiValidUntil, Period statementValidity) {
         var statementValidUntil = calculateValidUntilFromNow(statementValidity);
         return statementValidUntil.isBefore(bpiValidUntil) ? statementValidUntil : bpiValidUntil;
+    }
+
+    private void issueAllPiaTSForTrustedIdentifiers(BusinessPartnerIdentity bpi) {
+        var authorizations = protectedIssuanceAuthorizationRepository.findAllByBusinessPartnerIdentityId(bpi.getId());
+        if (authorizations.isEmpty()) {
+            return;
+        }
+
+        var statementValidUntil = calculateValidUntilForStatement(
+            bpi.getValidUntil(),
+            defaultStatementProperties.timeToLive()
+        );
+
+        for (var authorization : authorizations) {
+            var entry = protectedIssuanceEntryRepository
+                .findById(authorization.getProtectedIssuanceEntryId())
+                .orElseThrow(() ->
+                    new IllegalStateException(
+                        "No ProtectedIssuanceEntry found for id %s".formatted(
+                            authorization.getProtectedIssuanceEntryId()
+                        )
+                    )
+                );
+
+            var canIssue = new ProtectedIssuanceAuthorizationV2RequestDto.ProtectedIssuanceAuthorizationDto(
+                entry.getVct(),
+                entry.getName(),
+                authorization.getReason()
+            );
+            for (var trustedDid : bpi.getTrustedIdentifier()) {
+                var req = new ProtectedIssuanceAuthorizationV2RequestDto(
+                    bpi.getId(),
+                    trustedDid,
+                    Instant.now(),
+                    statementValidUntil,
+                    canIssue
+                );
+                trustStatementService.issueAndPublishProtectedIssuanceAuthorizationV2TrustStatement(
+                    req,
+                    authorization.getId()
+                );
+            }
+        }
     }
 }

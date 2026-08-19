@@ -12,7 +12,7 @@ import org.springframework.stereotype.*;
 @Service
 @RequiredArgsConstructor
 @Profile("test-data-injection")
-public class AsyncExecutor {
+public class DemoDataAsyncExecutor {
 
     private final AsyncService async;
     private final DemoDataImportService demoDataImportService;
@@ -27,10 +27,12 @@ public class AsyncExecutor {
 
                 demoDataImportService.deleteTrustOnboardingTasks();
                 demoDataImportService.deleteProtectedVerificationAuthorizations();
+                demoDataImportService.deleteProtectedIssuanceEntriesAndAuthorizations();
                 demoDataImportService.deleteBusinessPartnerIdentities();
                 demoDataImportService.loadBusinessPartnerIdentities();
                 demoDataImportService.loadProtectedVerificationAuthorizations();
                 demoDataImportService.loadTrustOnboardingTasks();
+                demoDataImportService.loadProtectedIssuanceDemoData();
 
                 log.debug("LOCAL TEST DATA INJECTION is done!");
             } catch (Exception e) {

@@ -192,6 +192,38 @@ public class DomainEventService {
         );
     }
 
+    @Transactional
+    public void protectedIssuanceAuthorizationAdded(
+        UUID protectedIssuanceAuthorizationId,
+        UUID businessPartnerIdentityId,
+        String triggeredBy
+    ) {
+        domainEventLogRepository.save(
+            DomainEventLog.createProtectedIssuanceAuthorizationDomainEventLog(
+                PROTECTED_ISSUANCE_AUTHORIZATION_ADDED,
+                triggeredBy,
+                protectedIssuanceAuthorizationId,
+                businessPartnerIdentityId
+            )
+        );
+    }
+
+    @Transactional
+    public void protectedIssuanceAuthorizationRemoved(
+        UUID protectedIssuanceAuthorizationId,
+        UUID businessPartnerIdentityId,
+        String triggeredBy
+    ) {
+        domainEventLogRepository.save(
+            DomainEventLog.createProtectedIssuanceAuthorizationDomainEventLog(
+                PROTECTED_ISSUANCE_AUTHORIZATION_REMOVED,
+                triggeredBy,
+                protectedIssuanceAuthorizationId,
+                businessPartnerIdentityId
+            )
+        );
+    }
+
     @Transactional(readOnly = true)
     public Page<DomainEventLogDto> getDomainEventLogs(UUID trustTaskId, Pageable pageable) {
         QDomainEventLog d = QDomainEventLog.domainEventLog;

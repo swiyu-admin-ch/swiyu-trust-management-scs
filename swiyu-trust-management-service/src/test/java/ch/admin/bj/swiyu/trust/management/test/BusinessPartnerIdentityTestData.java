@@ -1,13 +1,14 @@
 package ch.admin.bj.swiyu.trust.management.test;
 
-import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkStatus;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import lombok.experimental.UtilityClass;
 
@@ -34,7 +35,7 @@ public class BusinessPartnerIdentityTestData {
     }
 
     public static BusinessPartnerIdentity newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus status) {
-        var bpi = new BusinessPartnerIdentity(
+        return new BusinessPartnerIdentity(
             UUID.randomUUID(),
             BUSINESS_PARTNER_NAME,
             Instant.now(),
@@ -44,10 +45,9 @@ public class BusinessPartnerIdentityTestData {
             status,
             false,
             DateTimeHelper.today().plusYears(3).toInstant(), // 5 min
-            null
+            null,
+            Set.of("Some-did")
         );
-        bpi.getTrustedIdentifier().add("Some-did");
-        return bpi;
     }
 
     public static TrustStatementPartnerLink partnerLinkIdentityV1(String subject) {

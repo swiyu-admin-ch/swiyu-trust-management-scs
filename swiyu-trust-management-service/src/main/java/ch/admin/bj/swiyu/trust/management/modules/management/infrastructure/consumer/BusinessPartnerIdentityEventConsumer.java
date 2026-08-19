@@ -17,30 +17,21 @@ public class BusinessPartnerIdentityEventConsumer {
     private final BusinessPartnerIdentityEventProcessor processor;
     private final MessagingSecurityContext messagingSecurityContext;
 
-    @KafkaListener(
-        topics = { TiBusinessPartnerIdentityActivatedEvent.TypeRef.DEFAULT_TOPIC },
-        id = "TiBusinessPartnerIdentityActivatedEventListener"
-    )
+    @KafkaListener(topics = { TiBusinessPartnerIdentityActivatedEvent.TypeRef.DEFAULT_TOPIC })
     public void receiveActivated(TiBusinessPartnerIdentityActivatedEvent event, Acknowledgment ack) {
         messagingSecurityContext.setPreferredUser(event.getPublisher());
         processor.processTiBusinessPartnerIdentityActivatedEvent(event);
         ack.acknowledge();
     }
 
-    @KafkaListener(
-        topics = { TiBusinessPartnerIdentityDeactivatedEvent.TypeRef.DEFAULT_TOPIC },
-        id = "TiBusinessPartnerIdentityDeactivatedEventListener"
-    )
+    @KafkaListener(topics = { TiBusinessPartnerIdentityDeactivatedEvent.TypeRef.DEFAULT_TOPIC })
     public void receiveDeactivated(TiBusinessPartnerIdentityDeactivatedEvent event, Acknowledgment ack) {
         messagingSecurityContext.setPreferredUser(event.getPublisher());
         processor.processTiBusinessPartnerIdentityDeactivatedEvent(event);
         ack.acknowledge();
     }
 
-    @KafkaListener(
-        topics = { TiBusinessPartnerIdentityUpdatedEvent.TypeRef.DEFAULT_TOPIC },
-        id = "TiBusinessPartnerIdentityUpdatedEventListener"
-    )
+    @KafkaListener(topics = { TiBusinessPartnerIdentityUpdatedEvent.TypeRef.DEFAULT_TOPIC })
     public void receiveUpdated(TiBusinessPartnerIdentityUpdatedEvent event, Acknowledgment ack) {
         messagingSecurityContext.setPreferredUser(event.getPublisher());
         processor.processTiBusinessPartnerIdentityUpdatedEvent(event);

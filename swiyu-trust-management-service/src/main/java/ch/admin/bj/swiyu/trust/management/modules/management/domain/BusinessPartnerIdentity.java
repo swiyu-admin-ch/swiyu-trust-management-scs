@@ -2,7 +2,6 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper.today;
 
-import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMetadata;
 import ch.admin.bj.swiyu.trust.management.modules.common.i18n.ValidLocalizedMap;
 import com.google.common.annotations.VisibleForTesting;
@@ -35,6 +34,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @ToString
 public class BusinessPartnerIdentity {
 
+    @NotNull
+    @Column(name = "trusted_identifier", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private final Set<String> trustedIdentifier = new HashSet<>(); // DIDs to represent the BPI
+
+    @Embedded
+    private final AuditMetadata audit = new AuditMetadata();
+
     @Id
     private UUID id;
 
@@ -45,7 +52,6 @@ public class BusinessPartnerIdentity {
     private Map<String, @NotBlank String> entityName;
 
     private Instant lastActivated;
-
     private String uid;
 
     @NotNull
@@ -59,21 +65,12 @@ public class BusinessPartnerIdentity {
     @NotNull
     private Boolean isStateActor;
 
-    @NotNull
-    @Column(name = "trusted_identifier", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private final Set<String> trustedIdentifier = new HashSet<>(); // DIDs to represent the BPI
-
     private Instant validUntil;
-
     private Instant lastIssuanceAt;
 
     @NotNull
     @Version
     private Long version;
-
-    @Embedded
-    private final AuditMetadata audit = new AuditMetadata();
 
     public BusinessPartnerIdentity(
         @NotNull UUID partnerId,
@@ -85,7 +82,8 @@ public class BusinessPartnerIdentity {
         BusinessPartnerIdentityStatus status,
         Boolean isStateActor,
         Instant validUntil,
-        Instant lastIssuanceAt
+        Instant lastIssuanceAt,
+        @NotNull Set<@NotBlank String> trustedIdentifier
     ) {
         this.id = partnerId;
         this.entityName = entityName;
@@ -97,6 +95,7 @@ public class BusinessPartnerIdentity {
         this.isStateActor = isStateActor;
         this.validUntil = validUntil;
         this.lastIssuanceAt = lastIssuanceAt;
+        this.trustedIdentifier.addAll(trustedIdentifier);
     }
 
     public void activate(Period statementValidity) {
@@ -111,10 +110,6 @@ public class BusinessPartnerIdentity {
 
     public void updateLastIssuance() {
         lastIssuanceAt = Instant.now();
-    }
-
-    private Instant calculateValidUntilFromNow(Period statementValidity) {
-        return today().plus(statementValidity).toInstant();
     }
 
     @VisibleForTesting // only used for unit test
@@ -134,5 +129,9 @@ public class BusinessPartnerIdentity {
         this.isStateActor = source.isStateActor;
         this.validUntil = source.validUntil;
         this.lastIssuanceAt = source.lastIssuanceAt;
+    }
+
+    private Instant calculateValidUntilFromNow(Period statementValidity) {
+        return today().plus(statementValidity).toInstant();
     }
 }

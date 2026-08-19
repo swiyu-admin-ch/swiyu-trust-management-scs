@@ -68,7 +68,7 @@ class ProtectedIssuanceEntryControllerIT {
 
         // When
         var requestActions = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v2/protected-issuance-entry")
+            MockMvcRequestBuilders.post("/ui-api/v1/protected-issuance-entry")
                 .content(RequestTestData.objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
         );
@@ -91,20 +91,22 @@ class ProtectedIssuanceEntryControllerIT {
     @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void get_ProtectedIssuanceEntry() throws Exception {
         // Given
-        mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v2/protected-issuance-entry")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    RequestTestData.objectMapper.writeValueAsString(
-                        RequestTestData.tsProtectedIssuanceEntryCreateRequest("urn:vct:test")
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/ui-api/v1/protected-issuance-entry")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        RequestTestData.objectMapper.writeValueAsString(
+                            RequestTestData.tsProtectedIssuanceEntryCreateRequest("urn:vct:test")
+                        )
                     )
-                )
-        );
+            )
+            .andExpect(status().isCreated());
         var entry = protectedIssuanceEntryRepository.getByVct("urn:vct:test");
 
         // When
         var requestActions = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v2/protected-issuance-entry/{id}", entry.getId()).contentType(
+            MockMvcRequestBuilders.get("/ui-api/v1/protected-issuance-entry/{id}", entry.getId()).contentType(
                 MediaType.APPLICATION_JSON
             )
         );
@@ -121,7 +123,7 @@ class ProtectedIssuanceEntryControllerIT {
     void list_ProtectedIssuanceEntry_filterByVct() throws Exception {
         // Given
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v2/protected-issuance-entry")
+            MockMvcRequestBuilders.post("/ui-api/v1/protected-issuance-entry")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     RequestTestData.objectMapper.writeValueAsString(
@@ -131,7 +133,7 @@ class ProtectedIssuanceEntryControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
         );
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v2/protected-issuance-entry")
+            MockMvcRequestBuilders.post("/ui-api/v1/protected-issuance-entry")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     RequestTestData.objectMapper.writeValueAsString(
@@ -142,7 +144,7 @@ class ProtectedIssuanceEntryControllerIT {
 
         // When
         var requestActions = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v2/protected-issuance-entry/?vct={vct}", "urn:vct:test2").contentType(
+            MockMvcRequestBuilders.get("/ui-api/v1/protected-issuance-entry/?vct={vct}", "urn:vct:test2").contentType(
                 MediaType.APPLICATION_JSON
             )
         );
@@ -161,7 +163,7 @@ class ProtectedIssuanceEntryControllerIT {
     void list_ProtectedIssuanceEntry() throws Exception {
         // Given
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v2/protected-issuance-entry")
+            MockMvcRequestBuilders.post("/ui-api/v1/protected-issuance-entry")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     RequestTestData.objectMapper.writeValueAsString(
@@ -171,7 +173,7 @@ class ProtectedIssuanceEntryControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
         );
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v2/protected-issuance-entry")
+            MockMvcRequestBuilders.post("/ui-api/v1/protected-issuance-entry")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     RequestTestData.objectMapper.writeValueAsString(
@@ -182,7 +184,7 @@ class ProtectedIssuanceEntryControllerIT {
 
         // When
         var requestActions = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v2/protected-issuance-entry/").contentType(MediaType.APPLICATION_JSON)
+            MockMvcRequestBuilders.get("/ui-api/v1/protected-issuance-entry/").contentType(MediaType.APPLICATION_JSON)
         );
 
         // Then
@@ -199,7 +201,7 @@ class ProtectedIssuanceEntryControllerIT {
         // Given
         mockMvc
             .perform(
-                MockMvcRequestBuilders.post("/api/v2/protected-issuance-entry")
+                MockMvcRequestBuilders.post("/ui-api/v1/protected-issuance-entry")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         RequestTestData.objectMapper.writeValueAsString(
@@ -213,7 +215,7 @@ class ProtectedIssuanceEntryControllerIT {
 
         // When
         var requestActions = mockMvc.perform(
-            MockMvcRequestBuilders.delete("/api/v2/protected-issuance-entry/{id}", entry.getId()).contentType(
+            MockMvcRequestBuilders.delete("/ui-api/v1/protected-issuance-entry/{id}", entry.getId()).contentType(
                 MediaType.APPLICATION_JSON
             )
         );

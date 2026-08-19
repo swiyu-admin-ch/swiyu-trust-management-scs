@@ -15,10 +15,7 @@ public class VcSchemaSubmissionEventConsumer {
     private final VcSchemaSubmissionEventProcessor processor;
     private final MessagingSecurityContext messagingSecurityContext;
 
-    @KafkaListener(
-        topics = { TiVcSchemaSubmissionAcceptedEvent.TypeRef.DEFAULT_TOPIC },
-        id = "TiVcSchemaSubmissionAcceptedEventListener"
-    )
+    @KafkaListener(topics = { TiVcSchemaSubmissionAcceptedEvent.TypeRef.DEFAULT_TOPIC })
     public void receive(TiVcSchemaSubmissionAcceptedEvent event, Acknowledgment ack) {
         messagingSecurityContext.setPreferredUser(event.getPublisher());
         processor.processVcSchemaSubmissionAccepted(event);

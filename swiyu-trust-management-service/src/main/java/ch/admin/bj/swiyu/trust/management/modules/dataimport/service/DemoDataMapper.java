@@ -1,12 +1,12 @@
 package ch.admin.bj.swiyu.trust.management.modules.dataimport.service;
 
-import ch.admin.bj.swiyu.messagetype.ti.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.dataimport.domain.DemoData;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 
 @SuppressWarnings({ "java:S1854" })
@@ -39,7 +39,8 @@ public class DemoDataMapper {
             DemoDataMapper.toBusinessPartnerIdentityStatus(bp.bpi().status()),
             bp.type() == DemoData.DemoBusinessPartner.DemoBusinessPartnerType.GOVERNMENTAL_INSTITUTION,
             lastActivated.atZone(ZoneId.of("Europe/Zurich")).plusYears(3).toInstant(),
-            lastActivated
+            lastActivated,
+            bp.identifiers().stream().map(DemoData.DemoBusinessPartner.DemoIdentifier::did).collect(Collectors.toSet())
         );
     }
 

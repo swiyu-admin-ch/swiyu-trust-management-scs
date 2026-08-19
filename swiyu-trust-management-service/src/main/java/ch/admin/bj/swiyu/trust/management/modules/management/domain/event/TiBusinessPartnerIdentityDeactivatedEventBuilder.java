@@ -35,7 +35,9 @@ public class TiBusinessPartnerIdentityDeactivatedEventBuilder
         BusinessPartnerIdentity businessPartnerIdentityId
     ) {
         this.businessPartnerIdentityId = businessPartnerIdentityId.getId();
-        this.status = businessPartnerIdentityId.getStatus();
+        this.status = TiBusinessPartnerIdentityEventMapper.toBusinessPartnerIdentityStatus(
+            businessPartnerIdentityId.getStatus()
+        );
         this.version = businessPartnerIdentityId.getVersion();
         return this;
     }
@@ -62,21 +64,6 @@ public class TiBusinessPartnerIdentityDeactivatedEventBuilder
     }
 
     @Override
-    protected String getServiceName() {
-        return SERVICE_NAME;
-    }
-
-    @Override
-    protected String getSystemName() {
-        return SYSTEM_NAME;
-    }
-
-    @Override
-    protected TiBusinessPartnerIdentityDeactivatedEventBuilder self() {
-        return this;
-    }
-
-    @Override
     public TiBusinessPartnerIdentityDeactivatedEvent build() {
         if (!isIdempotenceIdOverwritten) {
             super.idempotenceId(UUID.randomUUID().toString());
@@ -95,5 +82,20 @@ public class TiBusinessPartnerIdentityDeactivatedEventBuilder
             .build();
         setPayload(declarationPayload);
         return super.build();
+    }
+
+    @Override
+    protected String getServiceName() {
+        return SERVICE_NAME;
+    }
+
+    @Override
+    protected String getSystemName() {
+        return SYSTEM_NAME;
+    }
+
+    @Override
+    protected TiBusinessPartnerIdentityDeactivatedEventBuilder self() {
+        return this;
     }
 }

@@ -44,3 +44,10 @@ app:
             zqlxcoKXFOLBcZMJxdl/qxZcDy1CZaBEEg==
             -----END EC PRIVATE KEY-----
 
+
+logging:
+  level:
+    io.confluent.kafka: WARN
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+    ch.admin.bit.jeap.messaging.kafka: WARN

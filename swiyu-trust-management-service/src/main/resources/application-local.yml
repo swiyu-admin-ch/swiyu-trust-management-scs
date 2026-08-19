@@ -55,7 +55,7 @@ jeap:
       password: "{noop}test"
   messaging:
     kafka:
-      bootstrapServers: "http://localhost:9092"
+      bootstrapServers: "localhost:9092"
       schemaRegistryUrl: "http://localhost:8081"
       securityProtocol: PLAINTEXT
 
@@ -76,7 +76,7 @@ spring:
       username: postgres
       password: secret
   flyway:
-    locations: []  # no afterMigrate script in local dev
+    locations: [ ]  # no afterMigrate script in local dev
   docker:
     compose:
       enabled: true

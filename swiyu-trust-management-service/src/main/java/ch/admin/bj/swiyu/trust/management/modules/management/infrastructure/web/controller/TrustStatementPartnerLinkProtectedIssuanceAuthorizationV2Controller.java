@@ -34,7 +34,8 @@ public class TrustStatementPartnerLinkProtectedIssuanceAuthorizationV2Controller
         @Valid @RequestBody ProtectedIssuanceAuthorizationV2RequestDto request
     ) {
         var statement = this.trustStatementService.issueAndPublishProtectedIssuanceAuthorizationV2TrustStatement(
-            request
+            request,
+            null
         );
         return new ResponseEntity<>(statement, HttpStatus.CREATED);
     }
