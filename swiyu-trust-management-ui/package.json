@@ -1,6 +1,6 @@
 {
   "name": "swiyu-trust-management-ui",
-  "version": "3.35.0",
+  "version": "3.35.1",
   "private": true,
   "scripts": {
     "build": "ng build",
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@angular/cdk": "^21.2.14",
-    "@angular/common": "^21.2.18",
+    "@angular/common": "^21.2.19",
     "@angular/compiler": "^21.2.18",
     "@angular/core": "^21.2.18",
     "@angular/forms": "^21.2.18",
@@ -75,8 +75,6 @@
     "node": ">=22.0.0"
   },
   "overrides": {
-    "fast-uri": "3.1.4",
-    "shell-quote": "1.9.0"
   },
   "jestSonar": {
     "reportPath": "./coverage/sonarQube",

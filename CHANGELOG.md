@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.35.1
+
+### Changed
+
+- Updated jeap-spring-boot-parent 39.4.0
+- Updated fast-uri 3.1.5
+- Add CVE overwrite of brace-expansion to 5.0.9
+- Removed CVE overwrite of shell-quote
+- Optimize OpenApi Code generator to skip during compilation if not needed
+
 ## 3.35.0
 
 ### Added

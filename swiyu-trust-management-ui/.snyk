@@ -2,24 +2,14 @@
 version: v1.25.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-JS-VITE-17353904:
-    - '*':
-        reason: 'Need to upgrade to angular 22; ticket created: EID-6533'
-        expires: 2026-07-23T14:51:28.722Z
-        created: 2026-06-23T14:51:28.723Z
   SNYK-JS-IMAGESIZE-17295816:
     - '*':
-        reason: 'Need to upgrade to angular 21; ticket created: EID-6533'
-        expires: 2026-07-23T14:51:45.484Z
+        reason: 'No update path as of now'
+        expires: 2026-11-09T09:00:00.000Z
         created: 2026-06-23T14:51:45.487Z
   SNYK-JS-IMAGESIZE-17295814:
     - '*':
-        reason: 'Need to upgrade to angular 21; ticket created: EID-6533'
-        expires: 2026-07-23T14:52:11.173Z
+        reason: 'No update path as of now'
+        expires: 2026-11-09T09:00:00.000Z
         created: 2026-06-23T14:52:11.176Z
-  SNYK-JS-FASTURI-17675102:
-    - '*':
-        reason: 'Oblique needs to be upgraded first; ticket created: EID-6533'
-        expires: 2026-07-30T09:00:00.000Z
-        created: 2026-06-30T09:00:00.000Z
 patch: {}
