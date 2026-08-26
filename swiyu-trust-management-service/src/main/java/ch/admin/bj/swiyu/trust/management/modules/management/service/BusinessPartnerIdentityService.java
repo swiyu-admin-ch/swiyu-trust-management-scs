@@ -47,6 +47,23 @@ public class BusinessPartnerIdentityService {
     private final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
     private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
 
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public boolean isPartnerTrusted(UUID businessPartnerId) {
+        return businessPartnerIdentityRepository
+            .findById(businessPartnerId)
+            .map(bpi -> bpi.getStatus() == BusinessPartnerIdentityStatus.ACTIVE)
+            .orElse(false);
+    }
+
+    /**
+     * Whether a {@link BusinessPartnerIdentity} exists for the partner at all, regardless of its status - an
+     * authorization can be added even for an untrusted (non-ACTIVE) BPI, but not if no BPI exists.
+     */
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public boolean businessPartnerIdentityExists(UUID businessPartnerId) {
+        return businessPartnerIdentityRepository.existsById(businessPartnerId);
+    }
+
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void activate(UUID businessPartnerId) {
         var bpi = businessPartnerIdentityRepository

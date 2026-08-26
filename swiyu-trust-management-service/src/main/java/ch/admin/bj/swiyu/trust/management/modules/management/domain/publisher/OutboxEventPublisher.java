@@ -129,6 +129,38 @@ public class OutboxEventPublisher {
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
+    public void publishProtectedVerificationSubmissionApprovedEvent(
+        @NonNull TiProtectedVerificationSubmissionApprovedEvent event
+    ) {
+        var topicName = TiProtectedVerificationSubmissionApprovedEvent.TypeRef.DEFAULT_TOPIC;
+        sendEvent(
+            topicName,
+            BeanReferenceMessageKey.newBuilder()
+                .setNamespace(TiProtectedVerificationSubmissionApprovedEvent.TypeRef.SYSTEM_NAME)
+                .setName(topicName)
+                .setId(event.getPayload().getProtectedVerificationSubmissionId().toString())
+                .build(),
+            event
+        );
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void publishProtectedVerificationSubmissionRejectedEvent(
+        @NonNull TiProtectedVerificationSubmissionRejectedEvent event
+    ) {
+        var topicName = TiProtectedVerificationSubmissionRejectedEvent.TypeRef.DEFAULT_TOPIC;
+        sendEvent(
+            topicName,
+            BeanReferenceMessageKey.newBuilder()
+                .setNamespace(TiProtectedVerificationSubmissionRejectedEvent.TypeRef.SYSTEM_NAME)
+                .setName(topicName)
+                .setId(event.getPayload().getProtectedVerificationSubmissionId().toString())
+                .build(),
+            event
+        );
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
     public void publishVqpsPublicationSucceededEvent(@NonNull TiVqpsPublicationSucceededEvent event) {
         var topicName = TiVqpsPublicationSucceededEvent.TypeRef.DEFAULT_TOPIC;
         sendEvent(

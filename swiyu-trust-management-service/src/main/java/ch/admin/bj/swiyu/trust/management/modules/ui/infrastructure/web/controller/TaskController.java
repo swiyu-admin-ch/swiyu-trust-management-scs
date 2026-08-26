@@ -4,13 +4,18 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Ex
 import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR_OR_READER;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 
+import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedVerificationRequestTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustAddDidTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskListItemDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.ZasDataDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.AddInternalNoteTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RejectProtectedVerificationRequestTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RejectTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RequestMoreInformationTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationRequestTaskService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustAddDidTaskService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingTaskService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,14 +37,15 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @AllArgsConstructor
-@Tag(name = "TrustOnboardingTask")
+@Tag(name = "Task")
 @RestController
 @RequestMapping("/ui-api/tasks")
 @PreAuthorize("isAuthenticated()")
-public class TrustOnboardingTaskController {
+public class TaskController {
 
     private final TrustOnboardingTaskService trustOnboardingTaskService;
     private final TrustAddDidTaskService trustAddDidTaskService;
+    private final ProtectedVerificationRequestTaskService protectedVerificationRequestTaskService;
 
     @GetMapping("/")
     @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
@@ -80,6 +86,42 @@ public class TrustOnboardingTaskController {
     @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     public TrustAddDidTaskDto getAddDidTask(@PathVariable UUID taskId) {
         return this.trustAddDidTaskService.getTask(taskId);
+    }
+
+    @GetMapping("/{taskId}/protected-verification-request")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
+    public ProtectedVerificationRequestTaskDto getProtectedVerificationRequestTask(@PathVariable UUID taskId) {
+        return this.protectedVerificationRequestTaskService.getTask(taskId, getCurrentUserFullName());
+    }
+
+    @GetMapping("/{taskId}/protected-verification-request/zas-data")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
+    public ZasDataDto getProtectedVerificationRequestTaskZasData(@PathVariable UUID taskId) {
+        return this.protectedVerificationRequestTaskService.getZasData(taskId);
+    }
+
+    @PostMapping("/{taskId}/protected-verification-request/zas-data/review")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
+    public void markProtectedVerificationRequestTaskZasDataReviewed(@PathVariable UUID taskId) {
+        this.protectedVerificationRequestTaskService.markZasDataReviewed(taskId);
+    }
+
+    @PostMapping("/{taskId}/protected-verification-request/approve")
+    @PreAuthorize(HAS_ROLE_EDITOR)
+    public void approveProtectedVerificationRequest(
+        @PathVariable UUID taskId,
+        @NotNull ApproveProtectedVerificationRequestTaskActionDto request
+    ) {
+        this.protectedVerificationRequestTaskService.approve(taskId, request, getCurrentUserFullName());
+    }
+
+    @PostMapping("/{taskId}/protected-verification-request/reject")
+    @PreAuthorize(HAS_ROLE_EDITOR)
+    public void rejectProtectedVerificationRequest(
+        @PathVariable UUID taskId,
+        @NotNull RejectProtectedVerificationRequestTaskActionDto request
+    ) {
+        this.protectedVerificationRequestTaskService.reject(taskId, request, getCurrentUserFullName());
     }
 
     @PostMapping("/{taskId}/approve")

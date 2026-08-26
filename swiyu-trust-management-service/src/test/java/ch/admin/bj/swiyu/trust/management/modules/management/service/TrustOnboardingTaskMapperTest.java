@@ -11,6 +11,7 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.model.SignatoryDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskContactTypeDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ class TrustOnboardingTaskMapperTest {
 
         // Then
         assertThat(result).isNotNull();
+        assertThat(result.taskType()).isEqualTo(TrustTaskType.REGISTRATION.name());
     }
 
     @Test

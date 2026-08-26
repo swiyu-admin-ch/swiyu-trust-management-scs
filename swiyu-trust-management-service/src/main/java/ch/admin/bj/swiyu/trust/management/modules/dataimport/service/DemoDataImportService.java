@@ -32,6 +32,7 @@ public class DemoDataImportService {
     private final TrustOnboardingTaskRepository trustOnboardingTaskRepository;
     private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
     private final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
+    private final ProtectedVerificationRequestTaskRepository protectedVerificationRequestTaskRepository;
 
     public void setSystemSecurityContext() {
         SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
@@ -51,6 +52,14 @@ public class DemoDataImportService {
         log.debug("Delete demo business partner identity entries ...");
         for (var demoCase : DemoData.DemoCase.values()) {
             businessPartnerIdentityRepository.deleteById(demoCase.bp.id());
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteProtectedVerificationRequestTasks() {
+        log.debug("Delete demo protected verification request tasks ...");
+        for (var demoCase : DemoData.DemoCase.values()) {
+            protectedVerificationRequestTaskRepository.deleteAllByPartnerId(demoCase.bp.id());
         }
     }
 
@@ -95,7 +104,7 @@ public class DemoDataImportService {
             .toList();
 
         for (var bpi : bpis) {
-            var dbEntity = businessPartnerIdentityRepository.findById(bpi.getId()).orElseGet(() -> bpi);
+            var dbEntity = businessPartnerIdentityRepository.findById(bpi.getId()).orElse(bpi);
             dbEntity.overrideFrom(bpi);
             businessPartnerIdentityRepository.saveAndFlush(dbEntity);
         }
@@ -202,5 +211,28 @@ public class DemoDataImportService {
                 domainEventService.trustOnboardingSubmissionReceived(newTask.getId(), getCurrentUserName());
             }
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void loadProtectedVerificationRequestTasks() {
+        log.debug("Importing demo protected verification request tasks ...");
+
+        Arrays.stream(DemoData.DemoCase.values()).forEach(demoCase ->
+            demoCase.bp
+                .protectedVerificationSubmissions()
+                .forEach(submission -> {
+                    if (submission.task() != null) {
+                        var task = DemoDataMapper.toProtectedVerificationRequestTask(demoCase.bp, submission);
+                        switch (submission.task().status()) {
+                            case ACCEPTED -> task.approve();
+                            case REJECTED -> task.reject();
+                            case OPENED -> {
+                                // Nothing to do, that's the status right after construction
+                            }
+                        }
+                        protectedVerificationRequestTaskRepository.save(task);
+                    }
+                })
+        );
     }
 }

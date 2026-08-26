@@ -3,6 +3,7 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain.event;
 import ch.admin.bit.jeap.domainevent.avro.AvroDomainEventBuilder;
 import ch.admin.bit.jeap.messaging.avro.AvroMessageBuilderException;
 import ch.admin.bj.swiyu.messagetype.ti.*;
+import java.time.Instant;
 import java.util.UUID;
 
 public class TiTrustOnboardingInformationRequestedEventBuilder
@@ -17,7 +18,7 @@ public class TiTrustOnboardingInformationRequestedEventBuilder
 
     private UUID trustOnboardingSubmissionId;
     private String partnerNote;
-    private String declineReasonType;
+    private Instant resubmitRequiredUntil;
 
     private boolean isIdempotenceIdOverwritten;
 
@@ -41,8 +42,8 @@ public class TiTrustOnboardingInformationRequestedEventBuilder
         return this;
     }
 
-    public TiTrustOnboardingInformationRequestedEventBuilder declineReasonType(String declineReasonType) {
-        this.declineReasonType = declineReasonType;
+    public TiTrustOnboardingInformationRequestedEventBuilder resubmitRequiredUntil(Instant resubmitRequiredUntil) {
+        this.resubmitRequiredUntil = resubmitRequiredUntil;
         return this;
     }
 
@@ -77,13 +78,18 @@ public class TiTrustOnboardingInformationRequestedEventBuilder
                 "rustOnboardingInformationRequestedReferences.trustOnboardingSubmissionId"
             );
         }
+        if (this.resubmitRequiredUntil == null) {
+            throw AvroMessageBuilderException.propertyNull(
+                "trustOnboardingInformationRequestedPayload.resubmitRequiredUntil"
+            );
+        }
         TrustOnboardingInformationRequestedReferences trustOnboardingInformationRequestedReferences =
             TrustOnboardingInformationRequestedReferences.newBuilder().build();
         TrustOnboardingInformationRequestedPayload trustOnboardingInformationRequestedPayload =
             TrustOnboardingInformationRequestedPayload.newBuilder()
                 .setTrustOnboardingSubmissionId(trustOnboardingSubmissionId)
                 .setPartnerNote(partnerNote)
-                .setRejectReason(declineReasonType)
+                .setResubmitRequiredUntil(resubmitRequiredUntil)
                 .build();
         setReferences(trustOnboardingInformationRequestedReferences);
         setPayload(trustOnboardingInformationRequestedPayload);

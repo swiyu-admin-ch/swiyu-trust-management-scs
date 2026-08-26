@@ -10,14 +10,18 @@ import {MatFormField, MatHint, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {MatOption, MatSelect} from '@angular/material/select';
 import {ObAlertComponent, ObButtonDirective} from '@oblique/oblique';
+import {Observable} from 'rxjs';
 import {TrustOnboardingRejectReason, TrustOnboardingTaskAction, TrustOnboardingTaskApi} from '../../../api/generated';
 
 interface FormData {
   partnerMessageBody: string;
   rejectReason?: TrustOnboardingRejectReason;
+  protectedVerificationRejectReason: string;
   internalMessageBody: string;
   declarationAccepted: boolean;
 }
+
+const PROTECTED_VERIFICATION_REQUEST_TASK_TYPE = 'PROTECTED_VERIFICATION_REQUEST';
 
 @Component({
   selector: 'app-sidepanel',
@@ -59,15 +63,25 @@ export class SidepanelComponent {
       this.formData.set(this.initialForm());
       this.panelData.set(data);
       this.submitLabelKey.set(getSubmitLabelKey(this.panelData()?.action));
+      const task = this.panelData()?.task;
       this.correspondenceLanguageKey.set(
-        this.getCorrespondenceLanguageKey(this.panelData()?.task?.correspondenceLanguage)
+        this.getCorrespondenceLanguageKey(
+          task && 'correspondenceLanguage' in task ? task.correspondenceLanguage : undefined
+        )
       );
       this.declarationError.set(false);
       if (this.panelData()) {
-        this.declarationCheckVisible.set(this.panelData()?.action !== TrustOnboardingTaskAction.AddInternalNote);
+        this.declarationCheckVisible.set(
+          this.panelData()?.action !== TrustOnboardingTaskAction.AddInternalNote && !this.isProtectedVerificationTask()
+        );
       }
     });
     this.translateSetup();
+  }
+
+  isProtectedVerificationTask(): boolean {
+    const task = this.panelData()?.task;
+    return !!task && 'taskType' in task && task.taskType === PROTECTED_VERIFICATION_REQUEST_TASK_TYPE;
   }
 
   submit(form: NgForm) {
@@ -76,9 +90,19 @@ export class SidepanelComponent {
       return;
     }
 
+    if (!this.validate()) {
+      return;
+    }
+
+    this.buildRequest()?.subscribe(() => {
+      this.sidepanelService.closePanel();
+    });
+  }
+
+  private validate(): boolean {
     const errors: string[] = [];
 
-    // Rule 1: Declaration must be accepted (except when adding internal notes)
+    // Rule 1: Declaration must be accepted (except when adding internal notes, or for protected verification tasks)
     if (this.declarationCheckVisible() && !this.formData().declarationAccepted) {
       this.declarationError.set(true);
       errors.push('Declaration must be accepted.');
@@ -86,73 +110,78 @@ export class SidepanelComponent {
 
     // Rule 2: Reject-specific validation
     if (this.panelData()?.action === TrustOnboardingTaskAction.Reject) {
-      const reason = this.formData().rejectReason;
-      if (!reason) {
-        errors.push('Reject reason is required.');
-      } else if (!this.rejectReasons.includes(reason)) {
-        errors.push('Reject reason must be one of the predefined values.');
+      if (this.isProtectedVerificationTask()) {
+        if (!this.formData().protectedVerificationRejectReason.trim()) {
+          errors.push('Reject reason is required.');
+        }
+      } else {
+        const reason = this.formData().rejectReason;
+        if (!reason) {
+          errors.push('Reject reason is required.');
+        } else if (!this.rejectReasons.includes(reason)) {
+          errors.push('Reject reason must be one of the predefined values.');
+        }
       }
     }
 
     if (errors.length > 0) {
       console.warn('Validation failed:', errors);
       // Optionally show errors in the UI
-      return;
+      return false;
     }
+    return true;
+  }
+
+  private buildRequest(): Observable<unknown> | undefined {
+    const taskId = this.panelData()?.task?.id as string;
+    const isProtectedVerificationTask = this.isProtectedVerificationTask();
 
     switch (this.panelData()?.action) {
       case TrustOnboardingTaskAction.Reject:
-        this.api
-          .reject({
-            taskId: this.panelData()?.task?.id as string,
-            request: {
-              internalNote: this.formData().internalMessageBody,
-              partnerNote: this.formData().partnerMessageBody,
-              rejectReason: this.formData().rejectReason! // can never be null when submitting
-            }
-          })
-          .subscribe(() => {
-            this.sidepanelService.closePanel();
-          });
-        break;
+        return isProtectedVerificationTask
+          ? this.api.rejectProtectedVerificationRequest({
+              taskId,
+              request: {
+                internalNote: this.formData().internalMessageBody,
+                rejectReason: this.formData().protectedVerificationRejectReason
+              }
+            })
+          : this.api.reject({
+              taskId,
+              request: {
+                internalNote: this.formData().internalMessageBody,
+                partnerNote: this.formData().partnerMessageBody,
+                rejectReason: this.formData().rejectReason! // can never be null when submitting
+              }
+            });
       case TrustOnboardingTaskAction.RequestMoreInformation:
-        this.api
-          .requestMoreInformation({
-            taskId: this.panelData()?.task?.id as string,
-            request: {
-              internalNote: this.formData().internalMessageBody,
-              partnerNote: this.formData().partnerMessageBody
-            }
-          })
-          .subscribe(() => {
-            this.sidepanelService.closePanel();
-          });
-        break;
+        return this.api.requestMoreInformation({
+          taskId,
+          request: {
+            internalNote: this.formData().internalMessageBody,
+            partnerNote: this.formData().partnerMessageBody
+          }
+        });
       case TrustOnboardingTaskAction.Approve:
-        this.api
-          .approve({
-            taskId: this.panelData()?.task?.id as string,
-            request: {
-              internalNote: this.formData().internalMessageBody,
-              partnerNote: this.formData().partnerMessageBody
-            }
-          })
-          .subscribe(() => {
-            this.sidepanelService.closePanel();
-          });
-        break;
+        return isProtectedVerificationTask
+          ? this.api.approveProtectedVerificationRequest({
+              taskId,
+              request: {internalNote: this.formData().internalMessageBody}
+            })
+          : this.api.approve({
+              taskId,
+              request: {
+                internalNote: this.formData().internalMessageBody,
+                partnerNote: this.formData().partnerMessageBody
+              }
+            });
       case TrustOnboardingTaskAction.AddInternalNote:
-        this.api
-          .addInternalNote({
-            taskId: this.panelData()?.task?.id as string,
-            request: {
-              internalNote: this.formData().internalMessageBody
-            }
-          })
-          .subscribe(() => {
-            this.sidepanelService.closePanel();
-          });
-        break;
+        return this.api.addInternalNote({
+          taskId,
+          request: {internalNote: this.formData().internalMessageBody}
+        });
+      default:
+        return undefined;
     }
   }
 
@@ -191,6 +220,7 @@ export class SidepanelComponent {
     return {
       partnerMessageBody: '',
       rejectReason: undefined,
+      protectedVerificationRejectReason: '',
       internalMessageBody: '',
       declarationAccepted: false
     };

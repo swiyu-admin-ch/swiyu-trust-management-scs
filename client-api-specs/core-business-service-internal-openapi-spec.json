@@ -44,9 +44,68 @@
     {
       "name": "Business Partner V2",
       "description": "Business Partner API"
+    },
+    {
+      "name": "ProtectedVerificationSubmission Internal",
+      "description": "ProtectedVerificationSubmission Internal API"
     }
   ],
   "paths": {
+    "/api/v1/internal/trust/protected-verification-submissions/{id}": {
+      "get": {
+        "tags": [
+          "ProtectedVerificationSubmission Internal"
+        ],
+        "summary": "Get specific ProtectedVerificationSubmission by ID",
+        "operationId": "getProtectedVerificationSubmission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtectedVerificationSubmission"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/internal/trust/trust-onboarding-submission/{id}": {
       "get": {
         "tags": [
@@ -1703,6 +1762,80 @@
   },
   "components": {
     "schemas": {
+    "ProtectedVerificationSubmission": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "partnerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sbnId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for organisations authorized by ZAS"
+        },
+        "entityName": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "string"
+        },
+        "contactPerson": {
+          "$ref": "#/components/schemas/Contact"
+        },
+        "category": {
+          "$ref": "#/components/schemas/ProtectedVerificationCategory"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/components/schemas/ProtectedVerificationSubmissionStatus"
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "partnerId",
+        "sbnId",
+        "entityName",
+        "category",
+        "reason",
+        "status",
+        "submittedAt",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ProtectedVerificationCategory": {
+      "type": "string",
+      "enum": [
+        "PERSONAL_ADMINISTRATIVE_NUMBER"
+      ]
+    },
+    "ProtectedVerificationSubmissionStatus": {
+      "type": "string",
+      "enum": [
+        "SUBMITTED",
+        "APPROVED",
+        "REJECTED"
+      ]
+    },
       "ApiError": {
         "type": "object",
         "properties": {
@@ -2058,6 +2191,9 @@
           "contactPerson": {
             "$ref": "#/components/schemas/Contact"
           },
+          "type": {
+            "$ref": "#/components/schemas/TrustOnboardingSubmissionType"
+          },
           "version": {
             "type": "integer",
             "format": "int64"
@@ -2141,6 +2277,7 @@
           "proofOfPossessions",
           "registryIds",
           "status",
+          "type",
           "updatedAt",
           "version"
         ]
@@ -2422,7 +2559,7 @@
       },
       "BusinessPartnerTrustStatus": {
         "type": "string",
-        "description": "Defines the current aggregated state of the trust process.\n    @startuml\n    [*] --\u003E NOT_VERIFIED\n\n    NOT_VERIFIED -[#green]-\u003E VERIFICATION_STARTED\n\n    VERIFICATION_STARTED -[#green]-\u003E VERIFICATION_IN_PROGRESS\n\n    VERIFICATION_IN_PROGRESS -[#orange]-\u003E INFORMATION_REQUESTED\n    VERIFICATION_IN_PROGRESS -[#green]-\u003E VERIFIED\n    VERIFICATION_IN_PROGRESS -[#red]-\u003E NOT_VERIFIED\n\n    INFORMATION_REQUESTED -[#green]-\u003E VERIFIED\n    INFORMATION_REQUESTED -[#red]-\u003E NOT_VERIFIED\n\n    VERIFIED -[#green]-\u003E RE_VERIFICATION_STARTED\n\n    RE_VERIFICATION_STARTED -[#green]-\u003E RE_VERIFICATION_IN_PROGRESS\n\n    RE_VERIFICATION_IN_PROGRESS -[#orange]-\u003E INFORMATION_REQUESTED\n    RE_VERIFICATION_IN_PROGRESS -[#green]-\u003E VERIFIED\n    RE_VERIFICATION_IN_PROGRESS -[#red]-\u003E NOT_VERIFIED\n    @enduml\n",
+        "description": "Defines the current aggregated state of the trust process.\n    @startuml\n    [*] --> NOT_VERIFIED\n\n    NOT_VERIFIED -[#green]-> VERIFICATION_STARTED\n\n    VERIFICATION_STARTED -[#green]-> VERIFICATION_IN_PROGRESS\n\n    VERIFICATION_IN_PROGRESS -[#orange]-> INFORMATION_REQUESTED\n    VERIFICATION_IN_PROGRESS -[#green]-> VERIFIED\n    VERIFICATION_IN_PROGRESS -[#red]-> NOT_VERIFIED\n\n    INFORMATION_REQUESTED -[#green]-> VERIFIED\n    INFORMATION_REQUESTED -[#red]-> NOT_VERIFIED\n\n    VERIFIED -[#green]-> RE_VERIFICATION_STARTED\n\n    RE_VERIFICATION_STARTED -[#green]-> RE_VERIFICATION_IN_PROGRESS\n\n    RE_VERIFICATION_IN_PROGRESS -[#orange]-> INFORMATION_REQUESTED\n    RE_VERIFICATION_IN_PROGRESS -[#green]-> VERIFIED\n    RE_VERIFICATION_IN_PROGRESS -[#red]-> NOT_VERIFIED\n    @enduml\n",
         "enum": [
           "NOT_VERIFIED",
           "VERIFICATION_STARTED",
@@ -2713,9 +2850,7 @@
           }
         }
       },
-      "JsonNode": {
-
-      },
+      "JsonNode": {},
       "VqpsSubmissionInternal": {
         "type": "object",
         "properties": {
@@ -3074,6 +3209,15 @@
             "$ref": "#/components/schemas/PageMetadata"
           }
         }
+      },
+      "TrustOnboardingSubmissionType": {
+        "type": "string",
+        "description": "Submission type for trust onboarding",
+        "enum": [
+          "REGISTRATION",
+          "PROFILE_CHANGE",
+          "RENEWAL"
+        ]
       }
     },
     "securitySchemes": {

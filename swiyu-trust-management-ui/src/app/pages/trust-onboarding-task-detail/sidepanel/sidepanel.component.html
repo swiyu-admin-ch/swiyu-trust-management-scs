@@ -2,7 +2,7 @@
   <form #form="ngForm" (ngSubmit)="submit(form)">
     <div class="sidepanel">
       <div class="sidepanel-container">
-        @if (panelData()?.action === TrustOnboardingTaskAction.Approve) {
+        @if (panelData()?.action === TrustOnboardingTaskAction.Approve && !isProtectedVerificationTask()) {
           <div>
             <h6>{{ "app.trust-onboarding-task.sidepanel.message" | translate }}</h6>
             <mat-form-field>
@@ -21,32 +21,47 @@
         @if (panelData()?.action === TrustOnboardingTaskAction.Reject) {
           <div>
             <h6>{{ "app.trust-onboarding-task.sidepanel.message" | translate }}</h6>
-            <mat-form-field>
-              <mat-label>{{ "app.trust-onboarding-task.sidepanel.reject-reason" | translate }}</mat-label>
-              <mat-select
-                name="rejectReason"
-                required
-                [(ngModel)]="formData().rejectReason"
-                data-cy="selectRejectReason"
-              >
-                @for (reason of rejectReasons; track reason) {
-                  <mat-option [value]="reason">
-                    {{ "app.trust-onboarding-task.sidepanel.reject-reason.type." + reason | translate }}
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>{{ "app.trust-onboarding-task.sidepanel.message.reject.body" | translate }}</mat-label>
-              <textarea
-                matInput
-                name="parnterMessageBody"
-                [(ngModel)]="formData().partnerMessageBody"
-                placeholder="{{ 'app.trust-onboarding-task.sidepanel.message.reject.body' | translate }}"
-                data-cy="rejectMsgBody"
-              ></textarea>
-              <mat-hint>{{ correspondenceLanguageKey() | translate }}</mat-hint>
-            </mat-form-field>
+            @if (isProtectedVerificationTask()) {
+              <mat-form-field>
+                <mat-label>{{
+                  "app.protected-verification-request-task.form.rejectReason.label" | translate
+                }}</mat-label>
+                <textarea
+                  matInput
+                  name="protectedVerificationRejectReason"
+                  required
+                  [(ngModel)]="formData().protectedVerificationRejectReason"
+                  data-cy="protectedVerificationRejectReason"
+                ></textarea>
+              </mat-form-field>
+            } @else {
+              <mat-form-field>
+                <mat-label>{{ "app.trust-onboarding-task.sidepanel.reject-reason" | translate }}</mat-label>
+                <mat-select
+                  name="rejectReason"
+                  required
+                  [(ngModel)]="formData().rejectReason"
+                  data-cy="selectRejectReason"
+                >
+                  @for (reason of rejectReasons; track reason) {
+                    <mat-option [value]="reason">
+                      {{ "app.trust-onboarding-task.sidepanel.reject-reason.type." + reason | translate }}
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>{{ "app.trust-onboarding-task.sidepanel.message.reject.body" | translate }}</mat-label>
+                <textarea
+                  matInput
+                  name="parnterMessageBody"
+                  [(ngModel)]="formData().partnerMessageBody"
+                  placeholder="{{ 'app.trust-onboarding-task.sidepanel.message.reject.body' | translate }}"
+                  data-cy="rejectMsgBody"
+                ></textarea>
+                <mat-hint>{{ correspondenceLanguageKey() | translate }}</mat-hint>
+              </mat-form-field>
+            }
           </div>
         }
         @if (panelData()?.action === TrustOnboardingTaskAction.RequestMoreInformation) {

@@ -42,6 +42,7 @@ public class TrustOnboardingTestData {
             UUID.randomUUID(),
             TEST_PARTNER_NAME,
             UUID.randomUUID(),
+            ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskType.REGISTRATION,
             submittedAt.plus(12, ChronoUnit.DAYS),
             submittedAt
         );
@@ -52,6 +53,7 @@ public class TrustOnboardingTestData {
             UUID.randomUUID(),
             TEST_PARTNER_NAME,
             UUID.randomUUID(),
+            ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskType.REGISTRATION,
             LocalDate.now().atStartOfDay(ZONE_ID_ZURICH).toInstant().plus(12, ChronoUnit.DAYS),
             submittedAt
         );
@@ -78,6 +80,7 @@ public class TrustOnboardingTestData {
             .partnerId(UUID.randomUUID())
             .proofOfPossessions(List.of(pop1, pop2))
             .businessPartnerType(BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION)
+            .type(TrustOnboardingSubmissionTypeDto.PROFILE_CHANGE)
             .submittedAt(LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant())
             .updatedAt(LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant())
             .createdAt(LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant())
@@ -187,6 +190,37 @@ public class TrustOnboardingTestData {
             .setReferences(TrustOnboardingSubmissionAcceptedReferences.newBuilder().build())
             .setPayload(payload)
             .setDomainEventVersion("2.0.0")
+            .build();
+    }
+
+    public static TiProtectedVerificationSubmissionAcceptedEvent tiProtectedVerificationSubmissionAcceptedEvent() {
+        return tiProtectedVerificationSubmissionAcceptedEvent(UUID.randomUUID());
+    }
+
+    public static TiProtectedVerificationSubmissionAcceptedEvent tiProtectedVerificationSubmissionAcceptedEvent(
+        UUID submissionId
+    ) {
+        var identity = AvroDomainEventIdentity.newBuilder()
+            .setEventId(UUID.randomUUID().toString())
+            .setIdempotenceId(UUID.randomUUID().toString())
+            .setCreated(Instant.now())
+            .build();
+
+        var type = AvroDomainEventType.newBuilder()
+            .setName("TiProtectedVerificationSubmissionAcceptedEvent")
+            .setVersion("1.0.0")
+            .build();
+
+        var payload = ProtectedVerificationSubmissionAcceptedPayload.newBuilder()
+            .setProtectedVerificationSubmissionId(submissionId)
+            .build();
+
+        return TiProtectedVerificationSubmissionAcceptedEvent.newBuilder()
+            .setIdentity(identity)
+            .setType(type)
+            .setPublisher(new AvroDomainEventPublisher())
+            .setPayload(payload)
+            .setDomainEventVersion("1.0.0")
             .build();
     }
 }

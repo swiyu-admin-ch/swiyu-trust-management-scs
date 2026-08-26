@@ -9,7 +9,6 @@ import lombok.*;
 @Entity
 @Getter
 @Table(name = "trust_add_did_task")
-@DiscriminatorValue("ADD_DID")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TrustAddDidTask extends TrustTask {
 

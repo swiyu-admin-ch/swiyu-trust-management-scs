@@ -17,7 +17,7 @@ public class TrustOnboardingTaskActionsResolver {
         String currentAssignee,
         String currentUserFullName
     ) {
-        return resolvePossibleActions(currentStatus, currentAssignee, currentUserFullName, true);
+        return resolvePossibleActions(currentStatus, currentAssignee, currentUserFullName, true, true);
     }
 
     public static Set<TrustOnboardingTaskActionDto> resolvePossibleActions(
@@ -26,16 +26,37 @@ public class TrustOnboardingTaskActionsResolver {
         String currentUserFullName,
         boolean canRequestMoreInformation
     ) {
+        return resolvePossibleActions(
+            currentStatus,
+            currentAssignee,
+            currentUserFullName,
+            canRequestMoreInformation,
+            true
+        );
+    }
+
+    /**
+     * @param reviewPreconditionsMet whether any task-type-specific precondition for APPROVE/REJECT has been met
+     *     (e.g. for a protected verification request, that ZAS data has been reviewed). Pass {@code true} for task
+     *     types without such a precondition.
+     */
+    public static Set<TrustOnboardingTaskActionDto> resolvePossibleActions(
+        TrustTaskStatus currentStatus,
+        String currentAssignee,
+        String currentUserFullName,
+        boolean canRequestMoreInformation,
+        boolean reviewPreconditionsMet
+    ) {
         var actions = new HashSet<TrustOnboardingTaskActionDto>();
         for (var action : TrustOnboardingTaskActionDto.values()) {
             switch (action) {
                 case REJECT -> {
-                    if (isValidNewStatus(currentStatus, TrustTaskStatus.REJECTED)) {
+                    if (isValidNewStatus(currentStatus, TrustTaskStatus.REJECTED) && reviewPreconditionsMet) {
                         actions.add(action);
                     }
                 }
                 case APPROVE -> {
-                    if (isValidNewStatus(currentStatus, TrustTaskStatus.ACCEPTED)) {
+                    if (isValidNewStatus(currentStatus, TrustTaskStatus.ACCEPTED) && reviewPreconditionsMet) {
                         actions.add(action);
                     }
                 }

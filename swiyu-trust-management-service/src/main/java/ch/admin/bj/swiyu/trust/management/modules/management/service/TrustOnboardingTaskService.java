@@ -13,8 +13,10 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboarding
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.TrustOnboardingTaskStatusValidationException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingRejectReasonDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskListItemDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementTypeDto;
@@ -28,7 +30,6 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrus
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustOnboardingSucceededEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
 import com.querydsl.core.BooleanBuilder;
-import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -36,6 +37,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +60,6 @@ public class TrustOnboardingTaskService {
     private final TrustOnboardingTaskRepository taskRepository;
     private final TrustStatementService trustStatementService;
     private final TrustOnboardingTaskDomainService taskDomainService;
-    private final EntityManager entityManager;
     private final TrustOnboardingTaskProperties trustOnboardingTaskProperties;
 
     /**
@@ -77,6 +78,7 @@ public class TrustOnboardingTaskService {
             trustOnboardingSubmission.getPartnerId(),
             Map.copyOf(trustOnboardingSubmission.getName()),
             trustOnboardingSubmission.getId(),
+            TrustOnboardingTaskMapper.toTaskType(trustOnboardingSubmission.getType()),
             calculateDueAt(trustOnboardingSubmission),
             trustOnboardingSubmission.getSubmittedAt()
         );
@@ -191,15 +193,7 @@ public class TrustOnboardingTaskService {
             where.and(q.taskType.in(taskTypeEnums));
         }
         return this.trustTaskRepository.findAll(where, pageable).map(task ->
-            TrustOnboardingTaskMapper.toTaskListItemDto(
-                task,
-                resolvePossibleActions(
-                    task.getStatus(),
-                    task.getAssignee(),
-                    getCurrentUserFullName(),
-                    !(task instanceof TrustOnboardingTask onboardingTask) || onboardingTask.canRequestMoreInformation()
-                )
-            )
+            TrustOnboardingTaskMapper.toTaskListItemDto(task, resolveListItemAllowedActions(task))
         );
     }
 
@@ -208,7 +202,7 @@ public class TrustOnboardingTaskService {
         log.info("Task {} is approved by {}", taskId.toString(), triggeredBy);
         var task = taskDomainService.getTrustOnboardingTask(taskId);
         var submissionId = task.getTrustOnboardingSubmissionId();
-        task.changeStatus(ACCEPTED);
+        task.approve();
         taskRepository.save(task);
 
         var trustOnboardingSubmissionDto = trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submissionId);
@@ -233,7 +227,7 @@ public class TrustOnboardingTaskService {
         log.info("Task {} is rejected by {}", taskId.toString(), triggeredBy);
         var task = taskDomainService.getTrustOnboardingTask(taskId);
         var submissionId = task.getTrustOnboardingSubmissionId();
-        task.changeStatus(REJECTED);
+        task.reject();
         taskRepository.save(task);
         outboxEventPublisher.publishTrustOnboardingRejectedEvent(
             TiTrustOnboardingRejectedEventBuilder.create()
@@ -260,13 +254,14 @@ public class TrustOnboardingTaskService {
             );
         }
         var submissionId = task.getTrustOnboardingSubmissionId();
-        task.requestMoreInformation(Instant.now().plus(trustOnboardingTaskProperties.rejectionEnforcementPeriod()));
+        var resubmitRequiredUntil = Instant.now().plus(trustOnboardingTaskProperties.rejectionEnforcementPeriod());
+        task.requestMoreInformation(resubmitRequiredUntil);
         taskRepository.save(task);
         outboxEventPublisher.publishTrustOnboardingInformationRequestedEvent(
             TiTrustOnboardingInformationRequestedEventBuilder.create()
                 .trustOnboardingSubmissionId(submissionId)
                 .partnerNote(request.partnerNote())
-                .declineReasonType(TrustOnboardingRejectReasonDto.OTHER.toString())
+                .resubmitRequiredUntil(resubmitRequiredUntil)
                 .build()
         );
         domainEventService.trustOnboardingSubmissionMoreInformationRequested(
@@ -307,16 +302,22 @@ public class TrustOnboardingTaskService {
 
     @Transactional
     public void addInternalNote(UUID taskId, String internalNote, String triggeredBy) {
-        var task = taskDomainService.getTrustOnboardingTask(taskId);
+        var task = getTrustTaskOrThrow(taskId);
         domainEventService.trustOnboardingSubmissionTaskNoteAdded(task.getId(), triggeredBy, internalNote);
     }
 
     @Transactional
     public void assign(UUID taskId, String assignee, String triggeredBy) {
-        var task = taskDomainService.getTrustOnboardingTask(taskId);
+        var task = getTrustTaskOrThrow(taskId);
         task.assignTo(assignee);
-        taskRepository.save(task);
+        trustTaskRepository.save(task);
         domainEventService.trustOnboardingSubmissionAssigned(task.getId(), triggeredBy);
+    }
+
+    private TrustTask getTrustTaskOrThrow(UUID taskId) {
+        return trustTaskRepository
+            .findById(taskId)
+            .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
     }
 
     private void issueAndPublishIdentityTrustStatements(TrustOnboardingSubmissionDto trustOnboardingSubmissionDto) {
@@ -360,6 +361,25 @@ public class TrustOnboardingTaskService {
                 newStatement.getSubject()
             );
         });
+    }
+
+    /**
+     * For a protected verification request, APPROVE/REJECT are only allowed once its ZAS data has been reviewed
+     * (see {@link TrustOnboardingTaskActionsResolver#resolvePossibleActions}) - once that's true, they're just as
+     * available from the generic task list row menu as from the dedicated detail page.
+     */
+    private Set<TrustOnboardingTaskActionDto> resolveListItemAllowedActions(TrustTask task) {
+        var canRequestMoreInformation =
+            task instanceof TrustOnboardingTask onboardingTask && onboardingTask.canRequestMoreInformation();
+        var reviewPreconditionsMet =
+            !(task instanceof ProtectedVerificationRequestTask pvTask) || pvTask.hasOpenedZasData();
+        return resolvePossibleActions(
+            task.getStatus(),
+            task.getAssignee(),
+            getCurrentUserFullName(),
+            canRequestMoreInformation,
+            reviewPreconditionsMet
+        );
     }
 
     private Instant calculateDueAt(TrustOnboardingSubmissionDto trustOnboardingSubmission) {

@@ -72,4 +72,21 @@ class TrustOnboardingTaskActionsResolverTest {
         // THEN
         assertThat(actions).containsExactlyInAnyOrder(REJECT, APPROVE, ADD_INTERNAL_NOTE, ASSIGN_SELF);
     }
+
+    @Test
+    void resolvePossibleActions_Opened_ReviewPreconditionsNotMet_ExcludesApproveAndReject() {
+        // GIVEN / WHEN - e.g. a protected verification request whose ZAS data hasn't been reviewed yet
+        var actions = resolvePossibleActions(OPENED, ASSIGNEE, CURRENT_USER_FULLNAME, false, false);
+        // THEN
+        assertThat(actions).containsExactlyInAnyOrder(ADD_INTERNAL_NOTE, ASSIGN_SELF);
+    }
+
+    @Test
+    void resolvePossibleActions_Opened_ReviewPreconditionsMet_IncludesApproveAndReject() {
+        // GIVEN / WHEN - e.g. a protected verification request whose ZAS data has already been reviewed, so
+        // approve/reject are allowed regardless of which view (list or detail) triggers the action
+        var actions = resolvePossibleActions(OPENED, ASSIGNEE, CURRENT_USER_FULLNAME, false, true);
+        // THEN
+        assertThat(actions).containsExactlyInAnyOrder(REJECT, APPROVE, ADD_INTERNAL_NOTE, ASSIGN_SELF);
+    }
 }

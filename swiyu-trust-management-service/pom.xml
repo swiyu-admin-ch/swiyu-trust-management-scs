@@ -5,7 +5,7 @@
     <parent>
         <groupId>ch.admin.bj.swiyu</groupId>
         <artifactId>swiyu-trust-management-scs</artifactId>
-        <version>3.35.1-SNAPSHOT</version>
+        <version>3.35.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>swiyu-trust-management-service</artifactId>
@@ -231,7 +231,7 @@
         <dependency>
             <groupId>ch.admin.bj.swiyu.messagetype.ti</groupId>
             <artifactId>ti-trust-onboarding-information-requested-event</artifactId>
-            <version>3.1.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>ch.admin.bj.swiyu.messagetype.ti</groupId>
@@ -284,6 +284,21 @@
             <version>3.0.0</version>
         </dependency>
         <dependency>
+            <groupId>ch.admin.bj.swiyu.messagetype.ti</groupId>
+            <artifactId>ti-protected-verification-submission-accepted-event</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.admin.bj.swiyu.messagetype.ti</groupId>
+            <artifactId>ti-protected-verification-submission-approved-event</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.admin.bj.swiyu.messagetype.ti</groupId>
+            <artifactId>ti-protected-verification-submission-rejected-event</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>au.com.dius.pact.consumer</groupId>
             <artifactId>junit5</artifactId>
             <scope>test</scope>
@@ -307,6 +322,13 @@
     </dependencyManagement>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
             <plugin>
                 <!-- See https://www.baeldung.com/checkstyle-java for more info -->
                 <groupId>org.apache.maven.plugins</groupId>

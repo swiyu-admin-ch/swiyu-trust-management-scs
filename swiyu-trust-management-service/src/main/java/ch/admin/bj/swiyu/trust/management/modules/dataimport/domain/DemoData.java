@@ -142,6 +142,103 @@ public class DemoData {
                             )
                         )
                     )
+                ),
+                List.of(
+                    // The request that led to the AHV_NUMBER authorization above - an authorization can only ever
+                    // be created by approving one of these, so this one must stay in sync with it.
+                    new DemoBusinessPartner.DemoProtectedVerificationSubmission(
+                        UUID.fromString("f4a1e295-6e83-4a13-8e3c-4b6f9a0e6d31"),
+                        UUID.fromString("319bdaeb-1611-46e9-bff7-dd2dbba45d74"), // real SBN-ID, Helsana Versicherungen AG
+                        DemoBusinessPartner.DemoProtectedVerificationSubmission.DemoProtectedVerificationCategory.PERSONAL_ADMINISTRATIVE_NUMBER,
+                        DemoBusinessPartner.DemoProtectedVerificationSubmission.DemoProtectedVerificationSubmissionStatus.APPROVED,
+                        "Verify AHV number for onboarding",
+                        new DemoBusinessPartner.DemoProtectedVerificationSubmission.DemoProtectedVerificationRequestTask(
+                            DemoBusinessPartner.DemoProtectedVerificationSubmission.DemoProtectedVerificationRequestTask.DemoProtectedVerificationTaskStatus.ACCEPTED,
+                            Instant.now().minus(5, ChronoUnit.DAYS),
+                            Instant.now().minus(35, ChronoUnit.DAYS)
+                        )
+                    )
+                )
+            )
+        ),
+        /**
+         * Status:<br/>
+         * identifier registry: <font color="green">onboarded</font><br/>
+         * trust registry: <font color="green">onboarded</font><br/>
+         * <!-- Should be one of: -->
+         * <!-- <font color="green">onboarded</font> -->
+         * <!-- <font color="orange">ongoing</font> -->
+         * <!-- <font color="red">NOT onboarded</font> -->
+         * <p>
+         * Scenario:<br/>
+         * Business BP which is already onboarded to Trust Registry, but has no protected verification history
+         * at all yet - no authorization, no submitted or approved request. Use this one (instead of
+         * {@link #GOV_BP_TRUST_ONBOARDING}) to test submitting and approving a protected verification request
+         * from a clean state, since GOV_BP_TRUST_ONBOARDING already has both seeded.<br/>
+         */
+        BP_VERIFIED_NO_PROTECTED_VERIFICATION(
+            DemoBusinessPartner.of(
+                DemoBusinessPartner.DemoBusinessPartnerType.BUSINESS,
+                "e2f0a7d4-7b91-4c3e-9c04-1a6b8f2d5e73",
+                "fresh.partner@e2e.test",
+                fromLanguages(
+                    "Fresh Verified Partner AG",
+                    "Fresh Verified Partner AG (DE)",
+                    "Fresh Verified Partner SA (FR)",
+                    "Fresh Verified Partner S.r.l. (IT)",
+                    "Fresh Verified Partner AG (EN)",
+                    "Fresh Verified Partner AG (RM)"
+                ),
+                new DemoBusinessPartner.DemoAddress(
+                    "Geschäftsstraße 13",
+                    "Demohausen",
+                    "1111",
+                    "Schweiz",
+                    "Democanton"
+                ),
+                new DemoBusinessPartner.DemoContact(
+                    "erika",
+                    "müller",
+                    "erika.mueller@trusty-consulting.com",
+                    "+41548884440",
+                    DemoBusinessPartner.DemoContact.Language.DE
+                ),
+                DemoBusinessPartner.DemoSigningRule.SINGLE_SIGNATURE,
+                List.of(
+                    new DemoBusinessPartner.DemoSignatory(
+                        "Erika",
+                        "Müller",
+                        "+41776665544",
+                        "erika.mueller@trusty-consulting.com"
+                    )
+                ),
+                null,
+                "+41791234567",
+                null,
+                null,
+                List.of(
+                    new DemoBusinessPartner.DemoTrustOnboarding(
+                        UUID.fromString("b6d3c9a1-4e27-4f8a-8e15-2c7d9a3f6b48"),
+                        DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingSubmissionStatus.SUCCEEDED,
+                        List.of(
+                            new DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingSubmissionDocument(
+                                "Declaration of intent.pdf",
+                                DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingSubmissionDocument.DemoTrustOnboardingSubmissionDocumentTypeDto.TRUST_ONBOARDING_DECLARATION_OF_INTENT,
+                                "something"
+                            )
+                        ),
+                        new DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingTask(
+                            UUID.fromString("d1a5e8c3-9f42-4b76-a1d8-6e0f3c8b2a95"),
+                            DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingTask.DemoTrustTaskStatus.ACCEPTED,
+                            Instant.now().minus(5, ChronoUnit.DAYS),
+                            Instant.now().minus(35, ChronoUnit.DAYS)
+                        )
+                    )
+                ),
+                DemoBusinessPartner.DemoBusinessPartnerIdentity.of(
+                    DemoBusinessPartner.DemoBusinessPartnerIdentity.DemoBusinessPartnerIdentityStatus.ACTIVE,
+                    List.of(),
+                    List.of()
                 )
             )
         ),
@@ -308,6 +405,7 @@ public class DemoData {
                     new DemoBusinessPartner.DemoTrustOnboarding(
                         UUID.fromString("3299cd25-8bab-47b7-9d46-f740be76e57e"),
                         DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingSubmissionStatus.SUBMITTED,
+                        DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingSubmissionType.PROFILE_CHANGE,
                         List.of(
                             new DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingSubmissionDocument(
                                 "Declaration of intent.pdf",
@@ -610,7 +708,8 @@ public class DemoData {
         String contactPhone,
         List<@NotNull DemoIdentifier> identifiers,
         @NotNull List<@NotNull DemoTrustOnboarding> trustOnboardings,
-        DemoBusinessPartnerIdentity bpi
+        DemoBusinessPartnerIdentity bpi,
+        @NotNull List<@NotNull DemoProtectedVerificationSubmission> protectedVerificationSubmissions
     ) {
         public enum DemoBusinessPartnerType {
             GOVERNMENTAL_INSTITUTION,
@@ -649,9 +748,29 @@ public class DemoData {
         public record DemoTrustOnboarding(
             @NotNull UUID submissionId,
             @NotNull DemoTrustOnboardingSubmissionStatus status,
+            @NotNull DemoTrustOnboardingSubmissionType submissionType,
             @NotNull List<DemoTrustOnboardingSubmissionDocument> documents,
             DemoTrustOnboardingTask task
         ) {
+            /**
+             * Convenience constructor: an onboarding is a REGISTRATION unless a specific submission
+             * type (e.g. PROFILE_CHANGE) is given.
+             */
+            public DemoTrustOnboarding(
+                UUID submissionId,
+                DemoTrustOnboardingSubmissionStatus status,
+                List<DemoTrustOnboardingSubmissionDocument> documents,
+                DemoTrustOnboardingTask task
+            ) {
+                this(submissionId, status, DemoTrustOnboardingSubmissionType.REGISTRATION, documents, task);
+            }
+
+            public enum DemoTrustOnboardingSubmissionType {
+                REGISTRATION,
+                PROFILE_CHANGE,
+                RENEWAL,
+            }
+
             public enum DemoTrustOnboardingSubmissionStatus {
                 UNSUBMITTED, // user can update at any time
                 UNSUBMITTED_TIMEOUT,
@@ -684,6 +803,37 @@ public class DemoData {
                     OPENED,
                     INFORMATION_REQUESTED,
                     RESUBMITTED,
+                }
+            }
+        }
+
+        public record DemoProtectedVerificationSubmission(
+            @NotNull UUID submissionId,
+            @NotNull UUID sbnId,
+            @NotNull DemoProtectedVerificationCategory category,
+            @NotNull DemoProtectedVerificationSubmissionStatus status,
+            @NotNull String reason,
+            DemoProtectedVerificationRequestTask task
+        ) {
+            public enum DemoProtectedVerificationCategory {
+                PERSONAL_ADMINISTRATIVE_NUMBER,
+            }
+
+            public enum DemoProtectedVerificationSubmissionStatus {
+                SUBMITTED,
+                APPROVED,
+                REJECTED,
+            }
+
+            public record DemoProtectedVerificationRequestTask(
+                @NotNull DemoProtectedVerificationTaskStatus status,
+                @NotNull Instant dueAt,
+                @NotNull Instant submittedAt
+            ) {
+                public enum DemoProtectedVerificationTaskStatus {
+                    OPENED,
+                    ACCEPTED,
+                    REJECTED,
                 }
             }
         }
@@ -745,6 +895,42 @@ public class DemoData {
             @NotNull List<@NotNull DemoTrustOnboarding> trustOnboardings,
             DemoBusinessPartnerIdentity bpi
         ) {
+            return of(
+                type,
+                id,
+                email,
+                names,
+                address,
+                contact,
+                signatoryRule,
+                signatory,
+                uid,
+                contactPhone,
+                exampleIdentifiers,
+                otherIdentifiers,
+                trustOnboardings,
+                bpi,
+                List.of()
+            );
+        }
+
+        static DemoBusinessPartner of(
+            @NotNull DemoBusinessPartnerType type,
+            @NotNull String id,
+            String email,
+            @NotNull Map<@NotBlank String, @NotBlank String> names,
+            DemoAddress address,
+            DemoContact contact,
+            DemoSigningRule signatoryRule,
+            List<@NotNull DemoSignatory> signatory,
+            String uid,
+            String contactPhone,
+            List<@NotNull String> exampleIdentifiers,
+            List<@NotNull DemoIdentifier> otherIdentifiers,
+            @NotNull List<@NotNull DemoTrustOnboarding> trustOnboardings,
+            DemoBusinessPartnerIdentity bpi,
+            @NotNull List<@NotNull DemoProtectedVerificationSubmission> protectedVerificationSubmissions
+        ) {
             return new DemoBusinessPartner(
                 type,
                 id,
@@ -787,7 +973,8 @@ public class DemoData {
                     Optional.ofNullable(otherIdentifiers).orElseGet(Collections::emptyList).stream()
                 ).toList(),
                 trustOnboardings,
-                bpi
+                bpi,
+                protectedVerificationSubmissions
             );
         }
     }

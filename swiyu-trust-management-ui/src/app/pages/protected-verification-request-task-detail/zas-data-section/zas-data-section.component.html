@@ -1,0 +1,61 @@
+@if (!zasData() && !loading()) {
+  <button (click)="load()" data-cy="btnLoadZasData" mat-stroked-button obButton="secondary" type="button">
+    <mat-icon svgIcon="eye"></mat-icon>
+    {{ "app.protected-verification-request-task.zas-data.load" | translate }}
+  </button>
+}
+
+@if (loading()) {
+  <mat-spinner diameter="24"></mat-spinner>
+}
+
+@if (error()) {
+  <ob-alert class="zas-data-error" type="error">
+    {{ "app.protected-verification-request-task.zas-data.error" | translate }}
+  </ob-alert>
+}
+
+@if (zasData(); as data) {
+  <div class="zas-data-header">
+    <h3>{{ "app.protected-verification-request-task.zas-data.title" | translate }}</h3>
+    <button
+      (click)="load()"
+      [disabled]="loading()"
+      data-cy="btnRefreshZasData"
+      mat-icon-button
+      obButton="secondary"
+      type="button"
+    >
+      <mat-icon svgIcon="refresh"></mat-icon>
+    </button>
+  </div>
+  <div class="ob-flex">
+    <div>
+      <small>{{ "app.protected-verification-request-task.zas-data.fields.businessId.label" | translate }}</small
+      ><br />
+      <span>{{ data.businessId }}</span>
+    </div>
+    <div>
+      <small>{{ "app.protected-verification-request-task.zas-data.fields.organisationName.label" | translate }}</small
+      ><br />
+      <span>{{ data.organisation?.name }}</span>
+    </div>
+    <div>
+      <small>{{ "app.protected-verification-request-task.zas-data.fields.status.label" | translate }}</small
+      ><br />
+      <span>{{ data.statusTranslation?.["de-CH"] || data.statusCode }}</span>
+    </div>
+    <div>
+      <small>{{ "app.protected-verification-request-task.zas-data.fields.activityDomain.label" | translate }}</small
+      ><br />
+      <span>{{ data.activityDomainTranslation?.["de-CH"] || data.activityDomainCode }}</span>
+    </div>
+    <div>
+      <small>{{
+        "app.protected-verification-request-task.zas-data.fields.commissionedOrganisationId.label" | translate
+      }}</small
+      ><br />
+      <span>{{ data.commissionedOrganisationId ?? "-" }}</span>
+    </div>
+  </div>
+}

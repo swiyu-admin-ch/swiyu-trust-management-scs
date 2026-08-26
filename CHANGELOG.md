@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.35.4
+
+### Added
+
+- Add approve/reject flow for protected verification request tasks, including ZAS data review
+
+## 3.35.3
+
+### Changed
+
+- Update ti-trust-onboarding-information-requested-event to 5.0.0.
+
+## 3.35.2
+
+### Added
+
+- Show the trust onboarding submission type (registration / profile change) as the task type in the trust onboarding task list column and filter (EID-6622)
+
 ## 3.35.1
 
 ### Changed

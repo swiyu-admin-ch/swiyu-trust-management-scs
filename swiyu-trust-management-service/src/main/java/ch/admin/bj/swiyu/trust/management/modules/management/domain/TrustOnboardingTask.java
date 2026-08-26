@@ -10,7 +10,6 @@ import lombok.*;
 @Entity
 @Getter
 @Table(name = "trust_onboarding_task")
-@DiscriminatorValue("ONBOARDING")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TrustOnboardingTask extends TrustTask {
 
@@ -28,10 +27,11 @@ public class TrustOnboardingTask extends TrustTask {
         UUID partnerId,
         Map<String, String> partnerName,
         UUID trustOnboardingSubmissionId,
+        TrustTaskType taskType,
         Instant dueAt,
         Instant submittedAt
     ) {
-        this(UUID.randomUUID(), partnerId, partnerName, trustOnboardingSubmissionId, dueAt, submittedAt);
+        this(UUID.randomUUID(), partnerId, partnerName, trustOnboardingSubmissionId, taskType, dueAt, submittedAt);
     }
 
     public TrustOnboardingTask(
@@ -39,10 +39,11 @@ public class TrustOnboardingTask extends TrustTask {
         UUID partnerId,
         Map<String, String> partnerName,
         UUID trustOnboardingSubmissionId,
+        TrustTaskType taskType,
         Instant dueAt,
         Instant submittedAt
     ) {
-        super(id, partnerId, partnerName, dueAt, submittedAt, TrustTaskType.ONBOARDING);
+        super(id, partnerId, partnerName, dueAt, submittedAt, taskType);
         this.trustOnboardingSubmissionId = trustOnboardingSubmissionId;
         this.timesResubmitted = 0;
     }

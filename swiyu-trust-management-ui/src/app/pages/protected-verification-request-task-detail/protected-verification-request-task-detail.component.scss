@@ -1,0 +1,26 @@
+.history-section {
+  margin-top: 1rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.decision-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  max-width: 32rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.decision-form-actions {
+  display: flex;
+  gap: 0.5rem;
+}

@@ -198,6 +198,8 @@ app:
     #* We have a max lifetime of rejection-enforcement-period for a task awaiting resubmission.
     #* The rejection-enforcement-check-cron MUST therefore be a fraction of the rejection-enforcement-period.
     rejection-enforcement-check-cron: "0 0 1 * * *" # once a day at 01:00
+  protected-verification-task:
+    due-date-period: 30 # 30 Days
   statement-defaults:
     time-to-live: P6M # 6 Months
     statuslist:

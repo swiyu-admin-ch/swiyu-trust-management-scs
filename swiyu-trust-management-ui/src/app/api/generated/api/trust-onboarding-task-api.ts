@@ -17,9 +17,15 @@ import {OpenApiHttpParams, QueryParamStyle} from '../query.params';
 // @ts-ignore
 import {AddInternalNoteTaskAction} from '../model/add-internal-note-task-action';
 // @ts-ignore
+import {ApproveProtectedVerificationRequestTaskAction} from '../model/approve-protected-verification-request-task-action';
+// @ts-ignore
 import {ApproveTaskAction} from '../model/approve-task-action';
 // @ts-ignore
 import {PagedModelTrustOnboardingTaskListItem} from '../model/paged-model-trust-onboarding-task-list-item';
+// @ts-ignore
+import {ProtectedVerificationRequestTask} from '../model/protected-verification-request-task';
+// @ts-ignore
+import {RejectProtectedVerificationRequestTaskAction} from '../model/reject-protected-verification-request-task-action';
 // @ts-ignore
 import {RejectTaskAction} from '../model/reject-task-action';
 // @ts-ignore
@@ -29,6 +35,8 @@ import {RequestMoreInformationTaskAction} from '../model/request-more-informatio
 import {TrustAddDidTask} from '../model/trust-add-did-task';
 // @ts-ignore
 import {TrustOnboardingTask} from '../model/trust-onboarding-task';
+// @ts-ignore
+import {ZasData} from '../model/zas-data';
 
 // @ts-ignore
 import {BaseService} from '../api.base.service';
@@ -45,11 +53,24 @@ export interface ApproveRequestParams {
   request: ApproveTaskAction;
 }
 
+export interface ApproveProtectedVerificationRequestRequestParams {
+  taskId: string;
+  request: ApproveProtectedVerificationRequestTaskAction;
+}
+
 export interface AssignSelfRequestParams {
   taskId: string;
 }
 
 export interface GetAddDidTaskRequestParams {
+  taskId: string;
+}
+
+export interface GetProtectedVerificationRequestTaskRequestParams {
+  taskId: string;
+}
+
+export interface GetProtectedVerificationRequestTaskZasDataRequestParams {
   taskId: string;
 }
 
@@ -73,9 +94,18 @@ export interface GetTasksRequestParams {
   sort?: Array<string>;
 }
 
+export interface MarkProtectedVerificationRequestTaskZasDataReviewedRequestParams {
+  taskId: string;
+}
+
 export interface RejectRequestParams {
   taskId: string;
   request: RejectTaskAction;
+}
+
+export interface RejectProtectedVerificationRequestRequestParams {
+  taskId: string;
+  request: RejectProtectedVerificationRequestTaskAction;
 }
 
 export interface RequestMoreInformationRequestParams {
@@ -286,6 +316,105 @@ export class TrustOnboardingTaskApi extends BaseService {
   }
 
   /**
+   * @endpoint post /ui-api/tasks/{taskId}/protected-verification-request/approve
+   * @param requestParameters
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public approveProtectedVerificationRequest(
+    requestParameters: ApproveProtectedVerificationRequestRequestParams,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any>;
+  public approveProtectedVerificationRequest(
+    requestParameters: ApproveProtectedVerificationRequestRequestParams,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpResponse<any>>;
+  public approveProtectedVerificationRequest(
+    requestParameters: ApproveProtectedVerificationRequestRequestParams,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpEvent<any>>;
+  public approveProtectedVerificationRequest(
+    requestParameters: ApproveProtectedVerificationRequestRequestParams,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any> {
+    const taskId = requestParameters?.taskId;
+    if (taskId === null || taskId === undefined) {
+      throw new Error(
+        'Required parameter taskId was null or undefined when calling approveProtectedVerificationRequest.'
+      );
+    }
+    const request = requestParameters?.request;
+    if (request === null || request === undefined) {
+      throw new Error(
+        'Required parameter request was null or undefined when calling approveProtectedVerificationRequest.'
+      );
+    }
+
+    let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'request',
+      <any>request,
+      QueryParamStyle.Form,
+      true
+    );
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (bearer-jwt) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'bearer-jwt',
+      'Authorization',
+      localVarHeaders,
+      'Bearer '
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/protected-verification-request/approve`;
+    const {basePath, withCredentials} = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      params: localVarQueryParameters.toHttpParams(),
+      responseType: <any>responseType_,
+      ...(withCredentials ? {withCredentials} : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? {transferCache: localVarTransferCache} : {}),
+      reportProgress: reportProgress
+    });
+  }
+
+  /**
    * @endpoint post /ui-api/tasks/{taskId}/assign/self
    * @param requestParameters
    * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -435,6 +564,170 @@ export class TrustOnboardingTaskApi extends BaseService {
     let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/add-did`;
     const {basePath, withCredentials} = this.configuration;
     return this.httpClient.request<TrustAddDidTask>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? {withCredentials} : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? {transferCache: localVarTransferCache} : {}),
+      reportProgress: reportProgress
+    });
+  }
+
+  /**
+   * @endpoint get /ui-api/tasks/{taskId}/protected-verification-request
+   * @param requestParameters
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public getProtectedVerificationRequestTask(
+    requestParameters: GetProtectedVerificationRequestTaskRequestParams,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<ProtectedVerificationRequestTask>;
+  public getProtectedVerificationRequestTask(
+    requestParameters: GetProtectedVerificationRequestTaskRequestParams,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpResponse<ProtectedVerificationRequestTask>>;
+  public getProtectedVerificationRequestTask(
+    requestParameters: GetProtectedVerificationRequestTaskRequestParams,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpEvent<ProtectedVerificationRequestTask>>;
+  public getProtectedVerificationRequestTask(
+    requestParameters: GetProtectedVerificationRequestTaskRequestParams,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any> {
+    const taskId = requestParameters?.taskId;
+    if (taskId === null || taskId === undefined) {
+      throw new Error(
+        'Required parameter taskId was null or undefined when calling getProtectedVerificationRequestTask.'
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (bearer-jwt) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'bearer-jwt',
+      'Authorization',
+      localVarHeaders,
+      'Bearer '
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/protected-verification-request`;
+    const {basePath, withCredentials} = this.configuration;
+    return this.httpClient.request<ProtectedVerificationRequestTask>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? {withCredentials} : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? {transferCache: localVarTransferCache} : {}),
+      reportProgress: reportProgress
+    });
+  }
+
+  /**
+   * @endpoint get /ui-api/tasks/{taskId}/protected-verification-request/zas-data
+   * @param requestParameters
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public getProtectedVerificationRequestTaskZasData(
+    requestParameters: GetProtectedVerificationRequestTaskZasDataRequestParams,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<ZasData>;
+  public getProtectedVerificationRequestTaskZasData(
+    requestParameters: GetProtectedVerificationRequestTaskZasDataRequestParams,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpResponse<ZasData>>;
+  public getProtectedVerificationRequestTaskZasData(
+    requestParameters: GetProtectedVerificationRequestTaskZasDataRequestParams,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpEvent<ZasData>>;
+  public getProtectedVerificationRequestTaskZasData(
+    requestParameters: GetProtectedVerificationRequestTaskZasDataRequestParams,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any> {
+    const taskId = requestParameters?.taskId;
+    if (taskId === null || taskId === undefined) {
+      throw new Error(
+        'Required parameter taskId was null or undefined when calling getProtectedVerificationRequestTaskZasData.'
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (bearer-jwt) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'bearer-jwt',
+      'Authorization',
+      localVarHeaders,
+      'Bearer '
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/protected-verification-request/zas-data`;
+    const {basePath, withCredentials} = this.configuration;
+    return this.httpClient.request<ZasData>('get', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,
       responseType: <any>responseType_,
       ...(withCredentials ? {withCredentials} : {}),
@@ -695,6 +988,88 @@ export class TrustOnboardingTaskApi extends BaseService {
   }
 
   /**
+   * @endpoint post /ui-api/tasks/{taskId}/protected-verification-request/zas-data/review
+   * @param requestParameters
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public markProtectedVerificationRequestTaskZasDataReviewed(
+    requestParameters: MarkProtectedVerificationRequestTaskZasDataReviewedRequestParams,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any>;
+  public markProtectedVerificationRequestTaskZasDataReviewed(
+    requestParameters: MarkProtectedVerificationRequestTaskZasDataReviewedRequestParams,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpResponse<any>>;
+  public markProtectedVerificationRequestTaskZasDataReviewed(
+    requestParameters: MarkProtectedVerificationRequestTaskZasDataReviewedRequestParams,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpEvent<any>>;
+  public markProtectedVerificationRequestTaskZasDataReviewed(
+    requestParameters: MarkProtectedVerificationRequestTaskZasDataReviewedRequestParams,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any> {
+    const taskId = requestParameters?.taskId;
+    if (taskId === null || taskId === undefined) {
+      throw new Error(
+        'Required parameter taskId was null or undefined when calling markProtectedVerificationRequestTaskZasDataReviewed.'
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (bearer-jwt) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'bearer-jwt',
+      'Authorization',
+      localVarHeaders,
+      'Bearer '
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/protected-verification-request/zas-data/review`;
+    const {basePath, withCredentials} = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? {withCredentials} : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? {transferCache: localVarTransferCache} : {}),
+      reportProgress: reportProgress
+    });
+  }
+
+  /**
    * @endpoint post /ui-api/tasks/{taskId}/reject
    * @param requestParameters
    * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -776,6 +1151,105 @@ export class TrustOnboardingTaskApi extends BaseService {
     }
 
     let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/reject`;
+    const {basePath, withCredentials} = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      params: localVarQueryParameters.toHttpParams(),
+      responseType: <any>responseType_,
+      ...(withCredentials ? {withCredentials} : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? {transferCache: localVarTransferCache} : {}),
+      reportProgress: reportProgress
+    });
+  }
+
+  /**
+   * @endpoint post /ui-api/tasks/{taskId}/protected-verification-request/reject
+   * @param requestParameters
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public rejectProtectedVerificationRequest(
+    requestParameters: RejectProtectedVerificationRequestRequestParams,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any>;
+  public rejectProtectedVerificationRequest(
+    requestParameters: RejectProtectedVerificationRequestRequestParams,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpResponse<any>>;
+  public rejectProtectedVerificationRequest(
+    requestParameters: RejectProtectedVerificationRequestRequestParams,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpEvent<any>>;
+  public rejectProtectedVerificationRequest(
+    requestParameters: RejectProtectedVerificationRequestRequestParams,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any> {
+    const taskId = requestParameters?.taskId;
+    if (taskId === null || taskId === undefined) {
+      throw new Error(
+        'Required parameter taskId was null or undefined when calling rejectProtectedVerificationRequest.'
+      );
+    }
+    const request = requestParameters?.request;
+    if (request === null || request === undefined) {
+      throw new Error(
+        'Required parameter request was null or undefined when calling rejectProtectedVerificationRequest.'
+      );
+    }
+
+    let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'request',
+      <any>request,
+      QueryParamStyle.Form,
+      true
+    );
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (bearer-jwt) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'bearer-jwt',
+      'Authorization',
+      localVarHeaders,
+      'Bearer '
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/protected-verification-request/reject`;
     const {basePath, withCredentials} = this.configuration;
     return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,

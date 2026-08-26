@@ -13,6 +13,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboarding
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskType;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
@@ -41,6 +42,19 @@ public class TrustOnboardingTaskMapper {
             task.getTaskType().name(),
             allowedActions
         );
+    }
+
+    /**
+     * Maps the core-business-service client's submission type enum to the local trust task type
+     * (a trust onboarding task's type is its submission subtype). The source is required (the CBS
+     * submission {@code type} is non-null), so there is no null case.
+     */
+    static TrustTaskType toTaskType(TrustOnboardingSubmissionTypeDto source) {
+        return switch (source) {
+            case REGISTRATION -> TrustTaskType.REGISTRATION;
+            case PROFILE_CHANGE -> TrustTaskType.PROFILE_CHANGE;
+            case RENEWAL -> TrustTaskType.RENEWAL;
+        };
     }
 
     public static TrustOnboardingTaskDto toTrustOnboardingTaskDto(

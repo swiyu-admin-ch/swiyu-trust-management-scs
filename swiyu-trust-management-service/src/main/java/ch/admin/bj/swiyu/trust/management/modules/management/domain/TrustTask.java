@@ -18,7 +18,6 @@ import org.springframework.data.jpa.domain.support.*;
 @Getter
 @Table(name = "trust_task")
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "task_type")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class TrustTask {
 
@@ -51,7 +50,8 @@ public abstract class TrustTask {
 
     private String assignee;
 
-    @Column(name = "task_type", insertable = false, updatable = false)
+    @NotNull
+    @Column(name = "task_type")
     @Enumerated(EnumType.STRING)
     private TrustTaskType taskType;
 
@@ -80,6 +80,14 @@ public abstract class TrustTask {
         this.dueAt = dueAt;
     }
 
+    public void approve() {
+        changeStatus(TrustTaskStatus.ACCEPTED);
+    }
+
+    public void reject() {
+        changeStatus(TrustTaskStatus.REJECTED);
+    }
+
     public void changeStatus(TrustTaskStatus newStatus) {
         validateNewStatus(this.status, newStatus);
         this.status = newStatus;
@@ -98,5 +106,6 @@ public abstract class TrustTask {
         this.dueAt = source.dueAt;
         this.submittedAt = source.submittedAt;
         this.status = source.status;
+        this.taskType = source.taskType;
     }
 }

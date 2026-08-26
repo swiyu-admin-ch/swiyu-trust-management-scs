@@ -12,6 +12,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementP
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskType;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingSubmissionEventProcessor;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementService;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
@@ -92,5 +93,6 @@ class TrustOnboardingSubmissionEventProcessorAutomaticApprovalEnabledIT {
         );
         assertThat(task).isNotNull();
         assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
+        assertThat(task.getTaskType()).isEqualTo(TrustTaskType.PROFILE_CHANGE);
     }
 }

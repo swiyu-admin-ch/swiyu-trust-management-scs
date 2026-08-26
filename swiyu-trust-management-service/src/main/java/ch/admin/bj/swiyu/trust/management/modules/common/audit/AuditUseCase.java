@@ -52,6 +52,24 @@ public enum AuditUseCase {
         "VC_SCHEMA_FILE",
         AuditEventType.CREATED,
         true
+    ),
+    PROTECTED_VERIFICATION_REQUEST_APPROVED(
+        "PROTECTED_VERIFICATION_REQUEST_APPROVED",
+        Category.TRUST_REGISTRY,
+        "PROTECTED_VERIFICATION_REQUEST_TASK",
+        "PROTECTED_VERIFICATION_REQUEST_ZAS_SNAPSHOT",
+        null,
+        AuditEventType.CREATED,
+        true
+    ),
+    PROTECTED_VERIFICATION_REQUEST_REJECTED(
+        "PROTECTED_VERIFICATION_REQUEST_REJECTED",
+        Category.TRUST_REGISTRY,
+        "PROTECTED_VERIFICATION_REQUEST_TASK",
+        "PROTECTED_VERIFICATION_REQUEST_ZAS_SNAPSHOT",
+        null,
+        AuditEventType.CREATED,
+        true
     );
 
     private final String name;

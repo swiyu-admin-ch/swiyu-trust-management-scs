@@ -22,9 +22,31 @@ public class DemoDataMapper {
             bp.id(),
             bp.names(),
             onboarding.submissionId(),
+            toTaskType(onboarding),
             onboarding.task().dueAt(),
             onboarding.task().submittedAt()
         );
+    }
+
+    public static ProtectedVerificationRequestTask toProtectedVerificationRequestTask(
+        DemoData.DemoBusinessPartner bp,
+        DemoData.DemoBusinessPartner.DemoProtectedVerificationSubmission submission
+    ) {
+        return new ProtectedVerificationRequestTask(
+            bp.id(),
+            bp.names(),
+            submission.submissionId(),
+            submission.task().dueAt(),
+            submission.task().submittedAt()
+        );
+    }
+
+    private static TrustTaskType toTaskType(DemoData.DemoBusinessPartner.DemoTrustOnboarding onboarding) {
+        return switch (onboarding.submissionType()) {
+            case REGISTRATION -> TrustTaskType.REGISTRATION;
+            case PROFILE_CHANGE -> TrustTaskType.PROFILE_CHANGE;
+            case RENEWAL -> TrustTaskType.RENEWAL;
+        };
     }
 
     public static BusinessPartnerIdentity toBusinessPartnerIdentity(DemoData.DemoBusinessPartner bp) {

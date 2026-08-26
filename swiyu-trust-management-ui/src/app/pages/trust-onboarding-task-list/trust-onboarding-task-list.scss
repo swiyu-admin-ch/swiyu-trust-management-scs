@@ -7,6 +7,18 @@
   margin-bottom: 1rem;
 }
 
+// Let the table scroll horizontally instead of cramming columns when there isn't
+// enough width for all of them (e.g. after adding the submission-type column).
+.task-table-container {
+  overflow-x: auto;
+}
+
+// Keep column headers on a single line so they aren't clipped by the fixed-height
+// header row when columns get narrow.
+.ob-table th {
+  white-space: nowrap;
+}
+
 .actions {
   display: flex;
   gap: 1em;

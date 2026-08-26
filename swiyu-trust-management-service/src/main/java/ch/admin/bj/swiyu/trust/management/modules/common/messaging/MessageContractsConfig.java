@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
         TiBusinessPartnerIdentityActivatedEvent.TypeRef.class,
         TiBusinessPartnerIdentityDeactivatedEvent.TypeRef.class,
         TiBusinessPartnerIdentityUpdatedEvent.TypeRef.class,
+        TiProtectedVerificationSubmissionAcceptedEvent.TypeRef.class,
     }
 )
 @JeapMessageProducerContracts(
@@ -30,6 +31,8 @@ import org.springframework.context.annotation.Configuration;
         TiBusinessPartnerIdentityActivatedEvent.TypeRef.class,
         TiBusinessPartnerIdentityDeactivatedEvent.TypeRef.class,
         TiBusinessPartnerIdentityUpdatedEvent.TypeRef.class,
+        TiProtectedVerificationSubmissionApprovedEvent.TypeRef.class,
+        TiProtectedVerificationSubmissionRejectedEvent.TypeRef.class,
     }
 )
 public class MessageContractsConfig {}

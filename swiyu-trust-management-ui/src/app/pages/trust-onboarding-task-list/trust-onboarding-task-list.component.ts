@@ -88,7 +88,7 @@ export class TrustOnboardingTaskListComponent implements AfterViewInit {
   pageIndex = 0;
   totalItems = 0;
   statuses = Object.values(TrustOnboardingTaskStatus);
-  taskTypes = ['ONBOARDING', 'ADD_DID'];
+  taskTypes = ['REGISTRATION', 'PROFILE_CHANGE', 'RENEWAL', 'ADD_DID', 'PROTECTED_VERIFICATION_REQUEST'];
 
   constructor() {
     this.meta.setTitle('app.menu.tasks');
@@ -120,6 +120,17 @@ export class TrustOnboardingTaskListComponent implements AfterViewInit {
 
   isOverdue(task: TrustOnboardingTaskListItem): boolean {
     return !!task.dueAt && new Date(task.dueAt) < new Date();
+  }
+
+  detailRoute(task: TrustOnboardingTaskListItem): string[] {
+    switch (task.taskType) {
+      case 'ADD_DID':
+        return ['/tasks', task.id, 'add-did'];
+      case 'PROTECTED_VERIFICATION_REQUEST':
+        return ['/tasks', task.id, 'protected-verification-request'];
+      default:
+        return ['/tasks', task.id];
+    }
   }
 
   assignSelf(task: TrustOnboardingTaskListItem) {

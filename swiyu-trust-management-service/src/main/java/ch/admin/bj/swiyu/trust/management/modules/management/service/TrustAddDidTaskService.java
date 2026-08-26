@@ -5,7 +5,6 @@ import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFo
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustAddDidTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTaskRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustAddDidSubmissionAcceptedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustAddDidSubmissionRejectedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
@@ -72,7 +71,7 @@ public class TrustAddDidTaskService {
         var task = trustAddDidTaskRepository
             .findById(taskId)
             .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
-        task.changeStatus(TrustTaskStatus.ACCEPTED);
+        task.approve();
         trustAddDidTaskRepository.save(task);
         outboxEventPublisher.publishTrustAddDidSubmissionAcceptedEvent(
             TiTrustAddDidSubmissionAcceptedEventBuilder.create()
@@ -87,7 +86,7 @@ public class TrustAddDidTaskService {
         var task = trustAddDidTaskRepository
             .findById(taskId)
             .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
-        task.changeStatus(TrustTaskStatus.REJECTED);
+        task.reject();
         trustAddDidTaskRepository.save(task);
         outboxEventPublisher.publishTrustAddDidSubmissionRejectedEvent(
             TiTrustAddDidSubmissionRejectedEventBuilder.create()

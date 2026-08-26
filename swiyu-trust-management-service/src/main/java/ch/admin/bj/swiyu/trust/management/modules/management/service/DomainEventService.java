@@ -139,6 +139,48 @@ public class DomainEventService {
     }
 
     @Transactional
+    public void protectedVerificationRequestReceived(UUID trustTaskId, String triggeredBy) {
+        domainEventLogRepository.save(
+            DomainEventLog.createTrustTaskDomainEventLog(
+                PROTECTED_VERIFICATION_REQUEST_RECEIVED,
+                triggeredBy,
+                trustTaskId
+            )
+        );
+    }
+
+    @Transactional
+    public void protectedVerificationRequestApproved(UUID trustTaskId, String triggeredBy, String internalNote) {
+        domainEventLogRepository.save(
+            DomainEventLog.createTrustTaskDomainEventLog(
+                PROTECTED_VERIFICATION_REQUEST_APPROVED,
+                triggeredBy,
+                trustTaskId,
+                null,
+                internalNote
+            )
+        );
+    }
+
+    @Transactional
+    public void protectedVerificationRequestRejected(
+        UUID trustTaskId,
+        String triggeredBy,
+        String rejectReason,
+        String internalNote
+    ) {
+        domainEventLogRepository.save(
+            DomainEventLog.createTrustTaskDomainEventLog(
+                PROTECTED_VERIFICATION_REQUEST_REJECTED,
+                triggeredBy,
+                trustTaskId,
+                rejectReason,
+                internalNote
+            )
+        );
+    }
+
+    @Transactional
     public void nonCompliantActorAdded(UUID nonCompliantActorId, String triggeredBy) {
         domainEventLogRepository.save(
             DomainEventLog.createNonCompliantActorDomainEventLog(

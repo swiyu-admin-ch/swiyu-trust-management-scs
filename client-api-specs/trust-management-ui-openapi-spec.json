@@ -760,6 +760,251 @@
           }
         }
       }
+    },
+    "/ui-api/tasks/{taskId}/protected-verification-request": {
+      "get": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "getProtectedVerificationRequestTask",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtectedVerificationRequestTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}/protected-verification-request/zas-data": {
+      "get": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "getProtectedVerificationRequestTaskZasData",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZasData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}/protected-verification-request/zas-data/review": {
+      "post": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "markProtectedVerificationRequestTaskZasDataReviewed",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}/protected-verification-request/approve": {
+      "post": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "approveProtectedVerificationRequest",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ApproveProtectedVerificationRequestTaskAction"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/ui-api/tasks/{taskId}/protected-verification-request/reject": {
+      "post": {
+        "tags": [
+          "TrustOnboardingTask"
+        ],
+        "operationId": "rejectProtectedVerificationRequest",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RejectProtectedVerificationRequestTaskAction"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleErrors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1435,6 +1680,189 @@
           "responseType",
           "scope",
           "useSilentRefresh"
+        ]
+      },
+      "ProtectedVerificationRequestTaskContactPerson": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "ProtectedVerificationRequestTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignee": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "$ref": "#/components/schemas/TrustOnboardingTaskStatus"
+          },
+          "partnerName": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "businessPartnerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "protectedVerificationSubmissionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "contactPerson": {
+            "$ref": "#/components/schemas/ProtectedVerificationRequestTaskContactPerson"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "sbnId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AuthorizableField"
+          },
+          "zasDataOpened": {
+            "type": "boolean"
+          },
+          "allowedActions": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/TrustOnboardingTaskAction"
+            }
+          }
+        },
+        "required": [
+          "allowedActions",
+          "category",
+          "id",
+          "partnerName",
+          "state",
+          "submittedAt",
+          "zasDataOpened"
+        ]
+      },
+      "AuthorizableField": {
+        "type": "string",
+        "enum": [
+          "AHV_NUMBER"
+        ]
+      },
+      "ZasDataOrganisation": {
+        "type": "object",
+        "properties": {
+          "canton": {
+            "type": "string"
+          },
+          "ide": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "streetName": {
+            "type": "string"
+          },
+          "streetNumber": {
+            "type": "string"
+          },
+          "poBox": {
+            "type": "string"
+          },
+          "npa": {
+            "type": "string"
+          },
+          "locality": {
+            "type": "string"
+          }
+        }
+      },
+      "ZasData": {
+        "type": "object",
+        "properties": {
+          "businessId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "organisation": {
+            "$ref": "#/components/schemas/ZasDataOrganisation"
+          },
+          "statusCode": {
+            "type": "string"
+          },
+          "statusTranslation": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "commissionedOrganisationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activityDomainCode": {
+            "type": "string"
+          },
+          "activityDomainTranslation": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApproveProtectedVerificationRequestTaskAction": {
+        "type": "object",
+        "properties": {
+          "internalNote": {
+            "type": "string"
+          }
+        }
+      },
+      "RejectProtectedVerificationRequestTaskAction": {
+        "type": "object",
+        "properties": {
+          "rejectReason": {
+            "type": "string"
+          },
+          "internalNote": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rejectReason"
         ]
       }
     },
