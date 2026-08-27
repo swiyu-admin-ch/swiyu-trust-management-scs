@@ -1951,6 +1951,9 @@
             "type": "string",
             "minLength": 1
           },
+          "correspondingLanguage": {
+            "$ref": "#/components/schemas/Language"
+          },
           "address": {
             "$ref": "#/components/schemas/Address"
           }

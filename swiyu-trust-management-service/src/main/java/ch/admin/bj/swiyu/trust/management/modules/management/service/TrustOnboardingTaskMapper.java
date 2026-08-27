@@ -76,7 +76,9 @@ public class TrustOnboardingTaskMapper {
             toAddressZipCodeCity(submission.getAddress()),
             toAddressCountry(submission.getAddress()),
             submission.getEntityEmail(),
-            toCorrespondanceLanguageDto(submission.getCorrespondingLanguage()),
+            toCorrespondanceLanguageDto(
+                submission.getContactPerson() == null ? null : submission.getContactPerson().getCorrespondingLanguage()
+            ),
             toContactDto(submission),
             toDidDto(submission.getProofOfPossessions()),
             allowedActions,

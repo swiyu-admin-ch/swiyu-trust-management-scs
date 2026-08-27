@@ -56,6 +56,25 @@ class TrustOnboardingTaskMapperTest {
     }
 
     @Test
+    void toTrustOnboardingTaskDtoTest_correspondingLanguageTakenFromContactPerson() {
+        // Given - EID-6618: the correspondence language must be read from contactPerson,
+        // not the deprecated top-level field. Set them to different values to prove the source.
+        var allowedActions = Set.of(TrustOnboardingTaskActionDto.APPROVE);
+        var submission = trustOnboardingSubmission();
+        submission.setCorrespondingLanguage(LanguageDto.DE);
+        submission.getContactPerson().setCorrespondingLanguage(LanguageDto.FR);
+        var task = trustOnboardingTask();
+
+        // When
+        var result = toTrustOnboardingTaskDto(allowedActions, task, submission);
+
+        // Then
+        assertThat(result.correspondenceLanguage()).isEqualTo(
+            ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskDto.LanguageDto.FR_CH
+        );
+    }
+
+    @Test
     void toTrustOnboardingTaskDtoTest_registryIdWithNullValue_shouldReturnNullUid() {
         // Given - reproduces bug: "uid" key is present but its value is null.
         var allowedActions = Set.of(TrustOnboardingTaskActionDto.APPROVE);

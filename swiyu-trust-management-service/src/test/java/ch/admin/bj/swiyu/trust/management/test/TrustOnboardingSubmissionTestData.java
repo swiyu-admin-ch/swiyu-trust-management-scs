@@ -29,7 +29,7 @@ public class TrustOnboardingSubmissionTestData {
         submission.setBusinessPartnerType(BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION);
         submission.setRegistryIds(Map.of("uid", "123456"));
         submission.setCorrespondingLanguage(correspondingLanguage);
-        submission.setContactPerson(contact());
+        submission.setContactPerson(contact(correspondingLanguage));
         submission.setProofOfPossessions(proofOfPossessions());
         submission.setPartnerId(UUID.randomUUID());
         submission.setStatus(TrustOnboardingSubmissionStatusDto.UNSUBMITTED);
@@ -66,13 +66,14 @@ public class TrustOnboardingSubmissionTestData {
         );
     }
 
-    private static @NotNull ContactDto contact() {
+    private static @NotNull ContactDto contact(LanguageDto correspondingLanguage) {
         var contact = new ContactDto();
         contact.setAddress(address());
         contact.setEmail("test@test.ch");
         contact.setFirstName("John");
         contact.setLastName("Doe");
         contact.setPhone("12345");
+        contact.setCorrespondingLanguage(correspondingLanguage);
         return contact;
     }
 
