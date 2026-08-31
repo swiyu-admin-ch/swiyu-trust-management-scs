@@ -52,16 +52,6 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
 
     private String token;
 
-    @BeforeEach
-    void init(@Autowired JwsBuilderFactory jwsBuilderFactory) {
-        token = buildJwsToken(
-            jwsBuilderFactory,
-            "swiyuServiceClient",
-            "swiyucorebusiness_@trust", // legacy role, will be removed in future
-            "ti_@trustonboardingsubmission_#read"
-        );
-    }
-
     @Pact(consumer = CONSUMER, provider = PROVIDER)
     private V4Pact pactGetTrustOnboardingSubmission(PactBuilder builder) {
         return builder
@@ -121,7 +111,7 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
                                         c.stringType("lastName", "Mustermann");
                                         c.stringType("email", "m.m@test.ch");
                                         c.stringType("phone", "+78 1234 56 78");
-                                        c.stringMatcher("correspondingLanguage", "^(EN|DE|FR|IT|RM)$", "DE");
+                                        c.nullValue("correspondingLanguage");
                                         o.object("address", a -> {
                                             a.stringType("street", "Musterstrasse 1");
                                             a.stringType("city", "8000 Zürich");
@@ -162,6 +152,16 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
                     )
             )
             .toPact();
+    }
+
+    @BeforeEach
+    void init(@Autowired JwsBuilderFactory jwsBuilderFactory) {
+        token = buildJwsToken(
+            jwsBuilderFactory,
+            "swiyuServiceClient",
+            "swiyucorebusiness_@trust", // legacy role, will be removed in future
+            "ti_@trustonboardingsubmission_#read"
+        );
     }
 
     @Test

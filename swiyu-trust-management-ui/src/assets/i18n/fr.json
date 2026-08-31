@@ -154,8 +154,8 @@
   "task.table.header.submittedAt": "Date de soumission",
   "task.table.header.taskType": "Type de tâche",
   "task.table.taskType.ADD_DID": "Ajout de DID",
-  "task.table.taskType.PROTECTED_VERIFICATION_REQUEST": "Demande de vérification protégée",
   "task.table.taskType.PROFILE_CHANGE": "Modification du profil",
+  "task.table.taskType.PROTECTED_VERIFICATION_REQUEST": "Demande de vérification protégée",
   "task.table.taskType.REGISTRATION": "Enregistrement",
   "task.table.taskType.RENEWAL": "Renouvellement"
 }

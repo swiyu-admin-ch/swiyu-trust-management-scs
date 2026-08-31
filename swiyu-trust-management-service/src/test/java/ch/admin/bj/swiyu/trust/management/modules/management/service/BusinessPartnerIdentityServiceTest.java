@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import ch.admin.bit.jeap.messaging.avro.security.AvroClassSecurity;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
@@ -24,6 +25,7 @@ import ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData;
 import java.time.Instant;
 import java.time.Period;
 import java.util.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,6 +67,11 @@ class BusinessPartnerIdentityServiceTest {
     private ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
 
     private BusinessPartnerIdentityService businessPartnerIdentityService;
+
+    @BeforeAll
+    static void installAvroClassWhitelist() {
+        AvroClassSecurity.installDefaultIfMissing();
+    }
 
     @BeforeEach
     void setUp() {

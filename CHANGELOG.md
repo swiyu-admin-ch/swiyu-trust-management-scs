@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.35.8
+
+### Changed
+
+- Allow for TrustOnboardingSubmission.contactPerson.correspondingLanguage to be null in PACT
+
+## 3.35.7
+
+### Changed
+
+- Updated jeap-spring-boot-parent -> 40.4.0
+
 ## 3.35.6
 
 ### Fixed
@@ -15,7 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Read trust onboarding correspondence language from `contactPerson.correspondingLanguage` instead of the deprecated submission-level field
+- Read trust onboarding correspondence language from `contactPerson.correspondingLanguage` instead of the deprecated
+  submission-level field
 - Override fast-uri to 3.1.6 to fix HIGH vulnerabilities pulled in transitively via @angular-devkit/build-angular
 
 ## 3.35.4
@@ -34,7 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Show the trust onboarding submission type (registration / profile change) as the task type in the trust onboarding task list column and filter (EID-6622)
+- Show the trust onboarding submission type (registration / profile change) as the task type in the trust onboarding
+  task list column and filter (EID-6622)
 
 ## 3.35.1
 

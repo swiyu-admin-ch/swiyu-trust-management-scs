@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.admin.bit.jeap.messaging.avro.security.AvroClassSecurity;
 import ch.admin.bj.swiyu.messagetype.ti.TiProtectedVerificationSubmissionApprovedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiProtectedVerificationSubmissionRejectedEvent;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionInternalApi;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,19 +74,6 @@ class ProtectedVerificationRequestTaskServiceTest {
 
     private ProtectedVerificationRequestTaskService service;
 
-    @BeforeEach
-    void setUp() {
-        service = new ProtectedVerificationRequestTaskService(
-            taskRepository,
-            protectedVerificationSubmissionApi,
-            usnApi,
-            businessPartnerIdentityService,
-            outboxEventPublisher,
-            domainEventService,
-            protectedVerificationTaskProperties
-        );
-    }
-
     private ProtectedVerificationRequestTask newTask() {
         return new ProtectedVerificationRequestTask(
             PARTNER_ID,
@@ -119,6 +108,24 @@ class ProtectedVerificationRequestTaskServiceTest {
             .organisation(new OrganisationDto().name("Acme AG").locality("Bern"))
             .status(new StatusDto().code("ACTIVE"))
             .activityDomain(null);
+    }
+
+    @BeforeAll
+    static void installAvroClassWhitelist() {
+        AvroClassSecurity.installDefaultIfMissing();
+    }
+
+    @BeforeEach
+    void setUp() {
+        service = new ProtectedVerificationRequestTaskService(
+            taskRepository,
+            protectedVerificationSubmissionApi,
+            usnApi,
+            businessPartnerIdentityService,
+            outboxEventPublisher,
+            domainEventService,
+            protectedVerificationTaskProperties
+        );
     }
 
     @Test

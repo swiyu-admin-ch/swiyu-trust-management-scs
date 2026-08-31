@@ -161,8 +161,8 @@
   "task.table.header.submittedAt": "Submission date",
   "task.table.header.taskType": "Task type",
   "task.table.taskType.ADD_DID": "Add DID",
-  "task.table.taskType.PROTECTED_VERIFICATION_REQUEST": "Protected verification request",
   "task.table.taskType.PROFILE_CHANGE": "Profile change",
+  "task.table.taskType.PROTECTED_VERIFICATION_REQUEST": "Protected verification request",
   "task.table.taskType.REGISTRATION": "Registration",
   "task.table.taskType.RENEWAL": "Renewal"
 }

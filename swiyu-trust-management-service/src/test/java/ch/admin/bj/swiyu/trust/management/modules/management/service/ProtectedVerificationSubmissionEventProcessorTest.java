@@ -5,7 +5,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
+import ch.admin.bit.jeap.messaging.avro.security.AvroClassSecurity;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +23,11 @@ class ProtectedVerificationSubmissionEventProcessorTest {
     private ProtectedVerificationRequestTaskService taskService;
 
     private ProtectedVerificationSubmissionEventProcessor processor;
+
+    @BeforeAll
+    static void installAvroClassWhitelist() {
+        AvroClassSecurity.installDefaultIfMissing();
+    }
 
     @BeforeEach
     void setUp() {
