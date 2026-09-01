@@ -9,6 +9,9 @@
  */
 import {ZasDataOrganisation} from './zas-data-organisation';
 
+/**
+ * Live snapshot of ZAS (Zentrale Ausgleichsstelle) SBN/USN data for a business
+ */
 export interface ZasData {
   businessId?: string;
   organisation?: ZasDataOrganisation;

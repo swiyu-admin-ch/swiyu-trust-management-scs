@@ -2,12 +2,12 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustAddDidTaskDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTask;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTaskRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustAddDidTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustAddDidSubmissionAcceptedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustAddDidSubmissionRejectedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTaskRepository;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class TrustAddDidTaskService {
             task.getAssignee(),
             task.getSubmittedAt(),
             task.getDueAt(),
-            TrustOnboardingTaskMapper.toTrustOnboardingTaskStatusDto(task.getStatus()),
+            TaskMapper.toTaskStatusDto(task.getStatus()),
             task.getPartnerName(),
             task.getPermissionDid(),
             task.getTrustAddDidSubmissionId()

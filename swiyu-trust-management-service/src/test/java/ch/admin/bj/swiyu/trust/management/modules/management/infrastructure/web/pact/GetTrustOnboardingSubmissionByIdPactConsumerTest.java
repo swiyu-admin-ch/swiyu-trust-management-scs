@@ -111,7 +111,6 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
                                         c.stringType("lastName", "Mustermann");
                                         c.stringType("email", "m.m@test.ch");
                                         c.stringType("phone", "+78 1234 56 78");
-                                        c.nullValue("correspondingLanguage");
                                         o.object("address", a -> {
                                             a.stringType("street", "Musterstrasse 1");
                                             a.stringType("city", "8000 Zürich");

@@ -5,7 +5,7 @@
     </ob-alert>
   </div>
 } @else if (task().id) {
-  @if (task().timesResubmitted > 1) {
+  @if (isTaskResubmittedMoreThanOnce()) {
     <ob-alert data-cy="taskResubmittedWarning" type="info">
       {{ "app.trust-onboarding-task.warning.additional-information" | translate }}
     </ob-alert>
@@ -20,13 +20,13 @@
         <mat-icon svgIcon="share"></mat-icon>
         <span>{{ "app.trust-onboarding-task.actions.share-link" | translate }}</span>
       </button>
-      @if (isActionAllowed(TrustOnboardingTaskAction.AddInternalNote)) {
+      @if (isActionAllowed(TaskAction.AddInternalNote)) {
         <button (click)="sidepanelService.addNote(task())" data-cy="btnTaskDetailMoreAddNote" mat-menu-item>
           <mat-icon svgIcon="file"></mat-icon>
           <span>{{ "app.trust-onboarding-task.actions.add-internal-note" | translate }}</span>
         </button>
       }
-      @if (isActionAllowed(TrustOnboardingTaskAction.AssignSelf)) {
+      @if (isActionAllowed(TaskAction.AssignSelf)) {
         <button (click)="assignSelf(task())" data-cy="btnTaskDetailMoreAssignToMe" mat-menu-item>
           <mat-icon svgIcon="person"></mat-icon>
           <span>{{ "app.trust-onboarding-task.actions.assign-self" | translate }}</span>
@@ -38,7 +38,7 @@
     <app-task-status-chip [status]="task().state"></app-task-status-chip>
     <button
       (click)="sidepanelService.approve(task())"
-      [disabled]="!isActionAllowed(TrustOnboardingTaskAction.Approve)"
+      [disabled]="!isActionAllowed(TaskAction.Approve)"
       data-cy="btnTaskApprove"
       mat-button
       obButton="primary"
@@ -49,7 +49,7 @@
     </button>
     <button
       (click)="sidepanelService.reject(task())"
-      [disabled]="!isActionAllowed(TrustOnboardingTaskAction.Reject)"
+      [disabled]="!isActionAllowed(TaskAction.Reject)"
       data-cy="btnTaskReject"
       mat-button
       obButton="secondary"
@@ -60,7 +60,7 @@
     </button>
     <button
       (click)="sidepanelService.requestMoreInformation(task())"
-      [disabled]="!isActionAllowed(TrustOnboardingTaskAction.RequestMoreInformation)"
+      [disabled]="!isActionAllowed(TaskAction.RequestMoreInformation)"
       data-cy="btnTaskAskMoreInfo"
       mat-button
       obButton="tertiary"

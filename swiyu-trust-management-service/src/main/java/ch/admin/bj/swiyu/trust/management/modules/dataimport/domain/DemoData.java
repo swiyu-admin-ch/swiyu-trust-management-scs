@@ -797,6 +797,10 @@ public class DemoData {
                 @NotNull Instant dueAt,
                 @NotNull Instant submittedAt
             ) {
+                public boolean isOpen() {
+                    return status == DemoTrustTaskStatus.OPENED;
+                }
+
                 public enum DemoTrustTaskStatus {
                     REJECTED,
                     ACCEPTED,

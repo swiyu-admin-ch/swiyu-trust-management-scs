@@ -64,8 +64,8 @@ class ProtectedVerificationAuthorizationControllerIT {
 
     @BeforeEach
     void setUp() {
-        repos.businessPartnerIdentityRepository.deleteAllInBatch();
-        repos.protectedVerificationRepository.deleteAllInBatch();
+        repos.businessPartnerIdentity.deleteAllInBatch();
+        repos.protectedVerification.deleteAllInBatch();
         repos.trustStatementPartnerLink.deleteAllInBatch();
     }
 
@@ -74,8 +74,8 @@ class ProtectedVerificationAuthorizationControllerIT {
     @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void addProtectedVerificationAuthorization() throws Exception {
         // Given
-        repos.businessPartnerIdentityRepository.flush();
-        var bpi = repos.businessPartnerIdentityRepository.save(newDefaultBusinessPartnerIdentity());
+        repos.businessPartnerIdentity.flush();
+        var bpi = repos.businessPartnerIdentity.save(newDefaultBusinessPartnerIdentity());
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -102,8 +102,8 @@ class ProtectedVerificationAuthorizationControllerIT {
     @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void deleteProtectedVerificationAuthorization() throws Exception {
         // Given
-        var bpi = repos.businessPartnerIdentityRepository.save(newDefaultBusinessPartnerIdentity());
-        var pva = repos.protectedVerificationRepository.save(
+        var bpi = repos.businessPartnerIdentity.save(newDefaultBusinessPartnerIdentity());
+        var pva = repos.protectedVerification.save(
             ProtectedVerificationAuthorizationTestData.defaultProtectedVerificationAuthorization(bpi.getId())
         );
 
@@ -115,7 +115,7 @@ class ProtectedVerificationAuthorizationControllerIT {
         // Then
         resultActions.andExpect(status().isNoContent());
 
-        await().untilAsserted(() -> assertThat(repos.protectedVerificationRepository.findAll()).isEmpty());
+        await().untilAsserted(() -> assertThat(repos.protectedVerification.findAll()).isEmpty());
 
         verifyBusinessPartnerIdentityUpdateEventIsEmitted(bpi.getId());
     }

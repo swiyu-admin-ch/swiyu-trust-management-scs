@@ -37,32 +37,29 @@ public class DomainEventLog {
     @NotNull
     private String triggeredBy;
 
-    private UUID trustTaskId;
+    private UUID taskId;
+
     private UUID nonCompliantActorId;
     private UUID protectedIssuanceEntryId;
-    private UUID businessPartnerIdentityId;
+    private UUID businessPartnerId;
     private UUID protectedIssuanceAuthorizationId;
     private String partnerNote;
     private String internalNote;
     private UUID protectedVerificationAuthorizationId;
 
-    public static DomainEventLog createTrustTaskDomainEventLog(
-        DomainEventType eventType,
-        String triggeredBy,
-        UUID trustTaskId
-    ) {
+    public static DomainEventLog createTaskDomainEventLog(DomainEventType eventType, String triggeredBy, UUID taskId) {
         var domainEventLog = new DomainEventLog();
         domainEventLog.eventType = eventType;
         domainEventLog.triggeredAt = Instant.now();
         domainEventLog.triggeredBy = triggeredBy;
-        domainEventLog.trustTaskId = trustTaskId;
+        domainEventLog.taskId = taskId;
         return domainEventLog;
     }
 
-    public static DomainEventLog createTrustTaskDomainEventLog(
+    public static DomainEventLog createTaskDomainEventLog(
         DomainEventType eventType,
         String triggeredBy,
-        UUID trustTaskId,
+        UUID taskId,
         String partnerNote,
         String internalNote
     ) {
@@ -70,7 +67,7 @@ public class DomainEventLog {
         domainEventLog.eventType = eventType;
         domainEventLog.triggeredAt = Instant.now();
         domainEventLog.triggeredBy = triggeredBy;
-        domainEventLog.trustTaskId = trustTaskId;
+        domainEventLog.taskId = taskId;
         domainEventLog.partnerNote = partnerNote;
         domainEventLog.internalNote = internalNote;
         return domainEventLog;
@@ -119,14 +116,14 @@ public class DomainEventLog {
         DomainEventType eventType,
         String triggeredBy,
         UUID protectedIssuanceAuthorizationId,
-        UUID businessPartnerIdentityId
+        UUID businessPartnerId
     ) {
         var domainEventLog = new DomainEventLog();
         domainEventLog.eventType = eventType;
         domainEventLog.triggeredAt = Instant.now();
         domainEventLog.triggeredBy = triggeredBy;
         domainEventLog.protectedIssuanceAuthorizationId = protectedIssuanceAuthorizationId;
-        domainEventLog.businessPartnerIdentityId = businessPartnerIdentityId;
+        domainEventLog.businessPartnerId = businessPartnerId;
         return domainEventLog;
     }
 }

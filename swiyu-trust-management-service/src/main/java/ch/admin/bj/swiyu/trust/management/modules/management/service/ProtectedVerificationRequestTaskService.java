@@ -1,9 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationRequestTaskMapper.toAuthorizableField;
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationRequestTaskMapper.toProtectedVerificationRequestTaskDto;
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationRequestTaskMapper.toZasDataDto;
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingTaskActionsResolver.resolvePossibleActions;
+import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.resolvePossibleActions;
+import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskMapper.*;
 
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionInternalApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationSubmissionDto;
@@ -13,17 +11,18 @@ import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSyste
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapUtil;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedVerificationAuthorizationRequestDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedVerificationRequestTaskDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ZasDataDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RejectProtectedVerificationRequestTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.ProtectedVerificationRequestTaskDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RejectProtectedVerificationRequestTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.ProtectedVerificationTaskProperties;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationRequestTask;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationRequestTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiProtectedVerificationSubmissionApprovedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiProtectedVerificationSubmissionRejectedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTaskRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Task;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -85,13 +84,7 @@ public class ProtectedVerificationRequestTaskService {
     public ProtectedVerificationRequestTaskDto getTask(UUID taskId, String currentUserFullName) {
         var task = getTaskOrThrow(taskId);
         var submission = fetchSubmission(task.getProtectedVerificationSubmissionId());
-        var allowedActions = resolvePossibleActions(
-            task.getStatus(),
-            task.getAssignee(),
-            currentUserFullName,
-            false,
-            task.hasOpenedZasData()
-        );
+        var allowedActions = resolvePossibleActions(task, currentUserFullName);
         return toProtectedVerificationRequestTaskDto(task, submission, allowedActions);
     }
 
@@ -120,7 +113,7 @@ public class ProtectedVerificationRequestTaskService {
     public void approve(UUID taskId, ApproveProtectedVerificationRequestTaskActionDto request, String triggeredBy) {
         log.info("Task {} is approved by {}", taskId, triggeredBy);
         var task = getTaskOrThrow(taskId);
-        requireActionAllowed(task, triggeredBy, TrustOnboardingTaskActionDto.APPROVE);
+        requireActionAllowed(task, triggeredBy, TaskActionDto.APPROVE);
         var submission = fetchSubmission(task.getProtectedVerificationSubmissionId());
 
         task.approve();
@@ -146,7 +139,7 @@ public class ProtectedVerificationRequestTaskService {
     public void reject(UUID taskId, RejectProtectedVerificationRequestTaskActionDto request, String triggeredBy) {
         log.info("Task {} is rejected by {}", taskId, triggeredBy);
         var task = getTaskOrThrow(taskId);
-        requireActionAllowed(task, triggeredBy, TrustOnboardingTaskActionDto.REJECT);
+        requireActionAllowed(task, triggeredBy, TaskActionDto.REJECT);
         rejectTask(task, triggeredBy, request.rejectReason(), request.internalNote());
     }
 
@@ -205,21 +198,11 @@ public class ProtectedVerificationRequestTaskService {
     }
 
     /**
-     * Validates the requested action against the same {@link TrustOnboardingTaskActionsResolver#resolvePossibleActions}
+     * Validates the requested action against the same {@link TaskActionsResolver#resolvePossibleActions(Task, String)}
      * result the UI uses to decide which actions to show, so the two never diverge.
      */
-    private void requireActionAllowed(
-        ProtectedVerificationRequestTask task,
-        String triggeredBy,
-        TrustOnboardingTaskActionDto action
-    ) {
-        var allowedActions = resolvePossibleActions(
-            task.getStatus(),
-            task.getAssignee(),
-            triggeredBy,
-            false,
-            task.hasOpenedZasData()
-        );
+    private void requireActionAllowed(ProtectedVerificationRequestTask task, String triggeredBy, TaskActionDto action) {
+        var allowedActions = resolvePossibleActions(task, triggeredBy);
         if (!allowedActions.contains(action)) {
             throw new IllegalArgumentException(
                 "Action %s is not allowed for task %s in its current state".formatted(action, task.getId())

@@ -61,10 +61,7 @@ class TrustOnboardingSubmissionEventProcessorIT {
         assertThat(output.getOut())
             .contains("Retrieve Trust Onboarding Submission Accepted Event with ID:")
             .contains(event.getPayload().getTrustOnboardingSubmissionId().toString());
-        verify(trustOnboardingTaskService).createOrResubmitTaskByTrustOnboardingSubmission(
-            trustOnboardingSubmission,
-            getCurrentUserName()
-        );
+        verify(trustOnboardingTaskService).createOrResubmitTask(trustOnboardingSubmission, getCurrentUserName());
         verifyNoMoreInteractions(trustOnboardingTaskService);
     }
 }

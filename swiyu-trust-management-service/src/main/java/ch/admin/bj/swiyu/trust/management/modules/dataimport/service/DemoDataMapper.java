@@ -2,6 +2,7 @@ package ch.admin.bj.swiyu.trust.management.modules.dataimport.service;
 
 import ch.admin.bj.swiyu.trust.management.modules.dataimport.domain.DemoData;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -17,15 +18,32 @@ public class DemoDataMapper {
         DemoData.DemoBusinessPartner bp,
         DemoData.DemoBusinessPartner.DemoTrustOnboarding onboarding
     ) {
-        return new TrustOnboardingTask(
-            onboarding.task().id(),
-            bp.id(),
-            bp.names(),
-            onboarding.submissionId(),
-            toTaskType(onboarding),
-            onboarding.task().dueAt(),
-            onboarding.task().submittedAt()
-        );
+        return switch (onboarding.submissionType()) {
+            case REGISTRATION -> TrustOnboardingTask.createRegistrationTask(
+                onboarding.task().id(),
+                bp.id(),
+                bp.names(),
+                onboarding.submissionId(),
+                onboarding.task().dueAt(),
+                onboarding.task().submittedAt()
+            );
+            case PROFILE_CHANGE -> TrustOnboardingTask.createProfileChangeTask(
+                onboarding.task().id(),
+                bp.id(),
+                bp.names(),
+                onboarding.submissionId(),
+                onboarding.task().dueAt(),
+                onboarding.task().submittedAt()
+            );
+            case RENEWAL -> TrustOnboardingTask.createRenewalTask(
+                onboarding.task().id(),
+                bp.id(),
+                bp.names(),
+                onboarding.submissionId(),
+                onboarding.task().dueAt(),
+                onboarding.task().submittedAt()
+            );
+        };
     }
 
     public static ProtectedVerificationRequestTask toProtectedVerificationRequestTask(
@@ -41,11 +59,11 @@ public class DemoDataMapper {
         );
     }
 
-    private static TrustTaskType toTaskType(DemoData.DemoBusinessPartner.DemoTrustOnboarding onboarding) {
+    private static TaskType toTaskType(DemoData.DemoBusinessPartner.DemoTrustOnboarding onboarding) {
         return switch (onboarding.submissionType()) {
-            case REGISTRATION -> TrustTaskType.REGISTRATION;
-            case PROFILE_CHANGE -> TrustTaskType.PROFILE_CHANGE;
-            case RENEWAL -> TrustTaskType.RENEWAL;
+            case REGISTRATION -> TaskType.REGISTRATION;
+            case PROFILE_CHANGE -> TaskType.PROFILE_CHANGE;
+            case RENEWAL -> TaskType.RENEWAL;
         };
     }
 
@@ -77,15 +95,15 @@ public class DemoDataMapper {
         );
     }
 
-    public static TrustTaskStatus toTrustTaskStatus(
+    public static TaskStatus toTaskStatus(
         DemoData.DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingTask.@NotNull DemoTrustTaskStatus status
     ) {
         return switch (status) {
-            case INFORMATION_REQUESTED -> TrustTaskStatus.INFORMATION_REQUESTED;
-            case OPENED -> TrustTaskStatus.OPENED;
-            case ACCEPTED -> TrustTaskStatus.ACCEPTED;
-            case REJECTED -> TrustTaskStatus.REJECTED;
-            case RESUBMITTED -> TrustTaskStatus.RESUBMITTED;
+            case INFORMATION_REQUESTED -> TaskStatus.INFORMATION_REQUESTED;
+            case OPENED -> TaskStatus.OPENED;
+            case ACCEPTED -> TaskStatus.ACCEPTED;
+            case REJECTED -> TaskStatus.REJECTED;
+            case RESUBMITTED -> TaskStatus.RESUBMITTED;
         };
     }
 

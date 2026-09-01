@@ -11,15 +11,15 @@ import {Contact} from './contact';
 import {Did} from './did';
 import {Language} from './language';
 import {PartnerType} from './partner-type';
-import {TrustOnboardingTaskAction} from './trust-onboarding-task-action';
-import {TrustOnboardingTaskStatus} from './trust-onboarding-task-status';
+import {TaskAction} from './task-action';
+import {TaskStatus} from './task-status';
 
 export interface TrustOnboardingTask {
   id: string;
   assignee?: string;
   submittedAt: string;
   dueAt: string;
-  state: TrustOnboardingTaskStatus;
+  state: TaskStatus;
   partnerType: PartnerType;
   uid?: string;
   isRegisteredInCommercialRegister?: boolean;
@@ -31,7 +31,7 @@ export interface TrustOnboardingTask {
   correspondenceLanguage: Language;
   contacts: Array<Contact>;
   dids: Array<Did>;
-  allowedActions: Set<TrustOnboardingTaskAction>;
-  timesResubmitted: number;
+  allowedActions: Set<TaskAction>;
+  timesResubmitted?: number;
 }
 export namespace TrustOnboardingTask {}

@@ -56,7 +56,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         TrustStatementPartnerLinkValidator.class,
         TrustRegistryService.class,
         TrustOnboardingTaskService.class,
-        TrustOnboardingTaskDomainService.class,
         StatusListServiceTestConfiguration.class,
         OutboxEventPublisher.class,
         MockAuditPublisherTestConfiguration.class,
@@ -112,11 +111,11 @@ class BusinessPartnerIdentityServiceIT {
     void setUp() {
         asyncTestConfig.waitForAsyncOperationsFinished();
         reset(outboxEventPublisher, auditPublisher);
-        repos.businessPartnerIdentityRepository.deleteAllInBatch();
-        repos.protectedVerificationRepository.deleteAllInBatch();
+        repos.businessPartnerIdentity.deleteAllInBatch();
+        repos.protectedVerification.deleteAllInBatch();
         repos.trustStatementPartnerLink.deleteAllInBatch();
         repos.domainEventLog.deleteAllInBatch();
-        repos.statementRepository.deleteAllInBatch();
+        repos.statement.deleteAllInBatch();
 
         // Default stubs for the external issuer service
         when(issuerClient.getStatusListUri()).thenReturn("https://issuer.example.com/status-list");
@@ -128,12 +127,12 @@ class BusinessPartnerIdentityServiceIT {
 
     @Test
     void activate_persistsAndEmitsEvent() {
-        var bpi = repos.businessPartnerIdentityRepository.save(
+        var bpi = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.DEACTIVATED)
         );
         repos.commit();
         businessPartnerIdentityService.activate(bpi.getId());
-        var persisted = repos.businessPartnerIdentityRepository.findById(bpi.getId()).orElseThrow();
+        var persisted = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
         assertThat(persisted.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
         var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityActivatedEvent.class);
         verify(outboxEventPublisher).publishBusinessPartnerIdentityActivatedEvent(captor.capture());
@@ -142,12 +141,12 @@ class BusinessPartnerIdentityServiceIT {
 
     @Test
     void deactivate_persistsAndEmitsEvent() {
-        var bpi = repos.businessPartnerIdentityRepository.save(
+        var bpi = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
         repos.commit();
         businessPartnerIdentityService.deactivate(bpi.getId());
-        var persisted = repos.businessPartnerIdentityRepository.findById(bpi.getId()).orElseThrow();
+        var persisted = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
         assertThat(persisted.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.DEACTIVATED);
         var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityDeactivatedEvent.class);
         verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(captor.capture());
@@ -156,7 +155,7 @@ class BusinessPartnerIdentityServiceIT {
 
     @Test
     void issueTrustStatements_createsStatementsAndUpdatesEntity() {
-        var bpi = repos.businessPartnerIdentityRepository.save(
+        var bpi = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
         // add a PVA
@@ -165,7 +164,7 @@ class BusinessPartnerIdentityServiceIT {
             bpi.getId(),
             ProtectedVerificationField.AHV_NUMBER
         );
-        repos.protectedVerificationRepository.save(pva);
+        repos.protectedVerification.save(pva);
         repos.commit();
         businessPartnerIdentityService.issueTrustStatements(bpi.getId());
         // three partner links should exist (V1, V2, PVA V2)
@@ -181,7 +180,7 @@ class BusinessPartnerIdentityServiceIT {
                 TrustStatementPartnerLinkType.TRUST_STATEMENT_PROTECTED_VERIFICATION_AUTHORIZATION_V2
             );
         // registry statements stored
-        var statements = repos.statementRepository.findAll();
+        var statements = repos.statement.findAll();
         assertThat(statements)
             .hasSize(2) // TRUST_STATEMENT_IDENTITY_V1 is not found in statements repository
             .extracting(Statement::getType)
@@ -189,20 +188,20 @@ class BusinessPartnerIdentityServiceIT {
                 ch.admin.bj.swiyu.trust.management.modules.registry.domain.StatementType.IDENTITY_TRUST_STATEMENT_V2,
                 ch.admin.bj.swiyu.trust.management.modules.registry.domain.StatementType.PROTECTED_VERIFICATION_AUTHORIZATION_TRUST_STATEMENT_V2
             );
-        var refreshed = repos.businessPartnerIdentityRepository.findById(bpi.getId()).orElseThrow();
+        var refreshed = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
         assertThat(refreshed.getLastIssuanceAt()).isCloseTo(Instant.now(), within(ofSeconds(2)));
     }
 
     @Test
     void addProtectedVerificationAuthorization_persistsAndEmitsEvents() {
-        var bpi = repos.businessPartnerIdentityRepository.save(
+        var bpi = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
         repos.commit();
         var request = new ProtectedVerificationAuthorizationRequestDto(bpi.getId(), AuthorizableFieldDto.AHV_NUMBER);
         var dto = businessPartnerIdentityService.addProtectedVerificationAuthorization(request);
         // persistence
-        var pvas = repos.protectedVerificationRepository.findAllByBusinessPartnerIdentityId(bpi.getId());
+        var pvas = repos.protectedVerification.findAllByBusinessPartnerIdentityId(bpi.getId());
         assertThat(pvas).hasSize(1);
         assertThat(pvas.getFirst().getProtectedVerificationField()).isEqualTo(ProtectedVerificationField.AHV_NUMBER);
         // domain event logged
@@ -219,10 +218,10 @@ class BusinessPartnerIdentityServiceIT {
 
     @Test
     void removeProtectedVerificationAuthorization_deletesAndEmitsUpdateEvent() {
-        var bpi = repos.businessPartnerIdentityRepository.save(
+        var bpi = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
-        var pva = repos.protectedVerificationRepository.save(
+        var pva = repos.protectedVerification.save(
             new ProtectedVerificationAuthorization(
                 UUID.randomUUID(),
                 bpi.getId(),
@@ -231,7 +230,7 @@ class BusinessPartnerIdentityServiceIT {
         );
         repos.commit();
         businessPartnerIdentityService.removeProtectedVerificationAuthorization(pva.getId());
-        var remaining = repos.protectedVerificationRepository.findAllByBusinessPartnerIdentityId(bpi.getId());
+        var remaining = repos.protectedVerification.findAllByBusinessPartnerIdentityId(bpi.getId());
         assertThat(remaining).isEmpty();
         var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityUpdatedEvent.class);
         verify(outboxEventPublisher).publishBusinessPartnerIdentityUpdatedEvent(captor.capture());
@@ -240,7 +239,7 @@ class BusinessPartnerIdentityServiceIT {
 
     @Test
     void sync_emitsUpdateEvent() {
-        var bpi = repos.businessPartnerIdentityRepository.save(
+        var bpi = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
         repos.commit();
@@ -252,10 +251,10 @@ class BusinessPartnerIdentityServiceIT {
 
     @Test
     void syncAll_emitsUpdateEvent() {
-        var bpi1 = repos.businessPartnerIdentityRepository.save(
+        var bpi1 = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
-        var bpi2 = repos.businessPartnerIdentityRepository.save(
+        var bpi2 = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
         repos.commit();
@@ -271,10 +270,10 @@ class BusinessPartnerIdentityServiceIT {
 
     @Test
     void getBusinessPartnerIdentities_filtersByCreatedBy() {
-        repos.businessPartnerIdentityRepository.save(
+        repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
-        repos.businessPartnerIdentityRepository.save(
+        repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
         repos.commit();

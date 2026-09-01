@@ -4,7 +4,8 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.api.*;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.*;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingSubmissionDocumentListItemDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
 import jakarta.servlet.http.*;
 import java.io.*;
 import java.net.*;
@@ -24,14 +25,15 @@ import org.springframework.web.client.*;
 public class TrustOnboardingSubmissionDocumentService {
 
     private final TrustOnboardingSubmissionApi trustOnboardingSubmissionApi;
-    private final TrustOnboardingTaskDomainService taskDomainService;
+    private final TrustOnboardingTaskRepository trustOnboardingTaskRepository;
     private final RestTemplate documentClient;
 
+    @Transactional(readOnly = true)
     public PagedModel<TrustOnboardingSubmissionDocumentListItemDto> getTrustOnboardingSubmissionDocuments(
         Pageable pageable,
         UUID taskId
     ) {
-        var task = taskDomainService.getTrustOnboardingTask(taskId);
+        var task = getTrustOnboardingTask(taskId);
 
         var sortParams = pageable
             .getSort()
@@ -71,7 +73,7 @@ public class TrustOnboardingSubmissionDocumentService {
 
     @Transactional(readOnly = true)
     public void getTrustOnboardingSubmissionDocument(UUID taskId, UUID documentId, HttpServletResponse response) {
-        var task = taskDomainService.getTrustOnboardingTask(taskId);
+        var task = getTrustOnboardingTask(taskId);
 
         var document = this.trustOnboardingSubmissionApi.getDocumentForTrustOnboarding(
             task.getTrustOnboardingSubmissionId(),
@@ -89,5 +91,11 @@ public class TrustOnboardingSubmissionDocumentService {
                 return null;
             });
         }
+    }
+
+    private TrustOnboardingTask getTrustOnboardingTask(UUID taskId) {
+        return trustOnboardingTaskRepository
+            .findById(taskId)
+            .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
     }
 }

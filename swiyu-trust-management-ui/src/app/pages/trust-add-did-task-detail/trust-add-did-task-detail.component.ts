@@ -5,7 +5,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {TranslatePipe} from '@ngx-translate/core';
 import {ObAlertComponent, ObButtonModule, ObColumnLayoutModule, ObDocumentMetaService} from '@oblique/oblique';
 import {filter, tap} from 'rxjs';
-import {TrustAddDidTask, TrustOnboardingTaskApi} from '../../api/generated';
+import {TaskApi, TrustAddDidTask} from '../../api/generated';
 import {LocalizeService} from '../../core/i18n/localize.service';
 import {LocalizePipe} from '../../core/i18n/localized-text.pipe';
 import {DomainEventListComponent} from '../../shared/domain-event-list/domain-event-list.component';
@@ -30,7 +30,7 @@ import {TaskStatusChipComponent} from '../../shared/task-status-chip/task-status
   ]
 })
 export class TrustAddDidTaskDetailComponent {
-  private readonly api = inject(TrustOnboardingTaskApi);
+  private readonly api = inject(TaskApi);
   private readonly metaService = inject(ObDocumentMetaService);
   private readonly localizeService = inject(LocalizeService);
 

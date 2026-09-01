@@ -4,19 +4,18 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ObDocumentMetaService, provideObliqueTestingConfiguration} from '@oblique/oblique';
 import {of} from 'rxjs';
 import {
-  AuthorizableField,
   DomainEventLogApi,
   ProtectedVerificationRequestTask,
-  TrustOnboardingTaskAction,
-  TrustOnboardingTaskApi,
-  TrustOnboardingTaskStatus
+  TaskAction,
+  TaskApi,
+  TaskStatus
 } from '../../api/generated';
 import {ProtectedVerificationRequestTaskDetailComponent} from './protected-verification-request-task-detail.component';
 
 describe('ProtectedVerificationRequestTaskDetailComponent', () => {
   let fixture: ComponentFixture<ProtectedVerificationRequestTaskDetailComponent>;
   let component: ProtectedVerificationRequestTaskDetailComponent;
-  let mockApi: jest.Mocked<TrustOnboardingTaskApi>;
+  let mockApi: jest.Mocked<TaskApi>;
   let mockDomainEventLogApi: jest.Mocked<DomainEventLogApi>;
   let mockObDocumentMetaService: jest.Mocked<ObDocumentMetaService>;
 
@@ -27,11 +26,12 @@ describe('ProtectedVerificationRequestTaskDetailComponent', () => {
       id: taskId,
       submittedAt: '2026-01-01T00:00:00Z',
       dueAt: '2026-02-01T00:00:00Z',
-      state: TrustOnboardingTaskStatus.Opened,
+      state: TaskStatus.Opened,
       partnerName: {default: 'Acme AG'},
-      category: AuthorizableField.AhvNumber,
+      category: ProtectedVerificationRequestTask.CategoryEnum.AhvNumber,
       zasDataOpened: false,
-      allowedActions: new Set([TrustOnboardingTaskAction.Approve, TrustOnboardingTaskAction.Reject]),
+      allowedActions: new Set([TaskAction.Approve, TaskAction.Reject]),
+      protectedVerificationSubmissionId: 'b4a92559-21cc-4ed0-8053-d3c78bb5b5cd',
       ...overrides
     };
   }
@@ -46,7 +46,7 @@ describe('ProtectedVerificationRequestTaskDetailComponent', () => {
       getProtectedVerificationRequestTaskZasData: jest.fn(),
       approveProtectedVerificationRequest: jest.fn(),
       rejectProtectedVerificationRequest: jest.fn()
-    } as unknown as jest.Mocked<TrustOnboardingTaskApi>;
+    } as unknown as jest.Mocked<TaskApi>;
 
     mockDomainEventLogApi = {
       getDomainEventLogs: jest.fn().mockReturnValue(of({content: [], page: {totalElements: 0}}))
@@ -58,7 +58,7 @@ describe('ProtectedVerificationRequestTaskDetailComponent', () => {
         provideZoneChangeDetection({eventCoalescing: true}),
         provideHttpClient(),
         provideObliqueTestingConfiguration(),
-        {provide: TrustOnboardingTaskApi, useValue: mockApi},
+        {provide: TaskApi, useValue: mockApi},
         {provide: DomainEventLogApi, useValue: mockDomainEventLogApi},
         {provide: ObDocumentMetaService, useValue: mockObDocumentMetaService}
       ]
@@ -99,13 +99,13 @@ describe('ProtectedVerificationRequestTaskDetailComponent', () => {
     fixture.componentRef.setInput('taskId', taskId);
     fixture.detectChanges();
 
-    expect(component.isActionAllowed(TrustOnboardingTaskAction.Approve)).toBe(false);
+    expect(component.isActionAllowed(TaskAction.Approve)).toBe(false);
 
     mockApi.getProtectedVerificationRequestTask.mockReturnValueOnce(
       of(
         getTestTask({
           zasDataOpened: true,
-          allowedActions: new Set([TrustOnboardingTaskAction.Approve, TrustOnboardingTaskAction.Reject])
+          allowedActions: new Set([TaskAction.Approve, TaskAction.Reject])
         })
       ) as never
     );
@@ -113,7 +113,7 @@ describe('ProtectedVerificationRequestTaskDetailComponent', () => {
     component.onZasDataOpened();
 
     expect(mockApi.getProtectedVerificationRequestTask).toHaveBeenCalledTimes(2);
-    expect(component.isActionAllowed(TrustOnboardingTaskAction.Approve)).toBe(true);
+    expect(component.isActionAllowed(TaskAction.Approve)).toBe(true);
   });
 
   it('should allow deciding immediately if the task already has zasDataOpened set by the backend', () => {

@@ -5,7 +5,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {TranslatePipe} from '@ngx-translate/core';
 import {ObAlertComponent, ObButtonModule} from '@oblique/oblique';
 import {finalize, map, switchMap, take} from 'rxjs';
-import {TrustOnboardingTaskApi, ZasData} from '../../../api/generated';
+import {TaskApi, ZasData} from '../../../api/generated';
 
 @Component({
   selector: 'app-zas-data-section',
@@ -15,7 +15,7 @@ import {TrustOnboardingTaskApi, ZasData} from '../../../api/generated';
   imports: [TranslatePipe, MatButtonModule, ObButtonModule, MatIconModule, MatProgressSpinnerModule, ObAlertComponent]
 })
 export class ZasDataSectionComponent {
-  private readonly api = inject(TrustOnboardingTaskApi);
+  private readonly api = inject(TaskApi);
 
   taskId = input.required<string>();
   opened = output<void>();

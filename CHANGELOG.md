@@ -2,8 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
+to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 3.35.9
+
+### Changed
+
+- various refactorings and alignments around the "task" entities
+
+## 3.35.9
+
+### Changed
+
+- Remove correspondingLanguage from contactPerson requirement in PACT test
 
 ## 3.35.8
 
@@ -1130,8 +1142,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Trust Statements from Trust Protocol V1 Spec are now
-  supported (see https://github.com/admin-ch-ssi/specifications-to-publish/blob/feat/EID-4989/trust-protocol-v1.0.md)
+- Trust Statements from Trust Protocol V1 Spec are now supported
+  (see https://github.com/admin-ch-ssi/specifications-to-publish/blob/feat/EID-4989/trust-protocol-v1.0.md)
 
 ## 2.1.4
 
@@ -1161,8 +1173,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Merged swiyu-registry-trust-authoring-service into this one (so API calls to former external service are replaced
-  by internal calls)
+- Merged swiyu-registry-trust-authoring-service into this one (so API calls to former external service are replaced by
+  internal calls)
 
 ## 2.0.9
 

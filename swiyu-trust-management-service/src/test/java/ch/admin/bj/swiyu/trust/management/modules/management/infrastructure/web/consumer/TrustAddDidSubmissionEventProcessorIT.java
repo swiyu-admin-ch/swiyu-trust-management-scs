@@ -15,6 +15,8 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.Trus
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.IssuerClient;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustAddDidSubmissionEventProcessor;
 import ch.admin.bj.swiyu.trust.management.test.*;
 import java.time.Instant;
@@ -150,7 +152,7 @@ class TrustAddDidSubmissionEventProcessorIT {
         var tasks = trustAddDidTaskRepository.findAll();
         assertThat(tasks).hasSize(1);
         var task = tasks.getFirst();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
         // Note: partnerId is null due to TrustStatementPartnerLink constructor not storing partnerId (pre-existing issue)
         assertThat(task.getPartnerName()).containsEntry("de-CH", "Test Partner DE");
         assertThat(task.getPermissionDid()).isEqualTo(permissionDid);
@@ -190,7 +192,7 @@ class TrustAddDidSubmissionEventProcessorIT {
         var tasks = trustAddDidTaskRepository.findAll();
         assertThat(tasks).hasSize(1);
         var task = tasks.getFirst();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.REJECTED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.REJECTED);
         assertThat(task.getPartnerId()).isNull();
 
         verify(issuerClient, never()).issueTrustStatement(any());
@@ -222,7 +224,7 @@ class TrustAddDidSubmissionEventProcessorIT {
         var tasks = trustAddDidTaskRepository.findAll();
         assertThat(tasks).hasSize(1);
         var task = tasks.getFirst();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.REJECTED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.REJECTED);
 
         verify(outboxEventPublisher).publishTrustAddDidSubmissionRejectedEvent(any());
         verify(outboxEventPublisher, never()).publishTrustAddDidSubmissionAcceptedEvent(any());

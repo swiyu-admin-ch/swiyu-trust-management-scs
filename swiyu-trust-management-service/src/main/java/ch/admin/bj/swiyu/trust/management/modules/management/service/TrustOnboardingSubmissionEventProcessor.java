@@ -8,7 +8,7 @@ import ch.admin.bj.swiyu.messagetype.ti.TiTrustOnboardingSubmissionAcceptedEvent
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.FunctionalityProperties;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +36,7 @@ public class TrustOnboardingSubmissionEventProcessor {
             var trustOnboardingSubmission = this.trustOnboardingSubmissionApi.getTrustOnboardingSubmission(
                 event.getPayload().getTrustOnboardingSubmissionId()
             );
-            var taskId = this.taskService.createOrResubmitTaskByTrustOnboardingSubmission(
-                trustOnboardingSubmission,
-                getCurrentUserName()
-            );
+            var taskId = this.taskService.createOrResubmitTask(trustOnboardingSubmission, getCurrentUserName());
             if (functionalityProperties.automaticApprovalEnabled()) {
                 this.taskService.approve(
                     taskId,

@@ -1,13 +1,13 @@
 import {provideHttpClient} from '@angular/common/http';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {of, throwError} from 'rxjs';
-import {TrustOnboardingTaskApi, ZasData} from '../../../api/generated';
+import {TaskApi, ZasData} from '../../../api/generated';
 import {ZasDataSectionComponent} from './zas-data-section.component';
 
 describe('ZasDataSectionComponent', () => {
   let fixture: ComponentFixture<ZasDataSectionComponent>;
   let component: ZasDataSectionComponent;
-  let mockApi: jest.Mocked<TrustOnboardingTaskApi>;
+  let mockApi: jest.Mocked<TaskApi>;
 
   const taskId = 'a4a92559-21cc-4ed0-8053-d3c78bb5b5cd';
 
@@ -19,11 +19,11 @@ describe('ZasDataSectionComponent', () => {
     mockApi = {
       getProtectedVerificationRequestTaskZasData: jest.fn(),
       markProtectedVerificationRequestTaskZasDataReviewed: jest.fn()
-    } as unknown as jest.Mocked<TrustOnboardingTaskApi>;
+    } as unknown as jest.Mocked<TaskApi>;
 
     await TestBed.configureTestingModule({
       imports: [ZasDataSectionComponent],
-      providers: [provideHttpClient(), {provide: TrustOnboardingTaskApi, useValue: mockApi}]
+      providers: [provideHttpClient(), {provide: TaskApi, useValue: mockApi}]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ZasDataSectionComponent);

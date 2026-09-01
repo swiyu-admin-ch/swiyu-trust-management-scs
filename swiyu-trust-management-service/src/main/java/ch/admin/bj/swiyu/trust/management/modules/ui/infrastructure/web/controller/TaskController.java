@@ -4,34 +4,30 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Ex
 import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR_OR_READER;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 
-import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedVerificationRequestTaskDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustAddDidTaskDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskListItemDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ZasDataDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.AddInternalNoteTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RejectProtectedVerificationRequestTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RejectTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RequestMoreInformationTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.*;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.AddInternalNoteTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RejectProtectedVerificationRequestTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RejectTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RequestMoreInformationTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationRequestTaskService;
+import ch.admin.bj.swiyu.trust.management.modules.management.service.TaskService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustAddDidTaskService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingTaskService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
 import org.springframework.data.web.SortDefault;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 @PreAuthorize("isAuthenticated()")
 public class TaskController {
 
+    private final TaskService taskService;
     private final TrustOnboardingTaskService trustOnboardingTaskService;
     private final TrustAddDidTaskService trustAddDidTaskService;
     private final ProtectedVerificationRequestTaskService protectedVerificationRequestTaskService;
@@ -50,36 +47,19 @@ public class TaskController {
     @GetMapping("/")
     @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @PageableAsQueryParam
-    public PagedModel<TrustOnboardingTaskListItemDto> getTasks(
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate submissionStartDate,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate submissionEndDate,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueStartDate,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueEndDate,
-        @RequestParam(required = false) List<String> state,
-        @RequestParam(required = false) String assignee,
-        @RequestParam(required = false) List<String> taskType,
+    public PagedModel<TaskListItemDto> getTasks(
+        @ParameterObject TaskFilterDto filter,
         @SortDefault(sort = "submittedAt", direction = Sort.Direction.DESC) @Parameter(
             hidden = true
         ) final Pageable pageable
     ) {
-        return new PagedModel<>(
-            trustOnboardingTaskService.getTasks(
-                pageable,
-                submissionStartDate,
-                submissionEndDate,
-                dueStartDate,
-                dueEndDate,
-                state,
-                assignee,
-                taskType
-            )
-        );
+        return new PagedModel<>(taskService.getTasks(pageable, filter, getCurrentUserFullName()));
     }
 
-    @GetMapping("/{taskId}")
+    @GetMapping("/{taskId}/trust-onboarding")
     @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
-    public TrustOnboardingTaskDto getTask(@PathVariable UUID taskId) {
-        return this.trustOnboardingTaskService.getTask(taskId);
+    public TrustOnboardingTaskDto getTrustOnboardingTask(@PathVariable UUID taskId) {
+        return this.trustOnboardingTaskService.getTask(taskId, getCurrentUserFullName());
     }
 
     @GetMapping("/{taskId}/add-did")
@@ -124,21 +104,21 @@ public class TaskController {
         this.protectedVerificationRequestTaskService.reject(taskId, request, getCurrentUserFullName());
     }
 
-    @PostMapping("/{taskId}/approve")
+    @PostMapping("/{taskId}/trust-onboarding/approve")
     @PreAuthorize(HAS_ROLE_EDITOR)
-    public void approve(@PathVariable UUID taskId, @NotNull ApproveTaskActionDto request) {
+    public void approveTrustOnboarding(@PathVariable UUID taskId, @NotNull ApproveTaskActionDto request) {
         this.trustOnboardingTaskService.approve(taskId, request, getCurrentUserFullName());
     }
 
-    @PostMapping("/{taskId}/reject")
+    @PostMapping("/{taskId}/trust-onboarding/reject")
     @PreAuthorize(HAS_ROLE_EDITOR)
-    public void reject(@PathVariable UUID taskId, @NotNull RejectTaskActionDto request) {
+    public void rejectTrustOnboarding(@PathVariable UUID taskId, @NotNull RejectTaskActionDto request) {
         this.trustOnboardingTaskService.reject(taskId, request, getCurrentUserFullName());
     }
 
-    @PostMapping("/{taskId}/request-more-information")
+    @PostMapping("/{taskId}/trust-onboarding/request-more-information")
     @PreAuthorize(HAS_ROLE_EDITOR)
-    public void requestMoreInformation(
+    public void requestMoreInformationForTrustOnboarding(
         @PathVariable UUID taskId,
         @NotNull RequestMoreInformationTaskActionDto request
     ) {
@@ -148,13 +128,13 @@ public class TaskController {
     @PostMapping("/{taskId}/add-internal-note")
     @PreAuthorize(HAS_ROLE_EDITOR)
     public void addInternalNote(@PathVariable @NotNull UUID taskId, @NotNull AddInternalNoteTaskActionDto request) {
-        this.trustOnboardingTaskService.addInternalNote(taskId, request.internalNote(), getCurrentUserFullName());
+        this.taskService.addInternalNote(taskId, request.internalNote(), getCurrentUserFullName());
     }
 
     @PostMapping("/{taskId}/assign/self")
     @PreAuthorize(HAS_ROLE_EDITOR)
     public void assignSelf(@PathVariable @NotNull UUID taskId) {
         var user = getCurrentUserFullName();
-        this.trustOnboardingTaskService.assign(taskId, user, user);
+        this.taskService.assign(taskId, user, user);
     }
 }

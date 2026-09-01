@@ -7,14 +7,14 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import {TrustOnboardingTaskStatus} from './trust-onboarding-task-status';
+import {TaskStatus} from './task-status';
 
 export interface TrustAddDidTask {
   id: string;
   assignee?: string;
   submittedAt: string;
   dueAt: string;
-  state: TrustOnboardingTaskStatus;
+  state: TaskStatus;
   partnerName: {[key: string]: string};
   permissionDid: string;
   trustAddDidSubmissionId: string;

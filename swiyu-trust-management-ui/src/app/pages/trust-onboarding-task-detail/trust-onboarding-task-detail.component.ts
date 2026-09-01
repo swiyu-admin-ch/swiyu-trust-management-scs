@@ -1,6 +1,6 @@
 import {Clipboard} from '@angular/cdk/clipboard';
 import {DatePipe, KeyValuePipe} from '@angular/common';
-import {Component, effect, inject, input, signal, ViewChild} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ViewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -30,12 +30,12 @@ import {catchError, filter, finalize, mergeMap, take, tap} from 'rxjs';
 import {
   Language,
   PageMetadata,
+  TaskAction,
+  TaskApi,
+  TaskStatus,
   TrustOnboardingDocumentApi,
   TrustOnboardingSubmissionDocumentListItemDto,
-  TrustOnboardingTask,
-  TrustOnboardingTaskAction,
-  TrustOnboardingTaskApi,
-  TrustOnboardingTaskStatus
+  TrustOnboardingTask
 } from '../../api/generated';
 import {ConcatI18nKey} from '../../core/format/concat-i18n-key';
 import {LocalizeService} from '../../core/i18n/localize.service';
@@ -73,7 +73,7 @@ import {TaskStatusChipComponent} from '../../shared/task-status-chip/task-status
   styleUrl: './trust-onboarding-task-detail.component.scss'
 })
 export class TrustOnboardingTaskDetailComponent {
-  private readonly api = inject(TrustOnboardingTaskApi);
+  private readonly api = inject(TaskApi);
   private readonly documentsApi = inject(TrustOnboardingDocumentApi);
   private readonly notificationService = inject(ObNotificationService);
   private readonly translateService = inject(TranslateService);
@@ -99,10 +99,14 @@ export class TrustOnboardingTaskDetailComponent {
   taskId = input.required<string>();
   task = signal({} as TrustOnboardingTask);
   notFoundError = signal(false);
+  isTaskResubmittedMoreThanOnce = computed(() => {
+    const resubmitted = this.task().timesResubmitted || 0;
+    return resubmitted > 1;
+  });
 
-  protected readonly TrustOnboardingTaskStatus = TrustOnboardingTaskStatus;
+  protected readonly TaskStatus = TaskStatus;
   protected readonly Language = Language;
-  protected readonly TrustOnboardingTaskAction = TrustOnboardingTaskAction;
+  protected readonly TaskAction = TaskAction;
 
   constructor() {
     this.sidepanelService.reload$.pipe(takeUntilDestroyed()).subscribe(() => {
@@ -128,7 +132,7 @@ export class TrustOnboardingTaskDetailComponent {
     this.clipboard.copy(link);
   }
 
-  isActionAllowed(action: TrustOnboardingTaskAction) {
+  isActionAllowed(action: TaskAction) {
     return Array.from(this.task().allowedActions.values() || []).includes(action);
   }
 
@@ -204,7 +208,7 @@ export class TrustOnboardingTaskDetailComponent {
 
   private loadTask() {
     this.api
-      .getTask({taskId: this.taskId()})
+      .getTrustOnboardingTask({taskId: this.taskId()})
       .pipe(
         filter(task => task != null),
         tap(task => {

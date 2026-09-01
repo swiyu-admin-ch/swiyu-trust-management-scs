@@ -1,7 +1,7 @@
 import {Component, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {TranslateService} from '@ngx-translate/core';
-import {TrustOnboardingTaskAction} from '../../../../api/generated';
+import {TaskAction} from '../../../../api/generated';
 import {PanelData, SidepanelService} from '../sidepanel.service';
 
 @Component({
@@ -23,15 +23,15 @@ export class SidepanelHeaderComponent {
     });
   }
 
-  private resolvePanelTitle(action?: TrustOnboardingTaskAction) {
+  private resolvePanelTitle(action?: TaskAction) {
     switch (action) {
-      case TrustOnboardingTaskAction.Approve:
+      case TaskAction.Approve:
         return this.translateService.instant('app.trust-onboarding-task.sidepanel.approve');
-      case TrustOnboardingTaskAction.Reject:
+      case TaskAction.Reject:
         return this.translateService.instant('app.trust-onboarding-task.sidepanel.reject');
-      case TrustOnboardingTaskAction.RequestMoreInformation:
+      case TaskAction.RequestMoreInformation:
         return this.translateService.instant('app.trust-onboarding-task.sidepanel.request-more-information');
-      case TrustOnboardingTaskAction.AddInternalNote:
+      case TaskAction.AddInternalNote:
         return this.translateService.instant('app.trust-onboarding-task.sidepanel.add-note');
       default:
         return this.translateService.instant('app.trust-onboarding-task.sidepanel.submit');

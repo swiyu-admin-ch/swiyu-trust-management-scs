@@ -2,7 +2,7 @@
   <form #form="ngForm" (ngSubmit)="submit(form)">
     <div class="sidepanel">
       <div class="sidepanel-container">
-        @if (panelData()?.action === TrustOnboardingTaskAction.Approve && !isProtectedVerificationTask()) {
+        @if (panelData()?.action === TaskAction.Approve && !isProtectedVerificationTask()) {
           <div>
             <h6>{{ "app.trust-onboarding-task.sidepanel.message" | translate }}</h6>
             <mat-form-field>
@@ -18,7 +18,7 @@
             </mat-form-field>
           </div>
         }
-        @if (panelData()?.action === TrustOnboardingTaskAction.Reject) {
+        @if (panelData()?.action === TaskAction.Reject) {
           <div>
             <h6>{{ "app.trust-onboarding-task.sidepanel.message" | translate }}</h6>
             @if (isProtectedVerificationTask()) {
@@ -64,7 +64,7 @@
             }
           </div>
         }
-        @if (panelData()?.action === TrustOnboardingTaskAction.RequestMoreInformation) {
+        @if (panelData()?.action === TaskAction.RequestMoreInformation) {
           <div>
             <ob-alert type="info">
               {{ "app.trust-onboarding-task.sidepanel.request-additional-information-warning" | translate }}

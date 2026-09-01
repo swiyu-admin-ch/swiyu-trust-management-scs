@@ -36,6 +36,14 @@ logging:
   level:
     ch.admin.bit.jeap: INFO
     ch.admin.bj.swiyu: DEBUG
+    io.confluent.kafka: ERROR
+    kafka.: ERROR
+    org.apache.kafka: ERROR
+    org.springframework.kafka: ERROR
+    ch.admin.bit.jeap.messaging.kafka: ERROR
+    org.springframework: WARN
+    org.flywaydb: WARN
+    org.hibernate: WARN
     # for transaction/sql logs set to TRACE / DEBUG
     org.hibernate.SQL: WARN
     org.hibernate.type.descriptor.sql.BasicBinder: WARN

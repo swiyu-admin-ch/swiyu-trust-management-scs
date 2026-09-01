@@ -11,8 +11,6 @@ public interface DomainEventLogRepository
     extends JpaRepository<DomainEventLog, UUID>, QuerydslPredicateExecutor<DomainEventLog>
 {
     @Modifying
-    @Query(
-        "DELETE FROM DomainEventLog d WHERE d.trustTaskId IN (SELECT t.id FROM TrustTask t WHERE t.partnerId = :partnerId)"
-    )
-    void deleteAllByTrustTaskPartnerId(@Param("partnerId") UUID partnerId);
+    @Query("DELETE FROM DomainEventLog d WHERE d.taskId IN (SELECT t.id FROM Task t WHERE t.partnerId = :partnerId)")
+    void deleteAllByTaskPartnerId(@Param("partnerId") UUID partnerId);
 }

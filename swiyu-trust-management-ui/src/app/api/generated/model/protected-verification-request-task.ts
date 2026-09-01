@@ -7,26 +7,30 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import {AuthorizableField} from './authorizable-field';
 import {ProtectedVerificationRequestTaskContactPerson} from './protected-verification-request-task-contact-person';
-import {TrustOnboardingTaskAction} from './trust-onboarding-task-action';
-import {TrustOnboardingTaskStatus} from './trust-onboarding-task-status';
+import {TaskAction} from './task-action';
+import {TaskStatus} from './task-status';
 
 export interface ProtectedVerificationRequestTask {
   id: string;
   assignee?: string;
   submittedAt: string;
   dueAt?: string;
-  state: TrustOnboardingTaskStatus;
+  state: TaskStatus;
   partnerName: {[key: string]: string};
   businessPartnerId?: string;
-  protectedVerificationSubmissionId?: string;
+  protectedVerificationSubmissionId: string;
   uid?: string;
   contactPerson?: ProtectedVerificationRequestTaskContactPerson;
   reason?: string;
   sbnId?: string;
-  category: AuthorizableField;
-  zasDataOpened: boolean;
-  allowedActions: Set<TrustOnboardingTaskAction>;
+  category: ProtectedVerificationRequestTask.CategoryEnum;
+  zasDataOpened?: boolean;
+  allowedActions: Set<TaskAction>;
 }
-export namespace ProtectedVerificationRequestTask {}
+export namespace ProtectedVerificationRequestTask {
+  export const CategoryEnum = {
+    AhvNumber: 'AHV_NUMBER'
+  } as const;
+  export type CategoryEnum = (typeof CategoryEnum)[keyof typeof CategoryEnum];
+}

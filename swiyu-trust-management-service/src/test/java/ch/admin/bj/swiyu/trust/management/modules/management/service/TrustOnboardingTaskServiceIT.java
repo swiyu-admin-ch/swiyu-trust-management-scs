@@ -10,18 +10,20 @@ import static org.mockito.Mockito.when;
 
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
-import ch.admin.bj.swiyu.trust.management.modules.common.exception.TrustOnboardingTaskStatusValidationException;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.TaskStatusValidationException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingRejectReasonDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RejectTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RequestMoreInformationTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskFilterDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RejectTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RequestMoreInformationTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.TrustOnboardingTaskProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusiness.IssuerTrustRootProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskType;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.JsonJwtDeserializer;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.TrustRegistryService;
 import ch.admin.bj.swiyu.trust.management.test.*;
@@ -36,7 +38,6 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,8 +52,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Import(
     {
         JwtStatementDomainService.class,
-        TrustOnboardingTaskDomainService.class,
         TrustOnboardingTaskService.class,
+        TaskService.class,
         DataJpaTestConfiguration.class,
         DataJpaTestKafkaConfiguration.class,
         TrustStatementService.class,
@@ -77,13 +78,10 @@ class TrustOnboardingTaskServiceIT {
     private TrustOnboardingTaskService trustOnboardingTaskService;
 
     @Autowired
-    private TrustOnboardingTaskRepository trustOnboardingTaskRepository;
+    private TaskService taskService;
 
     @Autowired
-    private DomainEventLogRepository domainEventLogRepository;
-
-    @Autowired
-    private TrustStatementPartnerLinkRepository trustStatementPartnerLinkRepository;
+    private TestRepositories repos;
 
     @Autowired
     private TrustStatementService trustStatementService;
@@ -97,9 +95,9 @@ class TrustOnboardingTaskServiceIT {
     @BeforeEach
     void setUp() {
         asyncTestConfig.waitForAsyncOperationsFinished();
-        domainEventLogRepository.deleteAllInBatch();
-        trustStatementPartnerLinkRepository.deleteAllInBatch();
-        trustOnboardingTaskRepository.deleteAllInBatch();
+        repos.domainEventLog.deleteAllInBatch();
+        repos.trustStatementPartnerLink.deleteAllInBatch();
+        repos.trustOnboardingTask.deleteAllInBatch();
     }
 
     @Test
@@ -109,18 +107,16 @@ class TrustOnboardingTaskServiceIT {
         var submission = trustOnboardingSubmissionDto();
 
         // when
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        this.trustOnboardingTaskService.createTask(submission, getCurrentUserName());
         commit();
 
         // then
-        var task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
-            submission.getId()
-        );
+        var task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
 
         assertThat(task).isNotNull();
         assertThat(task.getId()).isNotNull();
         assertThat(task.getTrustOnboardingSubmissionId()).isEqualTo(submission.getId());
-        assertThat(task.getTaskType()).isEqualTo(TrustTaskType.PROFILE_CHANGE);
+        assertThat(task.getTaskType()).isEqualTo(TaskType.PROFILE_CHANGE);
         assertThat(task.getPartnerName()).isEqualTo(submission.getName());
         Assertions.assertNotNull(submission.getCreatedAt());
         Assertions.assertNotNull(submission.getSubmittedAt());
@@ -137,12 +133,10 @@ class TrustOnboardingTaskServiceIT {
         // given
         var submission = trustOnboardingSubmissionDto();
         when(trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submission.getId())).thenReturn(submission);
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        this.trustOnboardingTaskService.createTask(submission, getCurrentUserName());
         commit();
 
-        var task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
-            submission.getId()
-        );
+        var task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
 
         // when
         trustOnboardingTaskService.approve(
@@ -152,11 +146,11 @@ class TrustOnboardingTaskServiceIT {
         );
 
         // then
-        task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
+        task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
         assertThat(task.getDueAt()).isNull();
 
-        var statements = trustStatementPartnerLinkRepository.findAll();
+        var statements = repos.trustStatementPartnerLink.findAll();
         assertThat(statements).hasSize(4);
         assertThat(
             statements.stream().filter(s -> s.getType() == TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V1)
@@ -181,12 +175,10 @@ class TrustOnboardingTaskServiceIT {
             )
         );
         when(trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submission.getId())).thenReturn(submission);
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        this.trustOnboardingTaskService.createTask(submission, getCurrentUserName());
         commit();
 
-        var task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
-            submission.getId()
-        );
+        var task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
 
         // when
         trustOnboardingTaskService.approve(
@@ -196,11 +188,11 @@ class TrustOnboardingTaskServiceIT {
         );
 
         // then
-        task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
+        task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
         assertThat(task.getDueAt()).isNull();
 
-        var statements = trustStatementPartnerLinkRepository.findAll();
+        var statements = repos.trustStatementPartnerLink.findAll();
         assertThat(statements).hasSize(6);
         assertThat(
             statements.stream().filter(s -> s.getType() == TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V1)
@@ -232,12 +224,10 @@ class TrustOnboardingTaskServiceIT {
     void reject() {
         // given
         var submission = trustOnboardingSubmissionDto();
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        this.trustOnboardingTaskService.createTask(submission, getCurrentUserName());
         commit();
 
-        var task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
-            submission.getId()
-        );
+        var task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
 
         // when
         trustOnboardingTaskService.reject(
@@ -247,60 +237,18 @@ class TrustOnboardingTaskServiceIT {
         );
 
         // then
-        task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.REJECTED);
+        task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.REJECTED);
         assertThat(task.getDueAt()).isNull();
-    }
-
-    @Test
-    void assign() {
-        // given
-        var submission = trustOnboardingSubmissionDto();
-        when(trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submission.getId())).thenReturn(submission);
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
-        commit();
-        var taskId = trustOnboardingTaskRepository
-            .getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId())
-            .getId();
-
-        // when
-        trustOnboardingTaskService.assign(taskId, "Timo Truster", "Tina Trusty");
-
-        // then
-        var task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
-            submission.getId()
-        );
-        assertThat(task.getAssignee()).isEqualTo("Timo Truster");
-    }
-
-    @Test
-    void addInternalNote() {
-        // given
-        var note = "This actor needs some more validation";
-        var triggeredBy = "Tina Trusty";
-        var submission = trustOnboardingSubmissionDto();
-        when(trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submission.getId())).thenReturn(submission);
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
-        commit();
-        var taskId = trustOnboardingTaskRepository
-            .getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId())
-            .getId();
-
-        // when
-        trustOnboardingTaskService.addInternalNote(taskId, note, triggeredBy);
-
-        // then
-        var event = domainEventLogRepository.findAll(Sort.by(Sort.Order.desc("triggeredAt"))).getFirst();
-        assertThat(event.getInternalNote()).isEqualTo(note);
     }
 
     @Test
     void requestMoreInformation() {
         // given
         var submission = trustOnboardingSubmissionDto();
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        this.trustOnboardingTaskService.createTask(submission, getCurrentUserName());
         commit();
-        var taskId = trustOnboardingTaskRepository
+        var taskId = repos.trustOnboardingTask
             .getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId())
             .getId();
 
@@ -312,10 +260,8 @@ class TrustOnboardingTaskServiceIT {
         );
 
         // then
-        var task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
-            submission.getId()
-        );
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.INFORMATION_REQUESTED);
+        var task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.INFORMATION_REQUESTED);
         assertThat(task.getDueAt()).isNull();
         assertThat(task.getRejectionEnforcedAt()).isCloseTo(
             Instant.now().plus(trustOnboardingTaskProperties.rejectionEnforcementPeriod()),
@@ -327,23 +273,23 @@ class TrustOnboardingTaskServiceIT {
     void requestMoreInformation_ResubmissionCapReached_Throws() {
         // given
         var submission = trustOnboardingSubmissionDto();
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        this.trustOnboardingTaskService.createTask(submission, getCurrentUserName());
         commit();
-        var taskId = trustOnboardingTaskRepository
+        var taskId = repos.trustOnboardingTask
             .getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId())
             .getId();
         var request = new RequestMoreInformationTaskActionDto("partner note", "internal note");
 
         // 1st round-trip
         trustOnboardingTaskService.requestMoreInformation(taskId, request, "Timo Truster");
-        trustOnboardingTaskService.createOrResubmitTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        trustOnboardingTaskService.createOrResubmitTask(submission, getCurrentUserName());
 
         // 2nd round-trip
         trustOnboardingTaskService.requestMoreInformation(taskId, request, "Timo Truster");
-        trustOnboardingTaskService.createOrResubmitTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        trustOnboardingTaskService.createOrResubmitTask(submission, getCurrentUserName());
 
         // when / then - 3rd request is blocked
-        assertThrows(TrustOnboardingTaskStatusValidationException.class, () ->
+        assertThrows(TaskStatusValidationException.class, () ->
             trustOnboardingTaskService.requestMoreInformation(taskId, request, "Timo Truster")
         );
     }
@@ -352,9 +298,9 @@ class TrustOnboardingTaskServiceIT {
     void createOrResubmitTaskByTrustOnboardingSubmission_ExistingTask_MarksResubmitted() {
         // given
         var submission = trustOnboardingSubmissionDto();
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        this.trustOnboardingTaskService.createTask(submission, getCurrentUserName());
         commit();
-        var taskId = trustOnboardingTaskRepository
+        var taskId = repos.trustOnboardingTask
             .getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId())
             .getId();
         trustOnboardingTaskService.requestMoreInformation(
@@ -364,17 +310,12 @@ class TrustOnboardingTaskServiceIT {
         );
 
         // when
-        var resultId = trustOnboardingTaskService.createOrResubmitTaskByTrustOnboardingSubmission(
-            submission,
-            getCurrentUserName()
-        );
+        var resultId = trustOnboardingTaskService.createOrResubmitTask(submission, getCurrentUserName());
 
         // then
         assertThat(resultId).isEqualTo(taskId);
-        var task = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
-            submission.getId()
-        );
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.RESUBMITTED);
+        var task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.RESUBMITTED);
         assertThat(task.getTimesResubmitted()).isEqualTo(1);
         assertThat(task.getRejectionEnforcedAt()).isNull();
         assertThat(task.getDueAt()).isNotNull();
@@ -385,21 +326,18 @@ class TrustOnboardingTaskServiceIT {
         // given: a task overdue (past its due date) while OPENED - must NOT be auto-rejected, only reviewers
         // acting on a REQUEST_MORE_INFORMATION deadline trigger auto-rejection
         var overdueOpenSubmission = trustOnboardingSubmissionDto();
-        trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(overdueOpenSubmission, getCurrentUserName());
+        trustOnboardingTaskService.createTask(overdueOpenSubmission, getCurrentUserName());
         commit();
-        var overdueOpenTask = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
+        var overdueOpenTask = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
             overdueOpenSubmission.getId()
         );
-        overdueOpenTask.setDueAt(Instant.now().minus(1, ChronoUnit.DAYS));
-        trustOnboardingTaskRepository.save(overdueOpenTask);
+        overdueOpenTask.overrideDueAt(Instant.now().minus(1, ChronoUnit.DAYS));
+        repos.trustOnboardingTask.save(overdueOpenTask);
 
         // given: a task overdue while INFORMATION_REQUESTED (past its rejection-enforcement deadline)
         var overdueInfoRequestedSubmission = trustOnboardingSubmissionDto();
-        trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(
-            overdueInfoRequestedSubmission,
-            getCurrentUserName()
-        );
-        var overdueInfoTaskId = trustOnboardingTaskRepository
+        trustOnboardingTaskService.createTask(overdueInfoRequestedSubmission, getCurrentUserName());
+        var overdueInfoTaskId = repos.trustOnboardingTask
             .getTrustOnboardingTaskByTrustOnboardingSubmissionId(overdueInfoRequestedSubmission.getId())
             .getId();
         trustOnboardingTaskService.requestMoreInformation(
@@ -407,61 +345,61 @@ class TrustOnboardingTaskServiceIT {
             new RequestMoreInformationTaskActionDto("partner note", "internal note"),
             "Timo Truster"
         );
-        var overdueInfoTask = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
+        var overdueInfoTask = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
             overdueInfoRequestedSubmission.getId()
         );
         overdueInfoTask.overrideRejectionEnforcedAt(Instant.now().minus(1, ChronoUnit.DAYS));
-        trustOnboardingTaskRepository.save(overdueInfoTask);
+        repos.trustOnboardingTask.save(overdueInfoTask);
 
         // given: a task that is not yet overdue
         var notOverdueSubmission = trustOnboardingSubmissionDto();
-        trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(notOverdueSubmission, getCurrentUserName());
-        var notOverdueTask = trustOnboardingTaskRepository.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
+        trustOnboardingTaskService.createTask(notOverdueSubmission, getCurrentUserName());
+        var notOverdueTask = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(
             notOverdueSubmission.getId()
         );
-        notOverdueTask.setDueAt(Instant.now().plus(30, ChronoUnit.DAYS));
-        trustOnboardingTaskRepository.save(notOverdueTask);
+        notOverdueTask.overrideDueAt(Instant.now().plus(30, ChronoUnit.DAYS));
+        repos.trustOnboardingTask.save(notOverdueTask);
 
         // when
         trustOnboardingTaskService.rejectTasksPastRejectionEnforcementDeadline();
 
         // then
         assertThat(
-            trustOnboardingTaskRepository
+            repos.trustOnboardingTask
                 .getTrustOnboardingTaskByTrustOnboardingSubmissionId(overdueOpenSubmission.getId())
                 .getStatus()
-        ).isEqualTo(TrustTaskStatus.OPENED);
+        ).isEqualTo(TaskStatus.OPENED);
         assertThat(
-            trustOnboardingTaskRepository
+            repos.trustOnboardingTask
                 .getTrustOnboardingTaskByTrustOnboardingSubmissionId(overdueInfoRequestedSubmission.getId())
                 .getStatus()
-        ).isEqualTo(TrustTaskStatus.REJECTED);
+        ).isEqualTo(TaskStatus.REJECTED);
         assertThat(
-            trustOnboardingTaskRepository
+            repos.trustOnboardingTask
                 .getTrustOnboardingTaskByTrustOnboardingSubmissionId(notOverdueSubmission.getId())
                 .getStatus()
-        ).isEqualTo(TrustTaskStatus.OPENED);
+        ).isEqualTo(TaskStatus.OPENED);
     }
 
     @Test
     void getTasks_ResubmissionCapReached_ExcludesRequestMoreInformationAction() {
         // given
         var submission = trustOnboardingSubmissionDto();
-        this.trustOnboardingTaskService.createTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        this.trustOnboardingTaskService.createTask(submission, getCurrentUserName());
         commit();
-        var taskId = trustOnboardingTaskRepository
+        var taskId = repos.trustOnboardingTask
             .getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId())
             .getId();
         var request = new RequestMoreInformationTaskActionDto("partner note", "internal note");
 
         // 1st and 2nd round-trip -> resubmission cap reached
         trustOnboardingTaskService.requestMoreInformation(taskId, request, "Timo Truster");
-        trustOnboardingTaskService.createOrResubmitTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
+        trustOnboardingTaskService.createOrResubmitTask(submission, getCurrentUserName());
         trustOnboardingTaskService.requestMoreInformation(taskId, request, "Timo Truster");
-        trustOnboardingTaskService.createOrResubmitTaskByTrustOnboardingSubmission(submission, getCurrentUserName());
-
+        trustOnboardingTaskService.createOrResubmitTask(submission, getCurrentUserName());
+        var filter = new TaskFilterDto(null, null, null, null, null, null, null);
         // when
-        var page = trustOnboardingTaskService.getTasks(PageRequest.of(0, 50), null, null, null, null, null, null, null);
+        var page = taskService.getTasks(PageRequest.of(0, 50), filter, "test user");
 
         // then
         var item = page
@@ -470,6 +408,6 @@ class TrustOnboardingTaskServiceIT {
             .filter(t -> t.id().equals(taskId))
             .findFirst()
             .orElseThrow();
-        assertThat(item.allowedActions()).doesNotContain(TrustOnboardingTaskActionDto.REQUEST_MORE_INFORMATION);
+        assertThat(item.allowedActions()).doesNotContain(TaskActionDto.REQUEST_MORE_INFORMATION);
     }
 }

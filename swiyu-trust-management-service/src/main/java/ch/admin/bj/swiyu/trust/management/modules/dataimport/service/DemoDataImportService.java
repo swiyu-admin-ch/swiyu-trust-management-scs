@@ -6,6 +6,9 @@ import ch.admin.bj.swiyu.trust.management.modules.common.security.SystemUserAuth
 import ch.admin.bj.swiyu.trust.management.modules.dataimport.domain.DemoData;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTaskRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.DomainEventService;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +45,7 @@ public class DemoDataImportService {
     public void deleteTrustOnboardingTasks() {
         log.debug("Delete demo business partner onboarding tasks ...");
         for (var demoCase : DemoData.DemoCase.values()) {
-            domainEventLogRepository.deleteAllByTrustTaskPartnerId(demoCase.bp.id());
+            domainEventLogRepository.deleteAllByTaskPartnerId(demoCase.bp.id());
             trustOnboardingTaskRepository.deleteAllByPartnerId(demoCase.bp.id());
         }
     }
@@ -189,11 +192,18 @@ public class DemoDataImportService {
                 .forEach(onboarding -> {
                     if (onboarding.task() != null) {
                         var task = DemoDataMapper.toTrustOnboardingTask(demoCase.bp, onboarding);
-                        if (
-                            onboarding.task().status() !=
-                            DemoData.DemoBusinessPartner.DemoTrustOnboarding.DemoTrustOnboardingTask.DemoTrustTaskStatus.OPENED
-                        ) {
-                            task.changeStatus(DemoDataMapper.toTrustTaskStatus(onboarding.task().status()));
+                        if (!onboarding.task().isOpen()) {
+                            switch (onboarding.task().status()) {
+                                case ACCEPTED -> task.approve();
+                                case REJECTED -> task.reject();
+                                case INFORMATION_REQUESTED -> task.requestMoreInformation(
+                                    task.getRejectionEnforcedAt()
+                                );
+                                case RESUBMITTED -> task.resubmit(task.getDueAt());
+                                case OPENED -> {
+                                    // Nothing to do, that's the status right after construction
+                                }
+                            }
                         }
                         data.add(task);
                     }
@@ -204,7 +214,7 @@ public class DemoDataImportService {
             var optDbEntity = trustOnboardingTaskRepository.findById(d.getId());
             if (optDbEntity.isPresent()) {
                 var dbEntity = optDbEntity.get();
-                dbEntity.overwriteFrom(d);
+                dbEntity.overwriteForDemoData(d);
                 trustOnboardingTaskRepository.saveAndFlush(dbEntity);
             } else {
                 var newTask = trustOnboardingTaskRepository.save(d);

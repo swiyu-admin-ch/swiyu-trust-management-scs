@@ -9,10 +9,7 @@ import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.messagetype.ti.TiTrustOnboardingSucceededEvent;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementPartnerLinkDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTask;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTaskRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskType;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingSubmissionEventProcessor;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementService;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
@@ -92,7 +89,7 @@ class TrustOnboardingSubmissionEventProcessorAutomaticApprovalEnabledIT {
             trustOnboardingSubmission.getId()
         );
         assertThat(task).isNotNull();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
-        assertThat(task.getTaskType()).isEqualTo(TrustTaskType.PROFILE_CHANGE);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
+        assertThat(task.getTaskType()).isEqualTo(TaskType.PROFILE_CHANGE);
     }
 }

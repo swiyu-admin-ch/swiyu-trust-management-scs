@@ -16,7 +16,7 @@ import ch.admin.bj.swiyu.trust.client.zas.sbn.model.OrganisationDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.StatusDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.UsnDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.UsnPageDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.DefaultIdentityProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.ProtectedVerificationTaskProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
@@ -25,14 +25,14 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPart
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.JwtStatementDomainService;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationField;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationRequestTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkValidator;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusiness.IssuerTrustRootProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventType;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTaskRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.StatementRepository;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.JsonJwtDeserializer;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.TrustRegistryService;
@@ -144,12 +144,12 @@ class ProtectedVerificationRequestTaskServiceIT {
         var task = taskRepository.findById(taskId).orElseThrow();
         assertThat(task.getPartnerId()).isEqualTo(PARTNER_ID);
         assertThat(task.getProtectedVerificationSubmissionId()).isEqualTo(SUBMISSION_ID);
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.OPENED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.OPENED);
 
         var event = domainEventLogRepository
             .findAll()
             .stream()
-            .filter(e -> taskId.equals(e.getTrustTaskId()))
+            .filter(e -> taskId.equals(e.getTaskId()))
             .findFirst()
             .orElseThrow();
         assertThat(event.getEventType()).isEqualTo(DomainEventType.PROTECTED_VERIFICATION_REQUEST_RECEIVED);
@@ -171,7 +171,7 @@ class ProtectedVerificationRequestTaskServiceIT {
 
         // then
         var task = taskRepository.findById(taskId).orElseThrow();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
 
         // The authorization is persisted synchronously; actual trust statement issuance for the partner's trusted
         // DIDs happens asynchronously afterward, triggered by the BusinessPartnerIdentity-updated event below -
@@ -191,7 +191,7 @@ class ProtectedVerificationRequestTaskServiceIT {
             .stream()
             .filter(
                 e ->
-                    taskId.equals(e.getTrustTaskId()) &&
+                    taskId.equals(e.getTaskId()) &&
                     e.getEventType() == DomainEventType.PROTECTED_VERIFICATION_REQUEST_APPROVED
             )
             .findFirst()
@@ -213,7 +213,7 @@ class ProtectedVerificationRequestTaskServiceIT {
 
         // then
         var task = taskRepository.findById(taskId).orElseThrow();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.REJECTED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.REJECTED);
 
         verify(outboxEventPublisher).publishProtectedVerificationSubmissionRejectedEvent(any());
 
@@ -222,7 +222,7 @@ class ProtectedVerificationRequestTaskServiceIT {
             .stream()
             .filter(
                 e ->
-                    taskId.equals(e.getTrustTaskId()) &&
+                    taskId.equals(e.getTaskId()) &&
                     e.getEventType() == DomainEventType.PROTECTED_VERIFICATION_REQUEST_REJECTED
             )
             .findFirst()

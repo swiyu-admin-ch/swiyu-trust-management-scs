@@ -1,15 +1,15 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static ch.admin.bj.swiyu.trust.management.modules.management.api.DomainEventTypeDto.*;
+import static ch.admin.bj.swiyu.trust.management.test.TaskTestData.trustOnboardingTask;
 import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData.trustAddDidTask;
-import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData.trustOnboardingTask;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTask;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTaskRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTask;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTaskRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
 import org.junit.jupiter.api.BeforeEach;
@@ -120,11 +120,11 @@ class DomainEventServiceIT {
     @Test
     void trustOnboardingSubmissionTaskNoteAdded() {
         // when
-        domainEventService.trustOnboardingSubmissionTaskNoteAdded(task.getId(), "test-user", "internal note");
+        domainEventService.taskNoteAdded(task.getId(), "test-user", "internal note");
         // then
         var events = domainEventService.getDomainEventLogs(task.getId(), Pageable.unpaged());
         assertThat(events.getTotalElements()).isEqualTo(1);
-        assertThat(events.getContent().getFirst().eventType()).isEqualTo(TRUST_ONBOARDING_TASK_NOTE_ADDED);
+        assertThat(events.getContent().getFirst().eventType()).isEqualTo(TASK_NOTE_ADDED);
         assertThat(events.getContent().getFirst().triggeredBy()).isEqualTo("test-user");
         assertThat(events.getContent().getFirst().internalNote()).isEqualTo("internal note");
     }

@@ -5,8 +5,8 @@ import static org.mockito.Mockito.*;
 
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustOnboardingTaskRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingSubmissionEventProcessor;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
 import ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData;
@@ -66,6 +66,6 @@ class TrustOnboardingSubmissionEventProcessorAutomaticApprovalDisabledIT {
             trustOnboardingSubmission.getId()
         );
         assertThat(task).isNotNull();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.OPENED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.OPENED);
     }
 }

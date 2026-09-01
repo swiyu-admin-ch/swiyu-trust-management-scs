@@ -13,18 +13,18 @@ import {
   Language,
   PagedModelTrustOnboardingSubmissionDocumentListItemDto,
   PartnerType,
+  TaskAction,
+  TaskApi,
+  TaskStatus,
   TrustOnboardingDocumentApi,
-  TrustOnboardingTask,
-  TrustOnboardingTaskAction,
-  TrustOnboardingTaskApi,
-  TrustOnboardingTaskStatus
+  TrustOnboardingTask
 } from '../../api/generated';
 import {TrustOnboardingTaskDetailComponent} from './trust-onboarding-task-detail.component';
 
 describe('TrustOnboardingTaskComponent', () => {
   let fixture: ComponentFixture<TrustOnboardingTaskDetailComponent>;
   let component: TrustOnboardingTaskDetailComponent;
-  let mockApi: jest.Mocked<TrustOnboardingTaskApi>;
+  let mockApi: jest.Mocked<TaskApi>;
   let mockDocumentsApi: jest.Mocked<TrustOnboardingDocumentApi>;
   let mockObNotificationService: jest.Mocked<ObNotificationService>;
   let mockObDocumentMetaService: jest.Mocked<ObDocumentMetaService>;
@@ -36,9 +36,9 @@ describe('TrustOnboardingTaskComponent', () => {
     } as unknown as jest.Mocked<ObDocumentMetaService>;
 
     mockApi = {
-      getTask: jest.fn(),
+      getTrustOnboardingTask: jest.fn(),
       assignSelf: jest.fn()
-    } as unknown as jest.Mocked<TrustOnboardingTaskApi>;
+    } as unknown as jest.Mocked<TaskApi>;
 
     mockDocumentsApi = {
       getTrustOnboardingSubmissionDocuments: jest.fn()
@@ -60,7 +60,7 @@ describe('TrustOnboardingTaskComponent', () => {
         provideHttpClient(),
         provideObliqueTestingConfiguration(),
 
-        {provide: TrustOnboardingTaskApi, useValue: mockApi},
+        {provide: TaskApi, useValue: mockApi},
         {provide: TrustOnboardingDocumentApi, useValue: mockDocumentsApi},
         {provide: ObNotificationService, useValue: mockObNotificationService},
         {provide: ObDocumentMetaService, useValue: mockObDocumentMetaService},
@@ -74,7 +74,7 @@ describe('TrustOnboardingTaskComponent', () => {
 
   it('should load task when taskId is set', () => {
     const mockTask = getTestTask('a4a92559-21cc-4ed0-8053-d3c78bb5b5cd');
-    mockApi.getTask.mockReturnValue(
+    mockApi.getTrustOnboardingTask.mockReturnValue(
       of(
         new HttpResponse<TrustOnboardingTask>({
           body: mockTask
@@ -92,7 +92,7 @@ describe('TrustOnboardingTaskComponent', () => {
     fixture.componentRef.setInput('taskId', 'a4a92559-21cc-4ed0-8053-d3c78bb5b5cd');
     fixture.detectChanges();
 
-    expect(mockApi.getTask).toHaveBeenCalledWith({taskId: 'a4a92559-21cc-4ed0-8053-d3c78bb5b5cd'});
+    expect(mockApi.getTrustOnboardingTask).toHaveBeenCalledWith({taskId: 'a4a92559-21cc-4ed0-8053-d3c78bb5b5cd'});
   });
 
   it('should share link and send notification', () => {
@@ -114,7 +114,7 @@ describe('TrustOnboardingTaskComponent', () => {
   });
   it('should call assignSelf API and reload task', () => {
     const mockTask = getTestTask('a4a92559-21cc-4ed0-8053-d3c78bb5b5cd');
-    mockApi.getTask.mockReturnValue(of(mockTask as unknown as HttpResponse<TrustOnboardingTask>));
+    mockApi.getTrustOnboardingTask.mockReturnValue(of(mockTask as unknown as HttpResponse<TrustOnboardingTask>));
     mockDocumentsApi.getTrustOnboardingSubmissionDocuments.mockReturnValue(
       of(new HttpResponse<PagedModelTrustOnboardingSubmissionDocumentListItemDto>({body: testDocumentsData}))
     );
@@ -134,7 +134,7 @@ describe('TrustOnboardingTaskComponent', () => {
   it('should show the inCommercialRegister block when partnerType is BUSINESS', () => {
     const mockTask = getTestTaskWithPartnerType('a4a92559-21cc-4ed0-8053-d3c78bb5b5cd', PartnerType.Business);
 
-    mockApi.getTask.mockReturnValue(of(mockTask as unknown as HttpResponse<TrustOnboardingTask>));
+    mockApi.getTrustOnboardingTask.mockReturnValue(of(mockTask as unknown as HttpResponse<TrustOnboardingTask>));
     mockDocumentsApi.getTrustOnboardingSubmissionDocuments.mockReturnValue(
       of(new HttpResponse<PagedModelTrustOnboardingSubmissionDocumentListItemDto>({body: testDocumentsData}))
     );
@@ -152,7 +152,7 @@ describe('TrustOnboardingTaskComponent', () => {
       PartnerType.GovernmentalInstitution
     );
 
-    mockApi.getTask.mockReturnValue(of(mockTask as unknown as HttpResponse<TrustOnboardingTask>));
+    mockApi.getTrustOnboardingTask.mockReturnValue(of(mockTask as unknown as HttpResponse<TrustOnboardingTask>));
     mockDocumentsApi.getTrustOnboardingSubmissionDocuments.mockReturnValue(
       of(new HttpResponse<PagedModelTrustOnboardingSubmissionDocumentListItemDto>({body: testDocumentsData}))
     );
@@ -167,7 +167,7 @@ describe('TrustOnboardingTaskComponent', () => {
   it('should NOT show inCommercialRegister block when partnerType is INDIVIDUAL', () => {
     const mockTask = getTestTaskWithPartnerType('a4a92559-21cc-4ed0-8053-d3c78bb5b5cd', PartnerType.Individual);
 
-    mockApi.getTask.mockReturnValue(of(mockTask as unknown as HttpResponse<TrustOnboardingTask>));
+    mockApi.getTrustOnboardingTask.mockReturnValue(of(mockTask as unknown as HttpResponse<TrustOnboardingTask>));
     mockDocumentsApi.getTrustOnboardingSubmissionDocuments.mockReturnValue(
       of(new HttpResponse<PagedModelTrustOnboardingSubmissionDocumentListItemDto>({body: testDocumentsData}))
     );
@@ -231,7 +231,7 @@ function getTestTask(id: string): TrustOnboardingTask {
     assignee: undefined,
     submittedAt: '2025-08-18T00:00:00Z',
     dueAt: '2028-05-15T00:00:00Z',
-    state: TrustOnboardingTaskStatus.Accepted,
+    state: TaskStatus.Accepted,
     partnerType: PartnerType.GovernmentalInstitution,
     uid: undefined,
     correspondenceLanguage: Language.DeCh,
@@ -249,11 +249,7 @@ function getTestTask(id: string): TrustOnboardingTask {
     email: 'test@example.email.admin.ch',
     contacts: [],
     dids: [],
-    allowedActions: new Set([
-      TrustOnboardingTaskAction.Approve,
-      TrustOnboardingTaskAction.Reject,
-      TrustOnboardingTaskAction.RequestMoreInformation
-    ])
+    allowedActions: new Set([TaskAction.Approve, TaskAction.Reject, TaskAction.RequestMoreInformation])
   };
 }
 

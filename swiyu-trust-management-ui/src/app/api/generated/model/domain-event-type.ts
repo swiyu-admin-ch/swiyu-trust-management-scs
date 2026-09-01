@@ -13,14 +13,22 @@ export const DomainEventType = {
   TrustOnboardingSucceeded: 'TRUST_ONBOARDING_SUCCEEDED',
   TrustOnboardingRejected: 'TRUST_ONBOARDING_REJECTED',
   TrustOnboardingMoreInformationRequested: 'TRUST_ONBOARDING_MORE_INFORMATION_REQUESTED',
-  TrustOnboardingTaskNoteAdded: 'TRUST_ONBOARDING_TASK_NOTE_ADDED',
-  TrustOnboardingTaskAssigned: 'TRUST_ONBOARDING_TASK_ASSIGNED',
+  TrustOnboardingResubmitted: 'TRUST_ONBOARDING_RESUBMITTED',
+  TaskNoteAdded: 'TASK_NOTE_ADDED',
+  TaskAssigned: 'TASK_ASSIGNED',
   TrustAddDidSubmissionReceived: 'TRUST_ADD_DID_SUBMISSION_RECEIVED',
   TrustAddDidSucceeded: 'TRUST_ADD_DID_SUCCEEDED',
   TrustAddDidRejected: 'TRUST_ADD_DID_REJECTED',
   NonCompliantActorAdded: 'NON_COMPLIANT_ACTOR_ADDED',
   NonCompliantActorRemoved: 'NON_COMPLIANT_ACTOR_REMOVED',
   ProtectedIssuanceEntryAdded: 'PROTECTED_ISSUANCE_ENTRY_ADDED',
-  ProtectedIssuanceEntryRemoved: 'PROTECTED_ISSUANCE_ENTRY_REMOVED'
+  ProtectedIssuanceEntryRemoved: 'PROTECTED_ISSUANCE_ENTRY_REMOVED',
+  ProtectedVerificationAuthorizationAdded: 'PROTECTED_VERIFICATION_AUTHORIZATION_ADDED',
+  ProtectedVerificationAuthorizationRemoved: 'PROTECTED_VERIFICATION_AUTHORIZATION_REMOVED',
+  ProtectedIssuanceAuthorizationAdded: 'PROTECTED_ISSUANCE_AUTHORIZATION_ADDED',
+  ProtectedIssuanceAuthorizationRemoved: 'PROTECTED_ISSUANCE_AUTHORIZATION_REMOVED',
+  ProtectedVerificationRequestReceived: 'PROTECTED_VERIFICATION_REQUEST_RECEIVED',
+  ProtectedVerificationRequestApproved: 'PROTECTED_VERIFICATION_REQUEST_APPROVED',
+  ProtectedVerificationRequestRejected: 'PROTECTED_VERIFICATION_REQUEST_REJECTED'
 } as const;
 export type DomainEventType = (typeof DomainEventType)[keyof typeof DomainEventType];

@@ -15,8 +15,8 @@ import {Observable} from 'rxjs';
 import {OpenApiHttpParams, QueryParamStyle} from '../query.params';
 
 // @ts-ignore
-import {PagedModelTrustOnboardingSubmissionDocumentListItemDto} from '../model/paged-model-trust-onboarding-submission-document-list-item-dto';
 // @ts-ignore
+import {PagedModelTrustOnboardingSubmissionDocumentListItemDto} from '../model/paged-model-trust-onboarding-submission-document-list-item-dto';
 
 // @ts-ignore
 import {BaseService} from '../api.base.service';
@@ -111,6 +111,9 @@ export class TrustOnboardingDocumentApi extends BaseService {
     }
 
     let localVarHeaders = this.defaultHeaders;
+
+    // authentication (OIDC) required
+    localVarHeaders = this.configuration.addCredentialToHeaders('OIDC', 'Authorization', localVarHeaders, 'Bearer ');
 
     // authentication (bearer-jwt) required
     localVarHeaders = this.configuration.addCredentialToHeaders(
@@ -231,6 +234,9 @@ export class TrustOnboardingDocumentApi extends BaseService {
     );
 
     let localVarHeaders = this.defaultHeaders;
+
+    // authentication (OIDC) required
+    localVarHeaders = this.configuration.addCredentialToHeaders('OIDC', 'Authorization', localVarHeaders, 'Bearer ');
 
     // authentication (bearer-jwt) required
     localVarHeaders = this.configuration.addCredentialToHeaders(

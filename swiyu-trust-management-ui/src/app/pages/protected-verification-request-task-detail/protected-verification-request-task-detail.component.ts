@@ -8,7 +8,7 @@ import {MatInputModule} from '@angular/material/input';
 import {TranslatePipe} from '@ngx-translate/core';
 import {ObAlertComponent, ObButtonModule, ObColumnLayoutModule, ObDocumentMetaService} from '@oblique/oblique';
 import {filter, finalize, take, tap} from 'rxjs';
-import {ProtectedVerificationRequestTask, TrustOnboardingTaskAction, TrustOnboardingTaskApi} from '../../api/generated';
+import {ProtectedVerificationRequestTask, TaskAction, TaskApi} from '../../api/generated';
 import {LocalizeService} from '../../core/i18n/localize.service';
 import {LocalizePipe} from '../../core/i18n/localized-text.pipe';
 import {DomainEventListComponent} from '../../shared/domain-event-list/domain-event-list.component';
@@ -38,11 +38,11 @@ import {ZasDataSectionComponent} from './zas-data-section/zas-data-section.compo
   ]
 })
 export class ProtectedVerificationRequestTaskDetailComponent {
-  private readonly api = inject(TrustOnboardingTaskApi);
+  private readonly api = inject(TaskApi);
   private readonly metaService = inject(ObDocumentMetaService);
   private readonly localizeService = inject(LocalizeService);
 
-  TrustOnboardingTaskAction = TrustOnboardingTaskAction;
+  TaskAction = TaskAction;
 
   taskId = input.required<string>();
   task = signal({} as ProtectedVerificationRequestTask);
@@ -64,7 +64,7 @@ export class ProtectedVerificationRequestTaskDetailComponent {
     });
   }
 
-  isActionAllowed(action: TrustOnboardingTaskAction): boolean {
+  isActionAllowed(action: TaskAction): boolean {
     return Array.from(this.task()?.allowedActions?.values() || []).includes(action);
   }
 

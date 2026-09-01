@@ -1,11 +1,11 @@
 import {Injectable, inject} from '@angular/core';
 import {ObOffCanvasService} from '@oblique/oblique';
 import {BehaviorSubject, Subject} from 'rxjs';
-import {TrustOnboardingTask, TrustOnboardingTaskAction, TrustOnboardingTaskListItem} from '../../../api/generated';
+import {TaskAction, TaskListItem, TrustOnboardingTask} from '../../../api/generated';
 
 export interface PanelData {
-  task: TrustOnboardingTask | TrustOnboardingTaskListItem;
-  action: TrustOnboardingTaskAction;
+  task: TrustOnboardingTask | TaskListItem;
+  action: TaskAction;
 }
 
 @Injectable({providedIn: 'root'})
@@ -27,20 +27,20 @@ export class SidepanelService {
     this.triggerReload();
   }
 
-  addNote(task: TrustOnboardingTask | TrustOnboardingTaskListItem) {
-    this.openPanel({action: TrustOnboardingTaskAction.AddInternalNote, task});
+  addNote(task: TrustOnboardingTask | TaskListItem) {
+    this.openPanel({action: TaskAction.AddInternalNote, task});
   }
 
-  approve(task: TrustOnboardingTask | TrustOnboardingTaskListItem) {
-    this.openPanel({action: TrustOnboardingTaskAction.Approve, task});
+  approve(task: TrustOnboardingTask | TaskListItem) {
+    this.openPanel({action: TaskAction.Approve, task});
   }
 
-  reject(task: TrustOnboardingTask | TrustOnboardingTaskListItem) {
-    this.openPanel({action: TrustOnboardingTaskAction.Reject, task});
+  reject(task: TrustOnboardingTask | TaskListItem) {
+    this.openPanel({action: TaskAction.Reject, task});
   }
 
   requestMoreInformation(task: TrustOnboardingTask) {
-    this.openPanel({action: TrustOnboardingTaskAction.RequestMoreInformation, task});
+    this.openPanel({action: TaskAction.RequestMoreInformation, task});
   }
 
   private clearPanel() {

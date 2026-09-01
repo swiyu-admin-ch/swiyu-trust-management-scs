@@ -23,13 +23,13 @@ import ch.admin.bj.swiyu.trust.client.zas.sbn.model.UsnPageDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.AuthorizableFieldDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedVerificationAuthorizationRequestDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.taskaction.RejectProtectedVerificationRequestTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RejectProtectedVerificationRequestTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.ProtectedVerificationTaskProperties;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationRequestTask;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationRequestTaskRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTaskRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -252,7 +252,7 @@ class ProtectedVerificationRequestTaskServiceTest {
 
         service.approve(task.getId(), new ApproveProtectedVerificationRequestTaskActionDto("ok"), "tester");
 
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
 
         var requestCaptor = ArgumentCaptor.forClass(ProtectedVerificationAuthorizationRequestDto.class);
         verify(businessPartnerIdentityService).addProtectedVerificationAuthorization(requestCaptor.capture());
@@ -278,7 +278,7 @@ class ProtectedVerificationRequestTaskServiceTest {
             "tester"
         );
 
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.REJECTED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.REJECTED);
         var eventCaptor = ArgumentCaptor.forClass(TiProtectedVerificationSubmissionRejectedEvent.class);
         verify(outboxEventPublisher).publishProtectedVerificationSubmissionRejectedEvent(eventCaptor.capture());
         assertThat(eventCaptor.getValue().getPayload().getRejectReason()).isEqualTo("Not eligible");

@@ -9,11 +9,11 @@ import static org.mockito.Mockito.verify;
 
 import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingTaskStatusDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustAddDidTaskRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustTaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTaskRepository;
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
 import java.time.Instant;
@@ -98,7 +98,7 @@ class TrustAddDidTaskServiceIT {
         assertThat(task.getPermissionDid()).isEqualTo(permissionDid);
         assertThat(task.getSubmittedAt()).isEqualTo(submittedAt);
         assertThat(task.getDueAt()).isEqualTo(submittedAt.plus(30, ChronoUnit.DAYS));
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.OPENED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.OPENED);
     }
 
     @Test
@@ -123,7 +123,7 @@ class TrustAddDidTaskServiceIT {
         // then
         var task = trustAddDidTaskRepository.findById(taskId).orElseThrow();
         assertThat(task.getPartnerId()).isNull();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.OPENED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.OPENED);
     }
 
     @Test
@@ -138,7 +138,7 @@ class TrustAddDidTaskServiceIT {
         assertThat(dto.id()).isEqualTo(saved.getId());
         assertThat(dto.permissionDid()).isEqualTo(saved.getPermissionDid());
         assertThat(dto.trustAddDidSubmissionId()).isEqualTo(saved.getTrustAddDidSubmissionId());
-        assertThat(dto.state()).isEqualTo(TrustOnboardingTaskStatusDto.OPENED);
+        assertThat(dto.state()).isEqualTo(TaskStatusDto.OPENED);
     }
 
     @Test
@@ -158,7 +158,7 @@ class TrustAddDidTaskServiceIT {
 
         // then
         var task = trustAddDidTaskRepository.findById(saved.getId()).orElseThrow();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.ACCEPTED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
         assertThat(task.getDueAt()).isNull();
 
         verify(outboxEventPublisher).publishTrustAddDidSubmissionAcceptedEvent(any());
@@ -181,7 +181,7 @@ class TrustAddDidTaskServiceIT {
 
         // then
         var task = trustAddDidTaskRepository.findById(saved.getId()).orElseThrow();
-        assertThat(task.getStatus()).isEqualTo(TrustTaskStatus.REJECTED);
+        assertThat(task.getStatus()).isEqualTo(TaskStatus.REJECTED);
         assertThat(task.getDueAt()).isNull();
         verify(outboxEventPublisher).publishTrustAddDidSubmissionRejectedEvent(any());
     }

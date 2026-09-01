@@ -15,7 +15,7 @@
   <div class="actions">
     <button
       (click)="openApproveForm()"
-      [disabled]="!isActionAllowed(TrustOnboardingTaskAction.Approve) || !canDecide()"
+      [disabled]="!isActionAllowed(TaskAction.Approve) || !canDecide()"
       data-cy="btnTaskApprove"
       mat-raised-button
       obButton="primary"
@@ -26,7 +26,7 @@
     </button>
     <button
       (click)="openRejectForm()"
-      [disabled]="!isActionAllowed(TrustOnboardingTaskAction.Reject) || !canDecide()"
+      [disabled]="!isActionAllowed(TaskAction.Reject) || !canDecide()"
       data-cy="btnTaskReject"
       mat-stroked-button
       obButton="secondary"

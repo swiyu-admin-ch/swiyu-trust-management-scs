@@ -11,7 +11,7 @@ import {MatInput} from '@angular/material/input';
 import {MatOption, MatSelect} from '@angular/material/select';
 import {ObAlertComponent, ObButtonDirective} from '@oblique/oblique';
 import {Observable} from 'rxjs';
-import {TrustOnboardingRejectReason, TrustOnboardingTaskAction, TrustOnboardingTaskApi} from '../../../api/generated';
+import {TaskAction, TaskApi, TrustOnboardingRejectReason} from '../../../api/generated';
 
 interface FormData {
   partnerMessageBody: string;
@@ -44,10 +44,10 @@ const PROTECTED_VERIFICATION_REQUEST_TASK_TYPE = 'PROTECTED_VERIFICATION_REQUEST
 })
 export class SidepanelComponent {
   private readonly sidepanelService = inject(SidepanelService);
-  private readonly api = inject(TrustOnboardingTaskApi);
+  private readonly api = inject(TaskApi);
   private readonly translateService = inject(TranslateService);
 
-  TrustOnboardingTaskAction = TrustOnboardingTaskAction;
+  TaskAction = TaskAction;
 
   rejectReasons = Object.values(TrustOnboardingRejectReason);
 
@@ -72,7 +72,7 @@ export class SidepanelComponent {
       this.declarationError.set(false);
       if (this.panelData()) {
         this.declarationCheckVisible.set(
-          this.panelData()?.action !== TrustOnboardingTaskAction.AddInternalNote && !this.isProtectedVerificationTask()
+          this.panelData()?.action !== TaskAction.AddInternalNote && !this.isProtectedVerificationTask()
         );
       }
     });
@@ -109,7 +109,7 @@ export class SidepanelComponent {
     }
 
     // Rule 2: Reject-specific validation
-    if (this.panelData()?.action === TrustOnboardingTaskAction.Reject) {
+    if (this.panelData()?.action === TaskAction.Reject) {
       if (this.isProtectedVerificationTask()) {
         if (!this.formData().protectedVerificationRejectReason.trim()) {
           errors.push('Reject reason is required.');
@@ -137,7 +137,7 @@ export class SidepanelComponent {
     const isProtectedVerificationTask = this.isProtectedVerificationTask();
 
     switch (this.panelData()?.action) {
-      case TrustOnboardingTaskAction.Reject:
+      case TaskAction.Reject:
         return isProtectedVerificationTask
           ? this.api.rejectProtectedVerificationRequest({
               taskId,
@@ -146,7 +146,7 @@ export class SidepanelComponent {
                 rejectReason: this.formData().protectedVerificationRejectReason
               }
             })
-          : this.api.reject({
+          : this.api.rejectTrustOnboarding({
               taskId,
               request: {
                 internalNote: this.formData().internalMessageBody,
@@ -154,28 +154,28 @@ export class SidepanelComponent {
                 rejectReason: this.formData().rejectReason! // can never be null when submitting
               }
             });
-      case TrustOnboardingTaskAction.RequestMoreInformation:
-        return this.api.requestMoreInformation({
+      case TaskAction.RequestMoreInformation:
+        return this.api.requestMoreInformationForTrustOnboarding({
           taskId,
           request: {
             internalNote: this.formData().internalMessageBody,
             partnerNote: this.formData().partnerMessageBody
           }
         });
-      case TrustOnboardingTaskAction.Approve:
+      case TaskAction.Approve:
         return isProtectedVerificationTask
           ? this.api.approveProtectedVerificationRequest({
               taskId,
               request: {internalNote: this.formData().internalMessageBody}
             })
-          : this.api.approve({
+          : this.api.approveTrustOnboarding({
               taskId,
               request: {
                 internalNote: this.formData().internalMessageBody,
                 partnerNote: this.formData().partnerMessageBody
               }
             });
-      case TrustOnboardingTaskAction.AddInternalNote:
+      case TaskAction.AddInternalNote:
         return this.api.addInternalNote({
           taskId,
           request: {internalNote: this.formData().internalMessageBody}
@@ -227,15 +227,15 @@ export class SidepanelComponent {
   }
 }
 
-function getSubmitLabelKey(action?: TrustOnboardingTaskAction): string {
+function getSubmitLabelKey(action?: TaskAction): string {
   switch (action) {
-    case TrustOnboardingTaskAction.RequestMoreInformation:
+    case TaskAction.RequestMoreInformation:
       return 'app.trust-onboarding-task.sidepanel.submit.request-information';
-    case TrustOnboardingTaskAction.AddInternalNote:
+    case TaskAction.AddInternalNote:
       return 'app.trust-onboarding-task.sidepanel.submit.note';
-    case TrustOnboardingTaskAction.Approve:
+    case TaskAction.Approve:
       return 'app.trust-onboarding-task.sidepanel.submit.approve-request';
-    case TrustOnboardingTaskAction.Reject:
+    case TaskAction.Reject:
       return 'app.trust-onboarding-task.sidepanel.submit.reject-request';
     default:
       return 'Submit';

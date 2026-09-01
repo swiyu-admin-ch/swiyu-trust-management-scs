@@ -15,8 +15,8 @@ import {Observable} from 'rxjs';
 import {OpenApiHttpParams, QueryParamStyle} from '../query.params';
 
 // @ts-ignore
-import {PagedModelDomainEventLog} from '../model/paged-model-domain-event-log';
 // @ts-ignore
+import {PagedModelDomainEventLog} from '../model/paged-model-domain-event-log';
 
 // @ts-ignore
 import {BaseService} from '../api.base.service';
@@ -116,6 +116,9 @@ export class DomainEventLogApi extends BaseService {
     );
 
     let localVarHeaders = this.defaultHeaders;
+
+    // authentication (OIDC) required
+    localVarHeaders = this.configuration.addCredentialToHeaders('OIDC', 'Authorization', localVarHeaders, 'Bearer ');
 
     // authentication (bearer-jwt) required
     localVarHeaders = this.configuration.addCredentialToHeaders(
