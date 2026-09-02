@@ -7,7 +7,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import ch.admin.bit.jeap.messaging.avro.security.AvroClassSecurity;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
@@ -25,7 +24,6 @@ import ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData;
 import java.time.Instant;
 import java.time.Period;
 import java.util.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +50,7 @@ class BusinessPartnerIdentityServiceTest {
     private OutboxEventPublisher outboxEventPublisher;
 
     @Mock
-    private ProtectedVerificationRepository protectedVerificationRepository;
+    private ProtectedVerificationAuthorizationRepository protectedVerificationAuthorizationRepository;
 
     @Mock
     private TrustStatementPartnerLinkRepository trustStatementPartnerLinkRepository;
@@ -68,11 +66,6 @@ class BusinessPartnerIdentityServiceTest {
 
     private BusinessPartnerIdentityService businessPartnerIdentityService;
 
-    @BeforeAll
-    static void installAvroClassWhitelist() {
-        AvroClassSecurity.installDefaultIfMissing();
-    }
-
     @BeforeEach
     void setUp() {
         businessPartnerIdentityService = new BusinessPartnerIdentityService(
@@ -81,7 +74,7 @@ class BusinessPartnerIdentityServiceTest {
             defaultStatementProperties,
             domainEventService,
             outboxEventPublisher,
-            protectedVerificationRepository,
+            protectedVerificationAuthorizationRepository,
             trustStatementPartnerLinkRepository,
             trustStatementService,
             protectedIssuanceAuthorizationRepository,
@@ -364,7 +357,7 @@ class BusinessPartnerIdentityServiceTest {
             BusinessPartnerIdentityStatus.ACTIVE
         );
         when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
-        when(protectedVerificationRepository.findAllByBusinessPartnerIdentityId(bpi.getId())).thenReturn(
+        when(protectedVerificationAuthorizationRepository.findAllByBusinessPartnerIdentityId(bpi.getId())).thenReturn(
             List.of(
                 new ProtectedVerificationAuthorization(
                     UUID.randomUUID(),

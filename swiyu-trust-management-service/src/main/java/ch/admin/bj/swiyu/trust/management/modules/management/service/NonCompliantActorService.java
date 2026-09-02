@@ -99,7 +99,7 @@ public class NonCompliantActorService {
         );
         var savedNonCompliantActor = this.nonCompliantActorRepository.save(nonCompliantActor);
         this.domainEventService.nonCompliantActorAdded(savedNonCompliantActor.getId(), currentUserFullName);
-        auditPublisher.createNonCompliantActor(
+        auditPublisher.nonCompliantActorAdded(
             savedNonCompliantActor.getId().toString(),
             savedNonCompliantActor.getVersion(),
             AuditMapper.toAuditJson(savedNonCompliantActor)
@@ -114,7 +114,7 @@ public class NonCompliantActorService {
         );
         this.nonCompliantActorRepository.deleteById(nonCompliantActorId);
         this.domainEventService.nonCompliantActorRemoved(nonCompliantActorId, currentUserFullName);
-        auditPublisher.deleteNonCompliantActor(
+        auditPublisher.nonCompliantActorDeleted(
             nonCompliantActorId.toString(),
             nonCompliantActor.getVersion(),
             AuditMapper.toAuditJson(nonCompliantActor)

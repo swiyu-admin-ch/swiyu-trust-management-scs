@@ -31,7 +31,7 @@ public class DemoDataImportService {
     private final BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
     private final DomainEventLogRepository domainEventLogRepository;
     private final DomainEventService domainEventService;
-    private final ProtectedVerificationRepository protectedVerificationRepository;
+    private final ProtectedVerificationAuthorizationRepository protectedVerificationAuthorizationRepository;
     private final TrustOnboardingTaskRepository trustOnboardingTaskRepository;
     private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
     private final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
@@ -70,7 +70,7 @@ public class DemoDataImportService {
     public void deleteProtectedVerificationAuthorizations() {
         log.debug("Delete demo business partner protected verification authorization entries ...");
         for (var demoCase : DemoData.DemoCase.values()) {
-            protectedVerificationRepository.deleteByBusinessPartnerIdentityId(demoCase.bp.id());
+            protectedVerificationAuthorizationRepository.deleteByBusinessPartnerIdentityId(demoCase.bp.id());
         }
     }
 
@@ -131,13 +131,13 @@ public class DemoDataImportService {
             );
 
         for (var pva : pvas) {
-            var optDbEntity = protectedVerificationRepository.findById(pva.getId());
+            var optDbEntity = protectedVerificationAuthorizationRepository.findById(pva.getId());
             if (optDbEntity.isPresent()) {
                 var dbEntity = optDbEntity.get();
                 dbEntity.overrideFrom(pva);
-                protectedVerificationRepository.saveAndFlush(dbEntity);
+                protectedVerificationAuthorizationRepository.saveAndFlush(dbEntity);
             } else {
-                protectedVerificationRepository.save(pva);
+                protectedVerificationAuthorizationRepository.save(pva);
             }
         }
     }

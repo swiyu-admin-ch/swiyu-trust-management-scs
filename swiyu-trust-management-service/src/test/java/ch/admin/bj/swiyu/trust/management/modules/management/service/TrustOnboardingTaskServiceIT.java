@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
-import ch.admin.bj.swiyu.trust.management.modules.common.exception.TaskStatusValidationException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingRejectReasonDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskFilterDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveTaskActionDto;
@@ -289,7 +288,7 @@ class TrustOnboardingTaskServiceIT {
         trustOnboardingTaskService.createOrResubmitTask(submission, getCurrentUserName());
 
         // when / then - 3rd request is blocked
-        assertThrows(TaskStatusValidationException.class, () ->
+        assertThrows(IllegalArgumentException.class, () ->
             trustOnboardingTaskService.requestMoreInformation(taskId, request, "Timo Truster")
         );
     }

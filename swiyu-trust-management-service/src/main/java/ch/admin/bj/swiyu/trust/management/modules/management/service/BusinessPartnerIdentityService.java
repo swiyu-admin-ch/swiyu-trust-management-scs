@@ -41,7 +41,7 @@ public class BusinessPartnerIdentityService {
     private final DefaultStatementProperties defaultStatementProperties;
     private final DomainEventService domainEventService;
     private final OutboxEventPublisher outboxEventPublisher;
-    private final ProtectedVerificationRepository protectedVerificationRepository;
+    private final ProtectedVerificationAuthorizationRepository protectedVerificationAuthorizationRepository;
     private final TrustStatementPartnerLinkRepository partnerLinkRepository;
     private final TrustStatementService trustStatementService;
     private final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
@@ -214,7 +214,7 @@ public class BusinessPartnerIdentityService {
         if (filters.lastModifiedBy() != null) {
             where.and(q.audit.lastModifiedBy.like(filters.lastModifiedBy()));
         }
-        return protectedVerificationRepository
+        return protectedVerificationAuthorizationRepository
             .findAll(where, mapPageableWithValidSortProperties(pageable))
             .map(BusinessPartnerIdentityMapper::toProtectedVerificationAuthorizationDto);
     }
@@ -223,7 +223,7 @@ public class BusinessPartnerIdentityService {
     public ProtectedVerificationAuthorizationDto getProtectedVerificationAuthorizationDto(
         @Valid @NotNull UUID protectedVerificationAuthorizationId
     ) {
-        var pva = protectedVerificationRepository
+        var pva = protectedVerificationAuthorizationRepository
             .findById(protectedVerificationAuthorizationId)
             .orElseThrow(protectedVerificationAuthorizationNotFound(protectedVerificationAuthorizationId));
         return toProtectedVerificationAuthorizationDto(pva);
@@ -238,7 +238,7 @@ public class BusinessPartnerIdentityService {
         // Uniqueness is enforced at the DB level (unique DID), but we also check here to provide a
         // friendly 400 error instead of a low-level constraint violation.
         var existingEntry =
-            protectedVerificationRepository.findAllByBusinessPartnerIdentityIdAndProtectedVerificationField(
+            protectedVerificationAuthorizationRepository.findAllByBusinessPartnerIdentityIdAndProtectedVerificationField(
                 request.businessPartnerIdentityId(),
                 field
             );
@@ -253,7 +253,7 @@ public class BusinessPartnerIdentityService {
 
         var bpi = getBusinessPartnerIdentity(request.businessPartnerIdentityId());
 
-        var pva = protectedVerificationRepository.save(
+        var pva = protectedVerificationAuthorizationRepository.save(
             new ProtectedVerificationAuthorization(UUID.randomUUID(), bpi.getId(), field)
         );
 
@@ -268,12 +268,12 @@ public class BusinessPartnerIdentityService {
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void removeProtectedVerificationAuthorization(@Valid @NotNull UUID protectedVerificationAuthorizationId) {
-        var pva = protectedVerificationRepository
+        var pva = protectedVerificationAuthorizationRepository
             .findById(protectedVerificationAuthorizationId)
             .orElseThrow(protectedVerificationAuthorizationNotFound(protectedVerificationAuthorizationId));
         var bpi = getBusinessPartnerIdentity(pva.getBusinessPartnerIdentityId());
 
-        protectedVerificationRepository.delete(pva);
+        protectedVerificationAuthorizationRepository.delete(pva);
 
         outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(
             TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build()
@@ -320,7 +320,7 @@ public class BusinessPartnerIdentityService {
     }
 
     private void issueAllPvaTSForTrustedIdentifiers(BusinessPartnerIdentity bpi) {
-        var pvas = protectedVerificationRepository.findAllByBusinessPartnerIdentityId(bpi.getId());
+        var pvas = protectedVerificationAuthorizationRepository.findAllByBusinessPartnerIdentityId(bpi.getId());
 
         for (var trustedDid : bpi.getTrustedIdentifier()) {
             var statementValidUntil = calculateValidUntilForStatement(

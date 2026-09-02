@@ -261,7 +261,7 @@ class NonCompliantActorServiceIT {
         String expectedJson
     ) {
         var jsonCaptor = ArgumentCaptor.forClass(String.class);
-        verify(auditPublisher).createNonCompliantActor(eq(actorId.toString()), eq(version), jsonCaptor.capture());
+        verify(auditPublisher).nonCompliantActorAdded(eq(actorId.toString()), eq(version), jsonCaptor.capture());
         assertThat(jsonCaptor.getValue()).isEqualTo(expectedJson);
     }
 
@@ -272,7 +272,7 @@ class NonCompliantActorServiceIT {
         String expectedJson
     ) {
         var jsonCaptor = ArgumentCaptor.forClass(String.class);
-        verify(auditPublisher).deleteNonCompliantActor(eq(actorId.toString()), eq(version), jsonCaptor.capture());
+        verify(auditPublisher).nonCompliantActorDeleted(eq(actorId.toString()), eq(version), jsonCaptor.capture());
         assertThat(jsonCaptor.getValue()).isEqualTo(expectedJson);
     }
 }

@@ -97,7 +97,7 @@ class AuditPublisherIT {
         var nonCompliantActorJson = sampleNonCompliantActorJson();
 
         var traceId = executeWithTracing(() ->
-            auditPublisher.createNonCompliantActor(
+            auditPublisher.nonCompliantActorAdded(
                 NON_COMPLIANT_ACTOR_ID,
                 NON_COMPLIANT_ACTOR_VERSION,
                 nonCompliantActorJson
@@ -123,7 +123,7 @@ class AuditPublisherIT {
         var nonCompliantActorJson = sampleNonCompliantActorJson();
 
         var traceId = executeWithTracing(() ->
-            auditPublisher.deleteNonCompliantActor(
+            auditPublisher.nonCompliantActorDeleted(
                 NON_COMPLIANT_ACTOR_ID,
                 NON_COMPLIANT_ACTOR_VERSION,
                 nonCompliantActorJson
@@ -149,7 +149,7 @@ class AuditPublisherIT {
         var partnerLinkJson = sampleTrustStatementPartnerLinkJson();
 
         var traceId = executeWithTracing(() ->
-            auditPublisher.publishTrustStatement(
+            auditPublisher.trustStatementPublished(
                 TRUST_STATEMENT_ID,
                 PARTNER_ID,
                 TRUST_STATEMENT_IDENTITY_V2.name(),
@@ -217,8 +217,8 @@ class AuditPublisherIT {
         assertAuditEvent(msg, VC_SCHEMA_PUBLISHED, traceId);
         assertBusinessPartnerId(msg, PARTNER_ID);
         assertAuditedObject(msg, VC_SCHEMA_ID, VC_SCHEMA_PUBLISHED.getAuditObjectType(), VC_SCHEMA_VERSION.toString());
-        assertJsonObjectData(msg, VC_SCHEMA_PUBLISHED.getMetaFieldName(), vcSchemaJson);
-        assertValueObjectData(msg, VC_SCHEMA_PUBLISHED.getDataFieldName(), VC_SCHEMA_FILE);
+        assertJsonObjectData(msg, VC_SCHEMA_PUBLISHED.getDataJsonFieldName(), vcSchemaJson);
+        assertValueObjectData(msg, VC_SCHEMA_PUBLISHED.getDataValueFieldName(), VC_SCHEMA_FILE);
     }
 
     private static void setEiamRefGovernmentUserInSecurityContext() {
@@ -250,7 +250,7 @@ class AuditPublisherIT {
 
     private static void assertAuditEvent(CreateAuditRecordCommand message, AuditUseCase useCase, String traceId) {
         assertThat(message.getPayload().getEvent().getType()).isEqualTo(useCase.getEventType());
-        assertThat(message.getPayload().getEvent().getContext().getUseCase()).isEqualTo(useCase.getName());
+        assertThat(message.getPayload().getEvent().getContext().getUseCase()).isEqualTo(useCase.name());
         assertThat(message.getPayload().getEvent().getContext().getProcessId()).isEqualTo(traceId);
     }
 
@@ -279,10 +279,10 @@ class AuditPublisherIT {
         AuditUseCase useCase,
         String expectedJson
     ) {
-        assertThat(getAuditObjectDataJSON(message, useCase.getMetaFieldName()).getRole()).isEqualTo(
+        assertThat(getAuditObjectDataJSON(message, useCase.getDataJsonFieldName()).getRole()).isEqualTo(
             AuditObjectDataRole.NEW
         );
-        assertJsonObjectData(message, useCase.getMetaFieldName(), expectedJson);
+        assertJsonObjectData(message, useCase.getDataJsonFieldName(), expectedJson);
     }
 
     private static AuditObjectDataJSON getAuditObjectDataJSON(CreateAuditRecordCommand message, String name) {
@@ -306,8 +306,8 @@ class AuditPublisherIT {
         String jwt
     ) {
         assertBusinessPartnerId(message, partnerId);
-        assertJsonObjectData(message, useCase.getMetaFieldName(), metaJson);
-        assertValueObjectData(message, useCase.getDataFieldName(), jwt);
+        assertJsonObjectData(message, useCase.getDataJsonFieldName(), metaJson);
+        assertValueObjectData(message, useCase.getDataValueFieldName(), jwt);
     }
 
     private static String sampleNonCompliantActorJson() {

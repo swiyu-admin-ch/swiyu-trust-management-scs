@@ -9,7 +9,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ch.admin.bit.jeap.messaging.avro.security.AvroClassSecurity;
 import ch.admin.bj.swiyu.messagetype.ti.TiProtectedVerificationSubmissionApprovedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiProtectedVerificationSubmissionRejectedEvent;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionInternalApi;
@@ -20,6 +19,7 @@ import ch.admin.bj.swiyu.trust.client.zas.sbn.model.OrganisationDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.StatusDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.UsnDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.UsnPageDto;
+import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.AuthorizableFieldDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedVerificationAuthorizationRequestDto;
@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -110,11 +109,6 @@ class ProtectedVerificationRequestTaskServiceTest {
             .activityDomain(null);
     }
 
-    @BeforeAll
-    static void installAvroClassWhitelist() {
-        AvroClassSecurity.installDefaultIfMissing();
-    }
-
     @BeforeEach
     void setUp() {
         service = new ProtectedVerificationRequestTaskService(
@@ -122,9 +116,10 @@ class ProtectedVerificationRequestTaskServiceTest {
             protectedVerificationSubmissionApi,
             usnApi,
             businessPartnerIdentityService,
+            protectedVerificationTaskProperties,
             outboxEventPublisher,
             domainEventService,
-            protectedVerificationTaskProperties
+            mock(AuditPublisher.class)
         );
     }
 

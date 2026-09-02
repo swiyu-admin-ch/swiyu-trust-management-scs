@@ -16,30 +16,18 @@ import ch.admin.bj.swiyu.trust.client.zas.sbn.model.OrganisationDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.StatusDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.UsnDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.UsnPageDto;
+import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.DefaultIdentityProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.ProtectedVerificationTaskProperties;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentityRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentityStatus;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.JwtStatementDomainService;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationField;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.ProtectedVerificationRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkValidator;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusiness.IssuerTrustRootProperties;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventType;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
-import ch.admin.bj.swiyu.trust.management.modules.registry.domain.StatementRepository;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.JsonJwtDeserializer;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.TrustRegistryService;
-import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
-import ch.admin.bj.swiyu.trust.management.test.MockAuditPublisherTestConfiguration;
-import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
-import ch.admin.bj.swiyu.trust.management.test.StatusListServiceTestConfiguration;
+import ch.admin.bj.swiyu.trust.management.test.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -91,22 +79,7 @@ class ProtectedVerificationRequestTaskServiceIT {
     private ProtectedVerificationRequestTaskService service;
 
     @Autowired
-    private ProtectedVerificationRequestTaskRepository taskRepository;
-
-    @Autowired
-    private DomainEventLogRepository domainEventLogRepository;
-
-    @Autowired
-    private TrustStatementPartnerLinkRepository trustStatementPartnerLinkRepository;
-
-    @Autowired
-    private BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
-
-    @Autowired
-    private ProtectedVerificationRepository protectedVerificationRepository;
-
-    @Autowired
-    private StatementRepository statementRepository;
+    private TestRepositories repos;
 
     @MockitoBean
     private ProtectedVerificationSubmissionInternalApi protectedVerificationSubmissionApi;
@@ -114,17 +87,20 @@ class ProtectedVerificationRequestTaskServiceIT {
     @MockitoBean
     private UsnApi usnApi;
 
-    @MockitoBean
+    @MockitoBean // mocked so we don't need to bootstrap kafka
     private OutboxEventPublisher outboxEventPublisher;
+
+    @MockitoBean // mocked so we don't need to bootstrap kafka
+    private AuditPublisher auditPublisher;
 
     @BeforeEach
     void setUp() {
-        domainEventLogRepository.deleteAllInBatch();
-        statementRepository.deleteAllInBatch();
-        protectedVerificationRepository.deleteAllInBatch();
-        trustStatementPartnerLinkRepository.deleteAllInBatch();
-        businessPartnerIdentityRepository.deleteAllInBatch();
-        taskRepository.deleteAllInBatch();
+        repos.domainEventLog.deleteAllInBatch();
+        repos.statement.deleteAllInBatch();
+        repos.protectedVerification.deleteAllInBatch();
+        repos.trustStatementPartnerLink.deleteAllInBatch();
+        repos.businessPartnerIdentity.deleteAllInBatch();
+        repos.task.deleteAllInBatch();
     }
 
     @Test
@@ -141,12 +117,12 @@ class ProtectedVerificationRequestTaskServiceIT {
         commit();
 
         // then
-        var task = taskRepository.findById(taskId).orElseThrow();
+        var task = repos.protectedVerificationRequestTask.findById(taskId).orElseThrow();
         assertThat(task.getPartnerId()).isEqualTo(PARTNER_ID);
         assertThat(task.getProtectedVerificationSubmissionId()).isEqualTo(SUBMISSION_ID);
         assertThat(task.getStatus()).isEqualTo(TaskStatus.OPENED);
 
-        var event = domainEventLogRepository
+        var event = repos.domainEventLog
             .findAll()
             .stream()
             .filter(e -> taskId.equals(e.getTaskId()))
@@ -170,14 +146,14 @@ class ProtectedVerificationRequestTaskServiceIT {
         service.approve(taskId, new ApproveProtectedVerificationRequestTaskActionDto("internal note"), "Timo Truster");
 
         // then
-        var task = taskRepository.findById(taskId).orElseThrow();
+        var task = repos.task.findById(taskId).orElseThrow();
         assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
 
         // The authorization is persisted synchronously; actual trust statement issuance for the partner's trusted
         // DIDs happens asynchronously afterward, triggered by the BusinessPartnerIdentity-updated event below -
         // that hand-off (and Registry DB persistence) is covered by BusinessPartnerIdentityServiceIT, not here.
         var authorizations =
-            protectedVerificationRepository.findAllByBusinessPartnerIdentityIdAndProtectedVerificationField(
+            repos.protectedVerificationAuthorization.findAllByBusinessPartnerIdentityIdAndProtectedVerificationField(
                 PARTNER_ID,
                 ProtectedVerificationField.AHV_NUMBER
             );
@@ -186,7 +162,7 @@ class ProtectedVerificationRequestTaskServiceIT {
         verify(outboxEventPublisher).publishBusinessPartnerIdentityUpdatedEvent(any());
         verify(outboxEventPublisher).publishProtectedVerificationSubmissionApprovedEvent(any());
 
-        var approvedEvent = domainEventLogRepository
+        var approvedEvent = repos.domainEventLog
             .findAll()
             .stream()
             .filter(
@@ -212,12 +188,12 @@ class ProtectedVerificationRequestTaskServiceIT {
         commit();
 
         // then
-        var task = taskRepository.findById(taskId).orElseThrow();
+        var task = repos.task.findById(taskId).orElseThrow();
         assertThat(task.getStatus()).isEqualTo(TaskStatus.REJECTED);
 
         verify(outboxEventPublisher).publishProtectedVerificationSubmissionRejectedEvent(any());
 
-        var rejectedEvent = domainEventLogRepository
+        var rejectedEvent = repos.domainEventLog
             .findAll()
             .stream()
             .filter(
@@ -284,7 +260,7 @@ class ProtectedVerificationRequestTaskServiceIT {
      * (existence only, regardless of status) to decide whether to auto-reject.
      */
     private void seedBusinessPartnerIdentity() {
-        businessPartnerIdentityRepository.save(
+        repos.businessPartnerIdentity.save(
             new BusinessPartnerIdentity(
                 PARTNER_ID,
                 Map.of("default", "Acme AG"),

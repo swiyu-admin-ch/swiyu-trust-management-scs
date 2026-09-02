@@ -157,12 +157,12 @@ class VcSchemaSubmissionEventProcessorIT {
     ) {
         return commands
             .stream()
-            .filter(cmd -> useCase.getName().equals(cmd.getPayload().getEvent().getContext().getUseCase()))
+            .filter(cmd -> useCase.name().equals(cmd.getPayload().getEvent().getContext().getUseCase()))
             .findFirst()
             .orElseThrow(() ->
                 new AssertionError(
                     "No audit command for use case %s among %s".formatted(
-                        useCase.getName(),
+                        useCase.name(),
                         commands
                             .stream()
                             .map(c -> c.getPayload().getEvent().getContext().getUseCase())
@@ -194,7 +194,7 @@ class VcSchemaSubmissionEventProcessorIT {
             submission.getVersion().toString()
         );
         assertBusinessPartnerId(audit, partnerId.toString());
-        assertJsonObjectData(audit, VC_SCHEMA_PUBLISHED.getMetaFieldName(), AuditMapper.toAuditJson(submission));
-        assertValueObjectData(audit, VC_SCHEMA_PUBLISHED.getDataFieldName(), submission.getFile());
+        assertJsonObjectData(audit, VC_SCHEMA_PUBLISHED.getDataJsonFieldName(), AuditMapper.toAuditJson(submission));
+        assertValueObjectData(audit, VC_SCHEMA_PUBLISHED.getDataValueFieldName(), submission.getFile());
     }
 }

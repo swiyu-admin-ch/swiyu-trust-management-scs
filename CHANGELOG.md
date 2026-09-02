@@ -5,17 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 3.35.9
+## 3.35.10
 
 ### Changed
 
-- various refactorings and alignments around the "task" entities
+- each task approval, reject and request more information is now audited
+- task actions are now validated everywhere
+- cleaned up AuditUseCase so it is according to spec
 
 ## 3.35.9
 
 ### Changed
 
 - Remove correspondingLanguage from contactPerson requirement in PACT test
+- refactorings and alignments around the "task" entities
 
 ## 3.35.8
 

@@ -393,7 +393,7 @@ public class TrustStatementService {
         publishTrustStatement(issuanceResult, partnerLink);
         partnerLink = trustStatementPartnerLinkRepository.saveAndFlush(partnerLink);
 
-        auditPublisher.publishTrustStatement(
+        auditPublisher.trustStatementPublished(
             partnerLink.getId().toString(),
             auditBusinessPartnerId(partnerLink),
             partnerLink.getType().name(),

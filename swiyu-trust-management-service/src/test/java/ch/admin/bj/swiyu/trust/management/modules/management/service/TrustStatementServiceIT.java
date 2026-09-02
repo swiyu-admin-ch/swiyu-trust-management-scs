@@ -90,7 +90,7 @@ class TrustStatementServiceIT {
         String expectedJwt
     ) {
         var jwtCaptor = ArgumentCaptor.forClass(String.class);
-        verify(auditPublisher).publishTrustStatement(
+        verify(auditPublisher).trustStatementPublished(
             eq(partnerLinkId.toString()),
             eq(partnerId),
             eq(statementType),

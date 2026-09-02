@@ -1,19 +1,22 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMapper.toAuditJson;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserName;
+import static ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.toBusinessPartnerIdentity;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.resolvePossibleActions;
+import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.validateActionAllowed;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskMapper.toTrustOnboardingTaskDto;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementMapper.toTrustStatementPartnerLinkIdentityV1RequestDtoList;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementMapper.toTrustStatementPartnerLinkIdentityV2RequestDtoList;
 
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
+import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
-import ch.admin.bj.swiyu.trust.management.modules.common.exception.TaskStatusValidationException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingRejectReasonDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustOnboardingTaskDto;
@@ -49,6 +52,7 @@ public class TrustOnboardingTaskService {
     private final DomainEventService domainEventService;
     private final TrustStatementService trustStatementService;
     private final TrustOnboardingTaskProperties trustOnboardingTaskProperties;
+    private final AuditPublisher auditPublisher;
 
     /**
      * Creates a new TrustOnboardingTask based on the provided TrustOnboardingSubmission
@@ -137,6 +141,7 @@ public class TrustOnboardingTaskService {
     public void approve(UUID taskId, ApproveTaskActionDto request, String triggeredBy) {
         log.info("Task {} is approved by {}", taskId.toString(), triggeredBy);
         var task = getTrustOnboardingTask(taskId);
+        validateActionAllowed(task, triggeredBy, APPROVE);
         var submissionId = task.getTrustOnboardingSubmissionId();
         task.approve();
         taskRepository.save(task);
@@ -156,6 +161,13 @@ public class TrustOnboardingTaskService {
             request.partnerNote(),
             request.internalNote()
         );
+        auditPublisher.taskApproved(
+            task.getPartnerId(),
+            task.getId(),
+            task.getVersion(),
+            task.getTaskType().toString(),
+            toAuditJson(task)
+        );
     }
 
     @Transactional
@@ -163,6 +175,7 @@ public class TrustOnboardingTaskService {
         log.info("Task {} is rejected by {}", taskId.toString(), triggeredBy);
         var task = getTrustOnboardingTask(taskId);
         var submissionId = task.getTrustOnboardingSubmissionId();
+        validateActionAllowed(task, triggeredBy, REJECT);
         task.reject();
         taskRepository.save(task);
         outboxEventPublisher.publishTrustOnboardingRejectedEvent(
@@ -178,17 +191,20 @@ public class TrustOnboardingTaskService {
             request.partnerNote(),
             request.internalNote()
         );
+        auditPublisher.taskRejected(
+            task.getPartnerId(),
+            task.getId(),
+            task.getVersion(),
+            task.getTaskType().toString(),
+            toAuditJson(task)
+        );
     }
 
     @Transactional
     public void requestMoreInformation(UUID taskId, RequestMoreInformationTaskActionDto request, String triggeredBy) {
         log.info("Task {} is send back to user by {}", taskId.toString(), triggeredBy);
         var task = getTrustOnboardingTask(taskId);
-        if (!task.canRequestMoreInformation()) {
-            throw new TaskStatusValidationException(
-                "Task " + taskId + " has already been resubmitted the maximum number of times"
-            );
-        }
+        validateActionAllowed(task, triggeredBy, REQUEST_MORE_INFORMATION);
         var submissionId = task.getTrustOnboardingSubmissionId();
         var resubmitRequiredUntil = Instant.now().plus(trustOnboardingTaskProperties.rejectionEnforcementPeriod());
         task.requestMoreInformation(resubmitRequiredUntil);
@@ -205,6 +221,13 @@ public class TrustOnboardingTaskService {
             triggeredBy,
             request.partnerNote(),
             request.internalNote()
+        );
+        auditPublisher.taskMoreInformationRequested(
+            task.getPartnerId(),
+            task.getId(),
+            task.getVersion(),
+            task.getTaskType().toString(),
+            toAuditJson(task)
         );
     }
 

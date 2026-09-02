@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
+import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
@@ -48,8 +49,11 @@ class TrustAddDidTaskServiceIT {
     @Autowired
     private DomainEventLogRepository domainEventLogRepository;
 
-    @MockitoBean
+    @MockitoBean // mocked so we don't need to bootstrap kafka
     private OutboxEventPublisher outboxEventPublisher;
+
+    @MockitoBean // mocked so we don't need to bootstrap kafka
+    private AuditPublisher auditPublisher;
 
     @BeforeEach
     void setUp() {
@@ -154,7 +158,7 @@ class TrustAddDidTaskServiceIT {
         var saved = trustAddDidTaskRepository.save(trustAddDidTask());
 
         // when
-        trustAddDidTaskService.accept(saved.getId());
+        trustAddDidTaskService.approve(saved.getId(), "test user");
 
         // then
         var task = trustAddDidTaskRepository.findById(saved.getId()).orElseThrow();
@@ -166,7 +170,7 @@ class TrustAddDidTaskServiceIT {
 
     @Test
     void accept_notFound() {
-        assertThatThrownBy(() -> trustAddDidTaskService.accept(UUID.randomUUID())).isInstanceOf(
+        assertThatThrownBy(() -> trustAddDidTaskService.approve(UUID.randomUUID(), "test user")).isInstanceOf(
             ResourceNotFoundException.class
         );
     }
@@ -177,7 +181,7 @@ class TrustAddDidTaskServiceIT {
         var saved = trustAddDidTaskRepository.save(trustAddDidTask());
 
         // when
-        trustAddDidTaskService.reject(saved.getId(), RejectReason.UNKNOWN);
+        trustAddDidTaskService.reject(saved.getId(), RejectReason.UNKNOWN, "test user");
 
         // then
         var task = trustAddDidTaskRepository.findById(saved.getId()).orElseThrow();
@@ -188,8 +192,8 @@ class TrustAddDidTaskServiceIT {
 
     @Test
     void reject_notFound() {
-        assertThatThrownBy(() -> trustAddDidTaskService.reject(UUID.randomUUID(), RejectReason.UNKNOWN)).isInstanceOf(
-            ResourceNotFoundException.class
-        );
+        assertThatThrownBy(() ->
+            trustAddDidTaskService.reject(UUID.randomUUID(), RejectReason.UNKNOWN, "test user")
+        ).isInstanceOf(ResourceNotFoundException.class);
     }
 }

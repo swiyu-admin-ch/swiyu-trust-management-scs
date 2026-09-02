@@ -16,6 +16,23 @@ import lombok.experimental.UtilityClass;
 public class TaskActionsResolver {
 
     /**
+     * Validates the requested action against the same {@link TaskActionsResolver#resolvePossibleActions(Task, String)}
+     * result the UI uses to decide which actions to show, so the two never diverge.
+     */
+    public static void validateActionAllowed(Task task, String triggeredBy, TaskActionDto action) {
+        var allowedActions = resolvePossibleActions(task, triggeredBy);
+        if (!allowedActions.contains(action)) {
+            throw new IllegalArgumentException(
+                "Action %s is not allowed for task %s in its current state. Only allowed actions are %s".formatted(
+                    action,
+                    task.getId(),
+                    allowedActions
+                )
+            );
+        }
+    }
+
+    /**
      * For a protected verification request, APPROVE/REJECT are only allowed once its ZAS data has been reviewed
      * (see {@link TaskActionsResolver#resolvePossibleActions}) - once that's true, they're just as
      * available from the generic task list row menu as from the dedicated detail page.

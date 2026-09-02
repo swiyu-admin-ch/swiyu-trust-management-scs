@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.persistence.TransactionManagerNames.MANAGEMENT_TRANSACTION_MANAGER;
+import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserName;
 
 import ch.admin.bit.jeap.messaging.idempotence.messagehandler.IdempotentMessageHandler;
@@ -94,7 +95,7 @@ public class TrustAddDidSubmissionEventProcessor {
                 "Permission DID {} is not trusted (no active identity trust statement found). Rejecting.",
                 permissionDid
             );
-            taskService.reject(taskId, RejectReason.UNKNOWN);
+            taskService.reject(taskId, RejectReason.UNKNOWN, getCurrentUserFullName());
             return;
         }
 
@@ -126,12 +127,12 @@ public class TrustAddDidSubmissionEventProcessor {
                 submissionId,
                 e
             );
-            taskService.reject(taskId, RejectReason.UNKNOWN);
+            taskService.reject(taskId, RejectReason.UNKNOWN, getCurrentUserFullName());
             return;
         }
 
         // All DIDs processed successfully
-        taskService.accept(taskId);
+        taskService.approve(taskId, getCurrentUserFullName());
         log.info("Trust Add DID submission {} processed successfully.", submissionId);
     }
 }

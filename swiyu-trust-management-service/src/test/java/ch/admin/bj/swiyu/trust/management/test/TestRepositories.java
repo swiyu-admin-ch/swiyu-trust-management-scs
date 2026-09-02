@@ -2,6 +2,7 @@ package ch.admin.bj.swiyu.trust.management.test;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.NonComplianceListRepository;
@@ -27,9 +28,11 @@ public class TestRepositories {
     public final NonComplianceListRepository nonComplianceList;
     public final TrustStatementPartnerLinkRepository trustStatementPartnerLink;
     public final BusinessPartnerIdentityRepository businessPartnerIdentity;
-    public final ProtectedVerificationRepository protectedVerification;
+    public final ProtectedVerificationAuthorizationRepository protectedVerification;
     public final StatementRepository statement;
     public final TaskRepository task;
+    public final ProtectedVerificationRequestTaskRepository protectedVerificationRequestTask;
+    public final ProtectedVerificationAuthorizationRepository protectedVerificationAuthorization;
     public final TrustOnboardingTaskRepository trustOnboardingTask;
 
     /**

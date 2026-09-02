@@ -1,8 +1,13 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMapper.toAuditJson;
+import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.validateActionAllowed;
+
 import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
+import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustAddDidTaskDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustAddDidSubmissionAcceptedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustAddDidSubmissionRejectedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
@@ -25,6 +30,7 @@ public class TrustAddDidTaskService {
     private final TrustAddDidTaskRepository trustAddDidTaskRepository;
     private final OutboxEventPublisher outboxEventPublisher;
     private final DomainEventService domainEventService;
+    private final AuditPublisher auditPublisher;
 
     @Transactional(readOnly = true)
     public TrustAddDidTaskDto getTask(UUID taskId) {
@@ -67,10 +73,11 @@ public class TrustAddDidTaskService {
     }
 
     @Transactional
-    public void accept(UUID taskId) {
+    public void approve(UUID taskId, String triggeredBy) {
         var task = trustAddDidTaskRepository
             .findById(taskId)
             .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
+        validateActionAllowed(task, triggeredBy, TaskActionDto.APPROVE);
         task.approve();
         trustAddDidTaskRepository.save(task);
         outboxEventPublisher.publishTrustAddDidSubmissionAcceptedEvent(
@@ -78,14 +85,22 @@ public class TrustAddDidTaskService {
                 .trustAddDidSubmissionId(task.getTrustAddDidSubmissionId())
                 .build()
         );
-        domainEventService.trustAddDidSubmissionSucceeded(task.getId(), "System User");
+        domainEventService.trustAddDidSubmissionSucceeded(task.getId(), triggeredBy);
+        auditPublisher.taskApproved(
+            task.getPartnerId(),
+            task.getId(),
+            task.getVersion(),
+            task.getTaskType().toString(),
+            toAuditJson(task)
+        );
     }
 
     @Transactional
-    public void reject(UUID taskId, RejectReason reason) {
+    public void reject(UUID taskId, RejectReason reason, String triggeredBy) {
         var task = trustAddDidTaskRepository
             .findById(taskId)
             .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
+        validateActionAllowed(task, triggeredBy, TaskActionDto.REJECT);
         task.reject();
         trustAddDidTaskRepository.save(task);
         outboxEventPublisher.publishTrustAddDidSubmissionRejectedEvent(
@@ -94,6 +109,13 @@ public class TrustAddDidTaskService {
                 .rejectReason(reason)
                 .build()
         );
-        domainEventService.trustAddDidSubmissionRejected(task.getId(), "System User", reason.name());
+        domainEventService.trustAddDidSubmissionRejected(task.getId(), triggeredBy, reason.name());
+        auditPublisher.taskRejected(
+            task.getPartnerId(),
+            task.getId(),
+            task.getVersion(),
+            task.getTaskType().toString(),
+            toAuditJson(task)
+        );
     }
 }

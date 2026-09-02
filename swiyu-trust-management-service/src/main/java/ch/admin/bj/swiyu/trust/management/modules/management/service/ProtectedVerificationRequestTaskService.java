@@ -1,11 +1,14 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMapper.toAuditJson;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.resolvePossibleActions;
+import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.validateActionAllowed;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskMapper.*;
 
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionInternalApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationSubmissionDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.api.UsnApi;
+import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
@@ -44,9 +47,10 @@ public class ProtectedVerificationRequestTaskService {
     private final ProtectedVerificationSubmissionInternalApi protectedVerificationSubmissionApi;
     private final UsnApi usnApi;
     private final BusinessPartnerIdentityService businessPartnerIdentityService;
+    private final ProtectedVerificationTaskProperties protectedVerificationTaskProperties;
     private final OutboxEventPublisher outboxEventPublisher;
     private final DomainEventService domainEventService;
-    private final ProtectedVerificationTaskProperties protectedVerificationTaskProperties;
+    private final AuditPublisher auditPublisher;
 
     @Transactional
     public UUID createTask(UUID protectedVerificationSubmissionId, String triggeredBy) {
@@ -98,7 +102,7 @@ public class ProtectedVerificationRequestTaskService {
     /**
      * The UI calls this right after it has fetched and displayed the ZAS data on the task detail page, so a
      * successful call here is taken as the signal that the data has been reviewed and gates approve/reject
-     * (see {@link #requireActionAllowed}). Kept separate from {@link #getZasData} so that reading the data stays a
+     * (see {@link TaskActionsResolver#validateActionAllowed(Task, String, TaskActionDto)}). Kept separate from {@link #getZasData} so that reading the data stays a
      * side-effect-free GET - safe for prefetching, monitoring, etc. - while this explicit action is what actually
      * records the review.
      */
@@ -113,34 +117,45 @@ public class ProtectedVerificationRequestTaskService {
     public void approve(UUID taskId, ApproveProtectedVerificationRequestTaskActionDto request, String triggeredBy) {
         log.info("Task {} is approved by {}", taskId, triggeredBy);
         var task = getTaskOrThrow(taskId);
-        requireActionAllowed(task, triggeredBy, TaskActionDto.APPROVE);
+        validateActionAllowed(task, triggeredBy, TaskActionDto.APPROVE);
         var submission = fetchSubmission(task.getProtectedVerificationSubmissionId());
 
         task.approve();
         taskRepository.save(task);
-
         businessPartnerIdentityService.addProtectedVerificationAuthorization(
             new ProtectedVerificationAuthorizationRequestDto(
                 task.getPartnerId(),
                 toAuthorizableField(submission.getCategory())
             )
         );
-
         outboxEventPublisher.publishProtectedVerificationSubmissionApprovedEvent(
             TiProtectedVerificationSubmissionApprovedEventBuilder.create()
                 .protectedVerificationSubmissionId(task.getProtectedVerificationSubmissionId())
                 .build()
         );
-
         domainEventService.protectedVerificationRequestApproved(task.getId(), triggeredBy, request.internalNote());
+        auditPublisher.taskApproved(
+            task.getPartnerId(),
+            task.getId(),
+            task.getVersion(),
+            task.getTaskType().toString(),
+            toAuditJson(task)
+        );
     }
 
     @Transactional
     public void reject(UUID taskId, RejectProtectedVerificationRequestTaskActionDto request, String triggeredBy) {
         log.info("Task {} is rejected by {}", taskId, triggeredBy);
         var task = getTaskOrThrow(taskId);
-        requireActionAllowed(task, triggeredBy, TaskActionDto.REJECT);
+        validateActionAllowed(task, triggeredBy, TaskActionDto.REJECT);
         rejectTask(task, triggeredBy, request.rejectReason(), request.internalNote());
+        auditPublisher.taskRejected(
+            task.getPartnerId(),
+            task.getId(),
+            task.getVersion(),
+            task.getTaskType().toString(),
+            toAuditJson(task)
+        );
     }
 
     private void rejectTask(
@@ -193,19 +208,6 @@ public class ProtectedVerificationRequestTaskService {
                 exception.getMessage(),
                 ExternalSystem.ZAS_SBN,
                 exception.getStatusCode()
-            );
-        }
-    }
-
-    /**
-     * Validates the requested action against the same {@link TaskActionsResolver#resolvePossibleActions(Task, String)}
-     * result the UI uses to decide which actions to show, so the two never diverge.
-     */
-    private void requireActionAllowed(ProtectedVerificationRequestTask task, String triggeredBy, TaskActionDto action) {
-        var allowedActions = resolvePossibleActions(task, triggeredBy);
-        if (!allowedActions.contains(action)) {
-            throw new IllegalArgumentException(
-                "Action %s is not allowed for task %s in its current state".formatted(action, task.getId())
             );
         }
     }
