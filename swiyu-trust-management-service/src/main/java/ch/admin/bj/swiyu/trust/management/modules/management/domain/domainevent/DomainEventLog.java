@@ -102,13 +102,13 @@ public class DomainEventLog {
     public static DomainEventLog createProtectedVerificationAuthorizationDomainEventLog(
         DomainEventType eventType,
         String triggeredBy,
-        UUID nonCompliantActorId
+        UUID protectedVerificationAuthorizationId
     ) {
         var domainEventLog = new DomainEventLog();
         domainEventLog.eventType = eventType;
         domainEventLog.triggeredAt = Instant.now();
         domainEventLog.triggeredBy = triggeredBy;
-        domainEventLog.nonCompliantActorId = nonCompliantActorId;
+        domainEventLog.protectedVerificationAuthorizationId = protectedVerificationAuthorizationId;
         return domainEventLog;
     }
 

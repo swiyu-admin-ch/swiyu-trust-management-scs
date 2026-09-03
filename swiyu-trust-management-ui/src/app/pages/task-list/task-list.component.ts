@@ -14,7 +14,7 @@ import {MatPaginator, MatPaginatorModule, PageEvent} from '@angular/material/pag
 import {MatSelectModule} from '@angular/material/select';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {RouterLink} from '@angular/router';
-import {TranslateModule} from '@ngx-translate/core';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {ObButtonDirective, ObDatepickerModule, ObDocumentMetaService} from '@oblique/oblique';
 import {debounceTime, take} from 'rxjs';
 import {TaskAction, TaskApi, TaskListItem, TaskStatus} from '../../api/generated';
@@ -66,6 +66,7 @@ export class TaskListComponent implements AfterViewInit {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(TaskApi);
   private readonly meta = inject(ObDocumentMetaService);
+  private readonly translateService = inject(TranslateService);
   readonly sidepanelService = inject(SidepanelService);
 
   TaskAction = TaskAction;
@@ -86,6 +87,7 @@ export class TaskListComponent implements AfterViewInit {
   taskTypes = ['REGISTRATION', 'PROFILE_CHANGE', 'RENEWAL', 'ADD_DID', 'PROTECTED_VERIFICATION_REQUEST'];
 
   constructor() {
+    this.translateSetup();
     this.meta.setTitle('app.menu.tasks');
     this.sidepanelService.reload$.pipe(takeUntilDestroyed()).subscribe(() => {
       this.loadTasks();
@@ -137,6 +139,16 @@ export class TaskListComponent implements AfterViewInit {
       .subscribe(() => {
         this.loadTasks();
       });
+  }
+
+  private translateSetup() {
+    // Required for translate service auto collection of i18n keys
+    this.translateService.get('task.table.taskType.REGISTRATION');
+    this.translateService.get('task.table.taskType.ADD_DID');
+    this.translateService.get('task.table.taskType.PROFILE_CHANGE');
+    this.translateService.get('task.table.taskType.PROTECTED_VERIFICATION_REQUEST');
+    this.translateService.get('task.table.taskType.REGISTRATION');
+    this.translateService.get('task.table.taskType.RENEWAL');
   }
 
   private loadTasks(): void {

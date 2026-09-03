@@ -2,9 +2,6 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.DEFAULT_VALUE_KEY;
 
-import ch.admin.bj.swiyu.trust.client.core.business.internal.model.BusinessPartnerTypeDto;
-import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProofOfPossessionDto;
-import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
@@ -13,12 +10,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.Trus
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -57,25 +49,7 @@ public class BusinessPartnerIdentityMapper {
         );
     }
 
-    // must fully be adapted in EID-6609
-    public static BusinessPartnerIdentity toBusinessPartnerIdentity(TrustOnboardingSubmissionDto submission) {
-        return new BusinessPartnerIdentity(
-            submission.getPartnerId(),
-            Map.copyOf(submission.getName()),
-            Instant.now(), // must be adapted in EID-6609
-            submission.getRegistryIds().get("UID") == null ? null : submission.getRegistryIds().get("UID"),
-            submission.getIsRegisteredInCommercialRegister() != null &&
-                submission.getIsRegisteredInCommercialRegister(),
-            submission.getCorrespondingLanguage() == null ? null : submission.getCorrespondingLanguage().toString(),
-            BusinessPartnerIdentityStatus.ACTIVE,
-            submission.getBusinessPartnerType() == BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION,
-            Instant.now().atZone(ZoneOffset.UTC).plusMonths(6).toInstant(), // to be adapted to the config in EID-6609
-            Instant.now(),
-            submission.getProofOfPossessions().stream().map(ProofOfPossessionDto::getDid).collect(Collectors.toSet())
-        );
-    }
-
-    // must be fully adapted in EID-6609
+    // must be fully adapted in EID-6610
     public static BusinessPartnerIdentity toBusinessPartnerIdentity(TrustStatementPartnerLink partnerLink) {
         return switch (partnerLink.getType()) {
             case TRUST_STATEMENT_IDENTITY_V1 -> {

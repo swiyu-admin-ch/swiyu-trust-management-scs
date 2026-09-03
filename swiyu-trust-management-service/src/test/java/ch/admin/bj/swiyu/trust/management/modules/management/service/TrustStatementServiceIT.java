@@ -145,6 +145,8 @@ class TrustStatementServiceIT {
         // WHEN
         var result = trustStatementService.getPartnerLinks(
             new TrustStatementPartnerLinkFilterDto(
+                null,
+                null,
                 null, // subject
                 TrustStatementTypeDto.ISSUANCE_V1,
                 null, // trustRegistryStatus

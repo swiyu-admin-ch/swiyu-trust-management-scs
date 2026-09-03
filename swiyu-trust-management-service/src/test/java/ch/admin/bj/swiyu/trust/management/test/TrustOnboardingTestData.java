@@ -56,7 +56,7 @@ public class TrustOnboardingTestData {
             .partnerId(UUID.randomUUID())
             .proofOfPossessions(List.of(pop1, pop2))
             .businessPartnerType(BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION)
-            .type(TrustOnboardingSubmissionTypeDto.PROFILE_CHANGE)
+            .type(TrustOnboardingSubmissionTypeDto.REGISTRATION)
             .submittedAt(LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant())
             .updatedAt(LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant())
             .createdAt(LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant())

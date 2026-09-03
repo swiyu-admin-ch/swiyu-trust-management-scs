@@ -65,6 +65,7 @@ public class TrustStatementMapper {
     ) {
         return new TrustStatementPartnerLinkListItemDto(
             source.getId(),
+            source.getPartnerId(),
             source.getSubject(),
             toTrustStatementTypeDto(source.getType()),
             toTrustStatementPartnerLinkStatusDto(source.getStatus()),

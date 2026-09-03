@@ -3,22 +3,11 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
-import ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class BusinessPartnerIdentityMapperTest {
-
-    @Test
-    void toGetBusinessPartnerIdentity_onboarding_preservesCbsDefaultEntry() {
-        var submission = TrustOnboardingTestData.trustOnboardingSubmissionDto();
-
-        var identity = BusinessPartnerIdentityMapper.toBusinessPartnerIdentity(submission);
-
-        assertThat(identity.getEntityName()).isEqualTo(submission.getName());
-        assertThat(identity.getEntityName()).containsEntry("default", "Migros");
-    }
 
     @Test
     void toLocalizedGetEntityName_addDid_legacyStatementWithoutDefault_fallsBackToFirstLocale() {

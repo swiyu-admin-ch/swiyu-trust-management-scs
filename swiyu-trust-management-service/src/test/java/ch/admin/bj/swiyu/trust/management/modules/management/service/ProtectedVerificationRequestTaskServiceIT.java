@@ -53,6 +53,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Import(
     {
         ProtectedVerificationRequestTaskService.class,
+        BusinessPartnerIdentityDomainService.class,
         BusinessPartnerIdentityService.class,
         DataJpaTestConfiguration.class,
         TrustStatementService.class,
@@ -92,6 +93,77 @@ class ProtectedVerificationRequestTaskServiceIT {
 
     @MockitoBean // mocked so we don't need to bootstrap kafka
     private AuditPublisher auditPublisher;
+
+    private ProtectedVerificationSubmissionDto submissionDto() {
+        return new ProtectedVerificationSubmissionDto()
+            .id(SUBMISSION_ID)
+            .partnerId(PARTNER_ID)
+            .sbnId(SBN_ID)
+            .entityName("Acme AG")
+            .category(ProtectedVerificationCategoryDto.PERSONAL_ADMINISTRATIVE_NUMBER)
+            .reason("test reason")
+            .status(ProtectedVerificationSubmissionStatusDto.SUBMITTED)
+            .submittedAt(Instant.now().truncatedTo(ChronoUnit.MICROS))
+            .createdAt(Instant.now().truncatedTo(ChronoUnit.MICROS))
+            .updatedAt(Instant.now().truncatedTo(ChronoUnit.MICROS));
+    }
+
+    private UsnPageDto usnPageWith(UsnDto usn) {
+        return new UsnPageDto().content(List.of(usn));
+    }
+
+    private UsnDto usnDto() {
+        return new UsnDto()
+            .businessId(SBN_ID)
+            .organisation(new OrganisationDto().name("Acme AG").locality("Bern"))
+            .status(new StatusDto().code("ACTIVE"));
+    }
+
+    private void stubExternalClients(ProtectedVerificationSubmissionDto submission) {
+        when(protectedVerificationSubmissionApi.getProtectedVerificationSubmission(SUBMISSION_ID)).thenReturn(
+            submission
+        );
+        when(
+            usnApi.searchUsns(
+                eq(SBN_ID),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(usnPageWith(usnDto()));
+    }
+
+    /**
+     * Seeds a {@link BusinessPartnerIdentity} row for the partner, which is what {@code createTask} checks for
+     * (existence only, regardless of status) to decide whether to auto-reject.
+     */
+    private void seedBusinessPartnerIdentity() {
+        repos.businessPartnerIdentity.save(
+            new BusinessPartnerIdentity(
+                PARTNER_ID,
+                Map.of("default", "Acme AG"),
+                Instant.now(),
+                "CHE-123.456.789",
+                true,
+                "de-CH",
+                BusinessPartnerIdentityStatus.ACTIVE,
+                false,
+                Instant.now().plusSeconds(3600),
+                null,
+                Set.of()
+            )
+        );
+    }
 
     @BeforeEach
     void setUp() {
@@ -204,76 +276,5 @@ class ProtectedVerificationRequestTaskServiceIT {
             .findFirst()
             .orElseThrow();
         assertThat(rejectedEvent.getPartnerNote()).contains("not yet onboarded to the trust registry");
-    }
-
-    private ProtectedVerificationSubmissionDto submissionDto() {
-        return new ProtectedVerificationSubmissionDto()
-            .id(SUBMISSION_ID)
-            .partnerId(PARTNER_ID)
-            .sbnId(SBN_ID)
-            .entityName("Acme AG")
-            .category(ProtectedVerificationCategoryDto.PERSONAL_ADMINISTRATIVE_NUMBER)
-            .reason("test reason")
-            .status(ProtectedVerificationSubmissionStatusDto.SUBMITTED)
-            .submittedAt(Instant.now().truncatedTo(ChronoUnit.MICROS))
-            .createdAt(Instant.now().truncatedTo(ChronoUnit.MICROS))
-            .updatedAt(Instant.now().truncatedTo(ChronoUnit.MICROS));
-    }
-
-    private UsnPageDto usnPageWith(UsnDto usn) {
-        return new UsnPageDto().content(List.of(usn));
-    }
-
-    private UsnDto usnDto() {
-        return new UsnDto()
-            .businessId(SBN_ID)
-            .organisation(new OrganisationDto().name("Acme AG").locality("Bern"))
-            .status(new StatusDto().code("ACTIVE"));
-    }
-
-    private void stubExternalClients(ProtectedVerificationSubmissionDto submission) {
-        when(protectedVerificationSubmissionApi.getProtectedVerificationSubmission(SUBMISSION_ID)).thenReturn(
-            submission
-        );
-        when(
-            usnApi.searchUsns(
-                eq(SBN_ID),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(usnPageWith(usnDto()));
-    }
-
-    /**
-     * Seeds a {@link BusinessPartnerIdentity} row for the partner, which is what {@code createTask} checks for
-     * (existence only, regardless of status) to decide whether to auto-reject.
-     */
-    private void seedBusinessPartnerIdentity() {
-        repos.businessPartnerIdentity.save(
-            new BusinessPartnerIdentity(
-                PARTNER_ID,
-                Map.of("default", "Acme AG"),
-                Instant.now(),
-                "CHE-123.456.789",
-                true,
-                "de-CH",
-                BusinessPartnerIdentityStatus.ACTIVE,
-                false,
-                Instant.now().plusSeconds(3600),
-                null,
-                Set.of()
-            )
-        );
     }
 }

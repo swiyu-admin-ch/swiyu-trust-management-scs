@@ -69,8 +69,8 @@ class BusinessPartnerIdentityServiceTest {
     @BeforeEach
     void setUp() {
         businessPartnerIdentityService = new BusinessPartnerIdentityService(
+            new BusinessPartnerIdentityDomainService(businessPartnerIdentityRepository, defaultIdentityProperties),
             businessPartnerIdentityRepository,
-            defaultIdentityProperties,
             defaultStatementProperties,
             domainEventService,
             outboxEventPublisher,
@@ -90,6 +90,7 @@ class BusinessPartnerIdentityServiceTest {
         bpi.setVersion(0);
         when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
         when(defaultIdentityProperties.validity()).thenReturn(Period.ofYears(3));
+        when(businessPartnerIdentityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         businessPartnerIdentityService.activate(bpi.getId());
 
@@ -127,6 +128,7 @@ class BusinessPartnerIdentityServiceTest {
         bpi.setVersion(0);
         when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
         when(defaultIdentityProperties.validity()).thenReturn(Period.ofYears(3));
+        when(businessPartnerIdentityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         businessPartnerIdentityService.activate(bpi.getId());
 
@@ -141,6 +143,7 @@ class BusinessPartnerIdentityServiceTest {
         bpi.setVersion(0);
         when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
         when(defaultIdentityProperties.validity()).thenReturn(Period.ofMonths(1));
+        when(businessPartnerIdentityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         businessPartnerIdentityService.activate(bpi.getId());
 
@@ -155,6 +158,7 @@ class BusinessPartnerIdentityServiceTest {
         bpi.setVersion(0);
         when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
         when(defaultIdentityProperties.validity()).thenReturn(Period.ofYears(3));
+        when(businessPartnerIdentityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         businessPartnerIdentityService.activate(bpi.getId());
 
@@ -168,6 +172,7 @@ class BusinessPartnerIdentityServiceTest {
         );
         bpi.setVersion(0);
         when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
+        when(businessPartnerIdentityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         businessPartnerIdentityService.deactivate(bpi.getId());
 
@@ -181,6 +186,7 @@ class BusinessPartnerIdentityServiceTest {
         );
         bpi.setVersion(0);
         when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
+        when(businessPartnerIdentityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         businessPartnerIdentityService.deactivate(bpi.getId());
 

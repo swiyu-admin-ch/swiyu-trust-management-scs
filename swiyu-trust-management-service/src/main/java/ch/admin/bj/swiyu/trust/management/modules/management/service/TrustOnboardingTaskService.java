@@ -4,12 +4,9 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMappe
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserName;
 import static ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus.*;
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.toBusinessPartnerIdentity;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.resolvePossibleActions;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.validateActionAllowed;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskMapper.toTrustOnboardingTaskDto;
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementMapper.toTrustStatementPartnerLinkIdentityV1RequestDtoList;
-import static ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementMapper.toTrustStatementPartnerLinkIdentityV2RequestDtoList;
 
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
@@ -18,7 +15,6 @@ import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSyste
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingRejectReasonDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustOnboardingTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RejectTaskActionDto;
@@ -28,9 +24,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrus
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustOnboardingRejectedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustOnboardingSucceededEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.QTrustOnboardingTask;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.*;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
@@ -50,9 +44,9 @@ public class TrustOnboardingTaskService {
     private final TrustOnboardingSubmissionApi trustOnboardingSubmissionApi;
     private final OutboxEventPublisher outboxEventPublisher;
     private final DomainEventService domainEventService;
-    private final TrustStatementService trustStatementService;
     private final TrustOnboardingTaskProperties trustOnboardingTaskProperties;
     private final AuditPublisher auditPublisher;
+    private final BusinessPartnerIdentityService businessPartnerIdentityService;
 
     /**
      * Creates a new TrustOnboardingTask based on the provided TrustOnboardingSubmission
@@ -147,7 +141,9 @@ public class TrustOnboardingTaskService {
         taskRepository.save(task);
 
         var trustOnboardingSubmissionDto = trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submissionId);
-        issueAndPublishIdentityTrustStatements(trustOnboardingSubmissionDto);
+        businessPartnerIdentityService.activate(
+            businessPartnerIdentityService.handleTrustOnboardingApproval(trustOnboardingSubmissionDto)
+        );
 
         outboxEventPublisher.publishTrustOnboardingSucceededEvent(
             TiTrustOnboardingSucceededEventBuilder.create()
@@ -259,57 +255,14 @@ public class TrustOnboardingTaskService {
         }
     }
 
-    private void issueAndPublishIdentityTrustStatements(TrustOnboardingSubmissionDto trustOnboardingSubmissionDto) {
-        // businessPartnerIdentityService.issueTrustStatements(trustOnboardingSubmissionDto.getPartnerId()); // should we add a new trustedIdentifier and call that ? // EID-6609
-        var businessPartnerIdentity = toBusinessPartnerIdentity(trustOnboardingSubmissionDto);
-
-        // map onboardingSubmissionDto to trustStatementRequestV1
-        var trustStatementPartnerLinkRequestList = toTrustStatementPartnerLinkIdentityV1RequestDtoList(
-            trustOnboardingSubmissionDto,
-            businessPartnerIdentity
-        );
-        trustStatementPartnerLinkRequestList.forEach(r -> {
-            // issue trust statements of TP1.0 for each did
-            var newStatement = trustStatementService.issueAndPublishIdentityV1TrustStatement(
-                trustOnboardingSubmissionDto.getPartnerId(),
-                r
-            );
-            // deactivate old trust statements
-            trustStatementService.deactivateAllStatementsOfTypeAndSubjectExcept(
-                TrustStatementTypeDto.IDENTITY_V1,
-                "Renewal through TrustOnboarding Submission",
-                newStatement.getId(),
-                newStatement.getSubject()
-            );
-        });
-
-        // map onboardingSubmissionDto to trustStatementRequestV2
-        var trustStatementV2PartnerLinkRequestList = toTrustStatementPartnerLinkIdentityV2RequestDtoList(
-            trustOnboardingSubmissionDto,
-            businessPartnerIdentity
-        );
-
-        trustStatementV2PartnerLinkRequestList.forEach(r -> {
-            // issue trust statements of TP2.0 for each did
-            var newStatement = trustStatementService.issueAndPublishIdentityV2TrustStatement(r);
-            // deactivate old trust statements
-            trustStatementService.deactivateAllStatementsOfTypeAndSubjectExcept(
-                TrustStatementTypeDto.IDENTITY_V2,
-                "Renewal through TrustOnboarding Submission",
-                newStatement.getId(),
-                newStatement.getSubject()
-            );
-        });
+    public TrustOnboardingTask getTrustOnboardingTask(UUID taskId) {
+        return taskRepository
+            .findById(taskId)
+            .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
     }
 
     private Instant calculateDueAt(TrustOnboardingSubmissionDto trustOnboardingSubmission) {
         var referenceInstant = Optional.ofNullable(trustOnboardingSubmission.getSubmittedAt()).orElseThrow();
         return referenceInstant.plus(trustOnboardingTaskProperties.dueDatePeriod());
-    }
-
-    public TrustOnboardingTask getTrustOnboardingTask(UUID taskId) {
-        return taskRepository
-            .findById(taskId)
-            .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
     }
 }

@@ -154,7 +154,6 @@
   "task.table.header.submittedAt": "Data di invio",
   "task.table.header.taskType": "Tipo di attività",
   "task.table.taskType.ADD_DID": "Aggiunta DID",
-  "task.table.taskType.ONBOARDING": "Onboarding",
   "task.table.taskType.PROFILE_CHANGE": "Modifica del profilo",
   "task.table.taskType.PROTECTED_VERIFICATION_REQUEST": "Richiesta di verifica protetta",
   "task.table.taskType.REGISTRATION": "Registrazione",

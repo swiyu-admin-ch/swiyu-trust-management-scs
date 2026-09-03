@@ -79,7 +79,7 @@ public class FrontendWebSecurityConfig {
      */
     @Bean
     @Order(99)
-    SecurityFilterChain deniedEndpointsFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain deniedEndpointsFilterChain(HttpSecurity http) {
         http
             .securityMatcher(RequestMatchers.anyOf(DENIED_GET_ENDPOINTS))
             .authorizeHttpRequests(auth -> auth.anyRequest().denyAll());
@@ -91,7 +91,7 @@ public class FrontendWebSecurityConfig {
      */
     @Bean
     @Order(100)
-    SecurityFilterChain publicEndpointsFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain publicEndpointsFilterChain(HttpSecurity http) {
         http
             .securityMatcher(RequestMatchers.anyOf(PUBLIC_GET_ENDPOINTS))
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
@@ -112,6 +112,6 @@ public class FrontendWebSecurityConfig {
 
     @Bean
     JwtTokenAuthoritiesResolver jwtTokenAuthoritiesResolver(ResourceServerProperties resourceServerProperties) {
-        return new JwtTokenAuthoritiesResolver(resourceServerProperties.getAudience());
+        return new JwtTokenAuthoritiesResolver(resourceServerProperties.getResourceId());
     }
 }

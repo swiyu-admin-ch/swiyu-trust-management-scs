@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.36.0
+
+### Changed
+
+- Refactor TrustOnboardingSubmission - Approval to issue BPI and not statements directly
+- Create BPI and authorizations from existing Trust Statements
+- Update jeap-spring-boot-parent -> 40.7
+- Update frontend packages
+
+## 3.35.11
+
+### Changed
+
+- Align demo data with CBS
+
 ## 3.35.10
 
 ### Changed

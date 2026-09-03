@@ -70,6 +70,16 @@ public class TrustStatementService {
     ) {
         var q = QTrustStatementPartnerLink.trustStatementPartnerLink;
         var where = new BooleanBuilder();
+        if (filter.partnerId() != null) {
+            where.and(q.partnerId.eq(filter.partnerId()));
+        }
+        if (filter.partnerIdIsSet() != null) {
+            if (filter.partnerIdIsSet()) {
+                where.and(q.partnerId.isNotNull());
+            } else {
+                where.and(q.partnerId.isNull());
+            }
+        }
         if (filter.subject() != null) {
             where.and(q.subject.like(filter.subject()));
         }

@@ -23,11 +23,6 @@ public class OutboxEventPublisher {
 
     public final TransactionalOutbox outbox;
 
-    private void sendEvent(final String topicName, Object key, final AvroMessage event) {
-        log.info("Publishing to topic {}", kv(TOPIC_LOGGING_KEY, topicName));
-        outbox.sendMessage(event, key, topicName);
-    }
-
     @Transactional(propagation = Propagation.MANDATORY)
     public void publishVcSchemaPublicationSucceededEvent(@NonNull TiVcSchemaPublicationSucceededEvent event) {
         var topicName = TiVcSchemaPublicationSucceededEvent.TypeRef.DEFAULT_TOPIC;
@@ -174,7 +169,7 @@ public class OutboxEventPublisher {
         );
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     public void publishBusinessPartnerIdentityActivatedEvent(@NonNull TiBusinessPartnerIdentityActivatedEvent event) {
         var topicName = TiBusinessPartnerIdentityActivatedEvent.TypeRef.DEFAULT_TOPIC;
         sendEvent(
@@ -188,7 +183,7 @@ public class OutboxEventPublisher {
         );
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     public void publishBusinessPartnerIdentityDeactivatedEvent(
         @NonNull TiBusinessPartnerIdentityDeactivatedEvent event
     ) {
@@ -204,7 +199,7 @@ public class OutboxEventPublisher {
         );
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     public void publishBusinessPartnerIdentityUpdatedEvent(@NonNull TiBusinessPartnerIdentityUpdatedEvent event) {
         var topicName = TiBusinessPartnerIdentityUpdatedEvent.TypeRef.DEFAULT_TOPIC;
         sendEvent(
@@ -216,5 +211,10 @@ public class OutboxEventPublisher {
                 .build(),
             event
         );
+    }
+
+    private void sendEvent(final String topicName, Object key, final AvroMessage event) {
+        log.info("Publishing to topic {}", kv(TOPIC_LOGGING_KEY, topicName));
+        outbox.sendMessage(event, key, topicName);
     }
 }

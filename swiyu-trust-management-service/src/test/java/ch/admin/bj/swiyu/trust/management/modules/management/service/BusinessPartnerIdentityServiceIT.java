@@ -52,6 +52,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(
     {
+        BusinessPartnerIdentityDomainService.class,
         TrustStatementService.class,
         TrustStatementPartnerLinkValidator.class,
         TrustRegistryService.class,

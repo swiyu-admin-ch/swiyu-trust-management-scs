@@ -5,10 +5,10 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.security.Securit
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationAuthorizationMapper.mapPageableWithValidSortProperties;
 
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityBadRequestException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
-import ch.admin.bj.swiyu.trust.management.modules.management.config.DefaultIdentityProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.statements.DefaultStatementProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiBusinessPartnerIdentityActivatedEventBuilder;
@@ -36,8 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BusinessPartnerIdentityService {
 
+    private final BusinessPartnerIdentityDomainService businessPartnerIdentityDomainService;
     private final BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
-    private final DefaultIdentityProperties defaultIdentityProperties;
     private final DefaultStatementProperties defaultStatementProperties;
     private final DomainEventService domainEventService;
     private final OutboxEventPublisher outboxEventPublisher;
@@ -46,14 +46,6 @@ public class BusinessPartnerIdentityService {
     private final TrustStatementService trustStatementService;
     private final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
     private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
-
-    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
-    public boolean isPartnerTrusted(UUID businessPartnerId) {
-        return businessPartnerIdentityRepository
-            .findById(businessPartnerId)
-            .map(bpi -> bpi.getStatus() == BusinessPartnerIdentityStatus.ACTIVE)
-            .orElse(false);
-    }
 
     /**
      * Whether a {@link BusinessPartnerIdentity} exists for the partner at all, regardless of its status - an
@@ -64,14 +56,8 @@ public class BusinessPartnerIdentityService {
         return businessPartnerIdentityRepository.existsById(businessPartnerId);
     }
 
-    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void activate(UUID businessPartnerId) {
-        var bpi = businessPartnerIdentityRepository
-            .findById(businessPartnerId)
-            .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
-
-        bpi.activate(defaultIdentityProperties.validity());
-
+        var bpi = businessPartnerIdentityDomainService.activate(businessPartnerId);
         var event = TiBusinessPartnerIdentityActivatedEventBuilder.create().businessPartnerIdentity(bpi).build();
 
         outboxEventPublisher.publishBusinessPartnerIdentityActivatedEvent(event);
@@ -79,11 +65,7 @@ public class BusinessPartnerIdentityService {
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void deactivate(UUID businessPartnerId) {
-        var bpi = businessPartnerIdentityRepository
-            .findById(businessPartnerId)
-            .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
-
-        bpi.deactivate();
+        var bpi = businessPartnerIdentityDomainService.deactivate(businessPartnerId);
 
         var event = TiBusinessPartnerIdentityDeactivatedEventBuilder.create().businessPartnerIdentity(bpi).build();
         outboxEventPublisher.publishBusinessPartnerIdentityDeactivatedEvent(event);
@@ -118,11 +100,18 @@ public class BusinessPartnerIdentityService {
             );
         }
 
+        log.debug(
+            "Issuing trust statements for business partner identity: {}, trustedIdentifier ({}): {} ",
+            businessPartnerId,
+            bpi.getTrustedIdentifier().size(),
+            bpi.getTrustedIdentifier()
+        );
         issueAllIdTSForTrustedIdentifiers(bpi);
         issueAllPvaTSForTrustedIdentifiers(bpi);
         issueAllPiaTSForTrustedIdentifiers(bpi);
 
         bpi.updateLastIssuance();
+        businessPartnerIdentityRepository.save(bpi);
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
@@ -165,6 +154,51 @@ public class BusinessPartnerIdentityService {
         return businessPartnerIdentityRepository
             .findById(businessPartnerIdentityId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerIdentityId));
+    }
+
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public UUID handleTrustOnboardingApproval(TrustOnboardingSubmissionDto submission) {
+        BusinessPartnerIdentity bpi;
+        var relevantInformationUpdate = BusinessPartnerIdentityRelevantInformationUpdate.of(submission);
+        var bpiOpt = businessPartnerIdentityRepository.findById(submission.getPartnerId());
+
+        switch (submission.getType()) {
+            case REGISTRATION -> {
+                if (bpiOpt.isEmpty()) {
+                    bpi = new BusinessPartnerIdentity(
+                        submission.getPartnerId(),
+                        relevantInformationUpdate.entityName(),
+                        null,
+                        relevantInformationUpdate.uid(),
+                        relevantInformationUpdate.isRegisteredInCommercialRegister(),
+                        relevantInformationUpdate.correspondingLanguage(),
+                        BusinessPartnerIdentityStatus.DEACTIVATED,
+                        relevantInformationUpdate.isStateActor(),
+                        null,
+                        null,
+                        relevantInformationUpdate.trustedIdentifier()
+                    );
+                } else {
+                    bpi = bpiOpt.get();
+                    bpi.applyRelevantInformationUpdate(relevantInformationUpdate);
+                }
+            }
+            case PROFILE_CHANGE, RENEWAL -> {
+                if (bpiOpt.isEmpty()) {
+                    throw new IllegalStateException(
+                        "Business partner identity for id '%s' must exist for a %s state change".formatted(
+                            submission.getPartnerId(),
+                            submission.getType()
+                        )
+                    );
+                }
+                bpi = bpiOpt.get();
+                bpi.applyRelevantInformationUpdate(relevantInformationUpdate);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + submission.getType());
+        }
+        businessPartnerIdentityRepository.save(bpi);
+        return bpi.getId();
     }
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
@@ -233,7 +267,7 @@ public class BusinessPartnerIdentityService {
     public ProtectedVerificationAuthorizationDto addProtectedVerificationAuthorization(
         @Valid @NotNull ProtectedVerificationAuthorizationRequestDto request
     ) {
-        var field = BusinessPartnerIdentityMapper.toProtectedVerificationField(request.protectedField());
+        var field = toProtectedVerificationField(request.protectedField());
 
         // Uniqueness is enforced at the DB level (unique DID), but we also check here to provide a
         // friendly 400 error instead of a low-level constraint violation.
@@ -280,8 +314,26 @@ public class BusinessPartnerIdentityService {
         );
     }
 
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public void addTrustedIdentifier(UUID partnerId, String trustedIdentifier) {
+        var bpi = getBusinessPartnerIdentity(partnerId);
+        bpi.getTrustedIdentifier().add(trustedIdentifier);
+        businessPartnerIdentityRepository.save(bpi);
+    }
+
+    public BusinessPartnerIdentityDto getBusinessPartnerIdentityByTrustedIdentifier(String identifier) {
+        var businessPartnerIdentity = businessPartnerIdentityRepository
+            .findByTrustedIdentifier(identifier)
+            .orElseThrow(businessPartnerIdentityNotFound());
+        return toBusinessPartnerIdentityDto(businessPartnerIdentity);
+    }
+
     private static Supplier<ResourceNotFoundException> businessPartnerIdentityNotFound(UUID id) {
         return () -> new ResourceNotFoundException("No business partner identity found for id %s".formatted(id));
+    }
+
+    private static Supplier<ResourceNotFoundException> businessPartnerIdentityNotFound() {
+        return () -> new ResourceNotFoundException("No matching business partner identity found");
     }
 
     private static Supplier<ResourceNotFoundException> protectedVerificationAuthorizationNotFound(UUID id) {
@@ -335,9 +387,7 @@ public class BusinessPartnerIdentityService {
                     Instant.now(),
                     statementValidUntil,
                     List.of(
-                        BusinessPartnerIdentityMapper.toProtectedVerificationAuthorizationV2AuthorizedFieldDto(
-                            pva.getProtectedVerificationField()
-                        )
+                        toProtectedVerificationAuthorizationV2AuthorizedFieldDto(pva.getProtectedVerificationField())
                     )
                 );
                 trustStatementService.issueAndPublishProtectedVerificationAuthorizationV2TrustStatement(req);

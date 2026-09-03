@@ -7,6 +7,7 @@ import java.util.UUID;
 @Schema(name = "TrustStatementPartnerLinkListItem")
 public record TrustStatementPartnerLinkListItemDto(
     UUID id,
+    UUID partnerId,
     String subject,
     TrustStatementTypeDto type,
     TrustStatementPartnerLinkStatusDto status,

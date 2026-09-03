@@ -37,7 +37,7 @@ public class BusinessPartnerIdentity {
     @NotNull
     @Column(name = "trusted_identifier", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
-    private final Set<String> trustedIdentifier = new HashSet<>(); // DIDs to represent the BPI
+    private final Set<@NotBlank String> trustedIdentifier = new HashSet<>(); // DIDs to represent the BPI
 
     @Embedded
     private final AuditMetadata audit = new AuditMetadata();
@@ -49,7 +49,7 @@ public class BusinessPartnerIdentity {
     @ValidLocalizedMap
     @Column(name = "partner_name", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, @NotBlank String> entityName;
+    private Map<@NotBlank String, @NotBlank String> entityName;
 
     private Instant lastActivated;
     private String uid;
@@ -98,9 +98,9 @@ public class BusinessPartnerIdentity {
         this.trustedIdentifier.addAll(trustedIdentifier);
     }
 
-    public void activate(Period statementValidity) {
+    public void activate(Period businessPartnerIdentityValidity) {
         status = BusinessPartnerIdentityStatus.ACTIVE;
-        validUntil = calculateValidUntilFromNow(statementValidity);
+        validUntil = today().plus(businessPartnerIdentityValidity).toInstant();
         lastActivated = Instant.now();
     }
 
@@ -131,7 +131,13 @@ public class BusinessPartnerIdentity {
         this.lastIssuanceAt = source.lastIssuanceAt;
     }
 
-    private Instant calculateValidUntilFromNow(Period statementValidity) {
-        return today().plus(statementValidity).toInstant();
+    public void applyRelevantInformationUpdate(BusinessPartnerIdentityRelevantInformationUpdate source) {
+        this.entityName = source.entityName();
+        this.uid = source.uid();
+        this.isRegisteredInCommercialRegister = source.isRegisteredInCommercialRegister();
+        this.correspondingLanguage = source.correspondingLanguage();
+        this.isStateActor = source.isStateActor();
+        this.trustedIdentifier.clear();
+        this.trustedIdentifier.addAll(source.trustedIdentifier());
     }
 }

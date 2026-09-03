@@ -5,7 +5,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {ObAlertComponent, ObButtonModule, ObColumnLayoutModule, ObDocumentMetaService} from '@oblique/oblique';
 import {filter, finalize, take, tap} from 'rxjs';
 import {ProtectedVerificationRequestTask, TaskAction, TaskApi} from '../../api/generated';
@@ -57,8 +57,10 @@ export class ProtectedVerificationRequestTaskDetailComponent {
   rejectReason = '';
 
   @ViewChild(DomainEventListComponent) domainEventList?: DomainEventListComponent;
+  private readonly translateService = inject(TranslateService);
 
   constructor() {
+    this.translateSetup();
     effect(() => {
       this.loadTask();
     });
@@ -131,6 +133,11 @@ export class ProtectedVerificationRequestTaskDetailComponent {
         this.cancelForms();
         this.loadTask();
       });
+  }
+
+  private translateSetup() {
+    // Required for translate service auto collection of i18n keys
+    this.translateService.get('app.protected-verification-request-task.fields.category.AHV_NUMBER');
   }
 
   private loadTask(): void {

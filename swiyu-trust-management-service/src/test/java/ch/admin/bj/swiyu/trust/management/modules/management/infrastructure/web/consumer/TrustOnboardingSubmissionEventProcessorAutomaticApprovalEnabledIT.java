@@ -90,6 +90,6 @@ class TrustOnboardingSubmissionEventProcessorAutomaticApprovalEnabledIT {
         );
         assertThat(task).isNotNull();
         assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
-        assertThat(task.getTaskType()).isEqualTo(TaskType.PROFILE_CHANGE);
+        assertThat(task.getTaskType()).isEqualTo(TaskType.REGISTRATION);
     }
 }

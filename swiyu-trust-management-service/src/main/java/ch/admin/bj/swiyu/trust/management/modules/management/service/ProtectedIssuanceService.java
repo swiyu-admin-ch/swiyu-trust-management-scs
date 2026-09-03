@@ -47,6 +47,14 @@ public class ProtectedIssuanceService {
     }
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public ProtectedIssuanceEntryDto getProtectedIssuanceEntry(@NotNull String vct) {
+        var protectedIssuanceEntry = this.protectedIssuanceEntryRepository.findByVct(vct).orElseThrow(
+            protectedIssuanceEntryNotFound(vct)
+        );
+        return ProtectedIssuanceEntryMapper.toProtectedIssuanceEntryDto(protectedIssuanceEntry);
+    }
+
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public Page<ProtectedIssuanceEntryDto> listProtectedIssuanceEntries(
         @Valid @NotNull ProtectedIssuanceEntryFilterDto filters,
         @Valid @NotNull Pageable pageable
@@ -148,6 +156,21 @@ public class ProtectedIssuanceService {
             .findById(businessPartnerIdentityId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerIdentityId));
 
+        if (
+            protectedIssuanceAuthorizationRepository
+                .findByBusinessPartnerIdentityIdAndProtectedIssuanceEntryId(
+                    businessPartnerIdentityId,
+                    protectedIssuanceEntryId
+                )
+                .isPresent()
+        ) {
+            throw new IllegalArgumentException(
+                "BusinessPartnerIdentity %s already has authorization for %s".formatted(
+                    businessPartnerIdentityId,
+                    protectedIssuanceEntryId
+                )
+            );
+        }
         var authorization = new ProtectedIssuanceAuthorization(
             UUID.randomUUID(),
             businessPartnerIdentityId,
@@ -221,6 +244,10 @@ public class ProtectedIssuanceService {
 
     private static Supplier<ResourceNotFoundException> protectedIssuanceEntryNotFound(UUID id) {
         return () -> new ResourceNotFoundException("No ProtectedIssuanceEntry found for id %s".formatted(id));
+    }
+
+    private static Supplier<ResourceNotFoundException> protectedIssuanceEntryNotFound(String vct) {
+        return () -> new ResourceNotFoundException("No ProtectedIssuanceEntry found for vct %s".formatted(vct));
     }
 
     private static Supplier<ResourceNotFoundException> protectedIssuanceAuthorizationNotFound(UUID id) {
