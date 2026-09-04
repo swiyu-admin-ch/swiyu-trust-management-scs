@@ -36,6 +36,7 @@ public class DemoDataImportService {
     private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
     private final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
     private final ProtectedVerificationRequestTaskRepository protectedVerificationRequestTaskRepository;
+    private final TrustStatementPartnerLinkRepository trustStatementPartnerLinkRepository;
 
     public void setSystemSecurityContext() {
         SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
@@ -96,6 +97,14 @@ public class DemoDataImportService {
                         protectedIssuanceEntryRepository.deleteById(pia.protectedVctEntryId());
                     })
             );
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteTrustStatementPartnerLinks() {
+        log.debug("Delete demo trust statement partner links ...");
+        for (var demoCase : DemoData.DemoCase.values()) {
+            trustStatementPartnerLinkRepository.deleteAllByPartnerId(demoCase.bp.id());
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

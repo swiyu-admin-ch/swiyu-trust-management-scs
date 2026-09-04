@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.36.2
+
+### Changed
+
+- Demo data import now deletes stale trust statements before reloading demo data
+
+## 3.36.1
+
+### Changed
+
+- Catch error case that a TiBusinessPartnerIdentityUpdatedEvent is thrown for a not activated BPI. (Use case:
+  Authorization set on a deactivated BPI)
+- Update frontend packages
+
 ## 3.36.0
 
 ### Changed

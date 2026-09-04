@@ -29,6 +29,7 @@ public class DemoDataAsyncExecutor {
                 demoDataImportService.deleteProtectedVerificationRequestTasks();
                 demoDataImportService.deleteProtectedVerificationAuthorizations();
                 demoDataImportService.deleteProtectedIssuanceEntriesAndAuthorizations();
+                demoDataImportService.deleteTrustStatementPartnerLinks();
                 demoDataImportService.deleteBusinessPartnerIdentities();
                 demoDataImportService.loadBusinessPartnerIdentities();
                 demoDataImportService.loadProtectedVerificationAuthorizations();

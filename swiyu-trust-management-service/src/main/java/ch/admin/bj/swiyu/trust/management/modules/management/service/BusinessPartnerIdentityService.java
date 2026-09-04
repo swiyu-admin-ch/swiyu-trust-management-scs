@@ -6,7 +6,7 @@ import static ch.admin.bj.swiyu.trust.management.modules.management.service.Busi
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationAuthorizationMapper.mapPageableWithValidSortProperties;
 
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
-import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityBadRequestException;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityNotActiveException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.statements.DefaultStatementProperties;
@@ -95,7 +95,7 @@ public class BusinessPartnerIdentityService {
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
 
         if (bpi.getStatus() != BusinessPartnerIdentityStatus.ACTIVE) {
-            throw new BusinessPartnerIdentityBadRequestException(
+            throw new BusinessPartnerIdentityNotActiveException(
                 "Business partner identity for id '%s' is not active".formatted(businessPartnerId)
             );
         }
@@ -121,7 +121,7 @@ public class BusinessPartnerIdentityService {
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
 
         if (bpi.getStatus() != BusinessPartnerIdentityStatus.ACTIVE) {
-            throw new BusinessPartnerIdentityBadRequestException(
+            throw new BusinessPartnerIdentityNotActiveException(
                 "Business partner identity for id '%s' is not active".formatted(businessPartnerId)
             );
         }

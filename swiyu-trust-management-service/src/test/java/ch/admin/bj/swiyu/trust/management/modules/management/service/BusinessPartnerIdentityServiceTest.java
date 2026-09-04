@@ -11,7 +11,7 @@ import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
 import ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper;
-import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityBadRequestException;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityNotActiveException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV1RequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.IdentityV2RequestDto;
@@ -243,7 +243,7 @@ class BusinessPartnerIdentityServiceTest {
         when(businessPartnerIdentityRepository.findById(bpiId)).thenReturn(Optional.of(bpi));
 
         assertThatThrownBy(() -> businessPartnerIdentityService.issueTrustStatements(bpiId))
-            .isInstanceOf(BusinessPartnerIdentityBadRequestException.class)
+            .isInstanceOf(BusinessPartnerIdentityNotActiveException.class)
             .hasMessageMatching("Business partner identity for id '%s' is not active".formatted(bpiId));
     }
 
@@ -401,7 +401,7 @@ class BusinessPartnerIdentityServiceTest {
         when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
 
         assertThatThrownBy(() -> businessPartnerIdentityService.renewTrustStatements(bpiId))
-            .isInstanceOf(BusinessPartnerIdentityBadRequestException.class)
+            .isInstanceOf(BusinessPartnerIdentityNotActiveException.class)
             .hasMessageMatching("Business partner identity for id '%s' is not active".formatted(bpi.getId()));
     }
 

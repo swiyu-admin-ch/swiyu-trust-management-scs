@@ -71,4 +71,6 @@ public interface TrustStatementPartnerLinkRepository
         UUID protectedIssuanceAuthorizationId,
         TrustStatementPartnerLinkStatus status
     );
+
+    void deleteAllByPartnerId(UUID partnerId);
 }

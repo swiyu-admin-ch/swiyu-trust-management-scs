@@ -6,6 +6,7 @@ import ch.admin.bit.jeap.messaging.idempotence.messagehandler.IdempotentMessageH
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityNotActiveException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,14 @@ public class BusinessPartnerIdentityEventProcessor {
     public void processTiBusinessPartnerIdentityUpdatedEvent(TiBusinessPartnerIdentityUpdatedEvent event) {
         var businessPartnerId = event.getPayload().getBusinessPartnerIdentityId();
         log.info("Retrieve Business Partner Identity Updated Event with ID: {}", businessPartnerId);
-        businessPartnerIdentityService.issueTrustStatements(businessPartnerId);
+        try {
+            businessPartnerIdentityService.issueTrustStatements(businessPartnerId);
+        } catch (BusinessPartnerIdentityNotActiveException e) {
+            log.warn(
+                "Received TiBusinessPartnerIdentityUpdatedEvent for business partner {} with a bad request.",
+                businessPartnerId,
+                e
+            );
+        }
     }
 }
