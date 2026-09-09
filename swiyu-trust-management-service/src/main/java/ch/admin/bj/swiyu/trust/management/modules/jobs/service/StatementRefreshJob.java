@@ -3,6 +3,8 @@ package ch.admin.bj.swiyu.trust.management.modules.jobs.service;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.setSystemUserAuthentication;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.async.Lock;
+import ch.admin.bj.swiyu.trust.management.modules.common.security.SystemUserAuthentication;
+import ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.NonCompliantActorPublicationService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.StatusListService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustStatementService;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,8 +30,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class StatementRefreshJob {
 
-    private final StatusListService statusListService;
+    private final BusinessPartnerIdentityService businessPartnerIdentityService;
     private final NonCompliantActorPublicationService nonCompliantActorPublicationService;
+    private final StatusListService statusListService;
     private final TrustStatementService trustStatementService;
 
     @Scheduled(cron = "${app.jobs.statement-non-compliance-trust-list-refresh-interval}")
@@ -50,5 +54,20 @@ public class StatementRefreshJob {
     public void refreshStatusLists() {
         setSystemUserAuthentication();
         statusListService.triggerPublications();
+    }
+
+    @Scheduled(cron = "${app.business-partner-defaults.deactivation-cron}")
+    @SchedulerLock(name = Lock.DEACTIVATE_EXPIRED_BUSINESS_PARTNER_IDENTITIES)
+    public void deactivateExpiredBusinessPartnerIdentities() {
+        SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdToDeactivate();
+        identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
+    }
+
+    @Scheduled(cron = "${app.statement-defaults.refresh-cron}")
+    @SchedulerLock(name = Lock.STATEMENT_REFRESH)
+    public void renewTrustStatementsOfBusinessPartnerIdentities() {
+        SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
+        businessPartnerIdentityService.renewTrustStatementsOfBusinessPartnerIdentities();
     }
 }

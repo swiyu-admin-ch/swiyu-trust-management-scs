@@ -1,8 +1,9 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
-import static ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventType.*;
+import static ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventType.PROTECTED_VERIFICATION_AUTHORIZATION_ADDED;
 import static java.time.Duration.ofSeconds;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.*;
 
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
@@ -13,12 +14,13 @@ import ch.admin.bj.swiyu.trust.client.issuer.management.api.CredentialApi;
 import ch.admin.bj.swiyu.trust.client.issuer.management.model.CredentialStatusTypeDto;
 import ch.admin.bj.swiyu.trust.client.issuer.oid4vci.api.IssuerOid4VciApi;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
-import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.AuthorizableFieldDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerIdentityFilterDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.ProtectedVerificationAuthorizationRequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.DefaultIdentityProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.TrustOnboardingTaskProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.issuer.IssuerJwtProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkStatus;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusiness.IssuerTrustRootProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.IssuerClient;
@@ -99,7 +101,7 @@ class BusinessPartnerIdentityServiceIT {
     @Autowired
     private TestRepositories repos;
 
-    @MockitoBean
+    @MockitoBean // mocked so we don't need to bootstrap kafka (reduce pipeline time)
     private OutboxEventPublisher outboxEventPublisher;
 
     @Autowired
@@ -281,5 +283,84 @@ class BusinessPartnerIdentityServiceIT {
         var filter = new BusinessPartnerIdentityFilterDto(null, null, "TestUser");
         var page = businessPartnerIdentityService.getBusinessPartnerIdentities(filter, PageRequest.of(0, 10));
         assertThat(page.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    void deactivateExpiredBusinessPartnerIdentities_deactivateOlderValidUntil() {
+        var bpi = BusinessPartnerIdentityTestData.businessPartnerIdentityValidUntilYesterday();
+        repos.businessPartnerIdentity.save(bpi);
+        repos.commit();
+
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdToDeactivate();
+        identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
+
+        var updatedBpi = repos.businessPartnerIdentity.findById(bpi.getId()).orElse(null);
+        assertThat(updatedBpi).isNotNull();
+        assertThat(updatedBpi.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.DEACTIVATED);
+        var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityDeactivatedEvent.class);
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(captor.capture());
+    }
+
+    @Test
+    void deactivateExpiredBusinessPartnerIdentities_DoNotDeactivateWhenNotActive() {
+        var bpi = BusinessPartnerIdentityTestData.businessPartnerIdentityValidUntilYesterday(
+            BusinessPartnerIdentityStatus.DEACTIVATED
+        );
+        repos.businessPartnerIdentity.save(bpi);
+        repos.commit();
+
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdToDeactivate();
+        identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
+
+        verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityDeactivatedEvent(any());
+    }
+
+    @Test
+    void deactivateExpiredBusinessPartnerIdentities_DoNotDeactivateWhenValidUntilIsNotReached() {
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity();
+        repos.businessPartnerIdentity.save(bpi);
+        repos.commit();
+
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdToDeactivate();
+        identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
+
+        verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityDeactivatedEvent(any());
+    }
+
+    @Test
+    void renewTrustStatementsOfBusinessPartnerIdentities_isRenewed() {
+        repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.businessPartnerIdentityLastIssuance7MonthsAgo()
+        );
+        repos.commit();
+
+        businessPartnerIdentityService.renewTrustStatementsOfBusinessPartnerIdentities();
+
+        var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityUpdatedEvent.class);
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityUpdatedEvent(captor.capture());
+    }
+
+    @Test
+    void renewTrustStatementsOfBusinessPartnerIdentities_deactivatedIsNotRenewed() {
+        repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.businessPartnerIdentityLastIssuance7MonthsAgo(
+                BusinessPartnerIdentityStatus.DEACTIVATED
+            )
+        );
+        repos.commit();
+
+        businessPartnerIdentityService.renewTrustStatementsOfBusinessPartnerIdentities();
+
+        verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityUpdatedEvent(any());
+    }
+
+    @Test
+    void renewTrustStatementsOfBusinessPartnerIdentities_doesNothingWhenRefreshPeriodIsNotReached() {
+        repos.businessPartnerIdentity.save(BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity());
+        repos.commit();
+
+        businessPartnerIdentityService.renewTrustStatementsOfBusinessPartnerIdentities();
+
+        verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityUpdatedEvent(any());
     }
 }

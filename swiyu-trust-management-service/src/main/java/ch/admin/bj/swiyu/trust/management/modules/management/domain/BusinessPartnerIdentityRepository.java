@@ -1,5 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +20,14 @@ public interface BusinessPartnerIdentityRepository
         nativeQuery = true
     )
     Optional<BusinessPartnerIdentity> findByTrustedIdentifier(String identifier);
+
+    List<BusinessPartnerIdentity> findAllByStatusAndValidUntilBefore(
+        BusinessPartnerIdentityStatus status,
+        Instant validUntilBefore
+    );
+
+    List<BusinessPartnerIdentity> findAllByStatusAndLastIssuanceAtLessThanEqual(
+        BusinessPartnerIdentityStatus status,
+        Instant lastIssuanceLimit
+    );
 }

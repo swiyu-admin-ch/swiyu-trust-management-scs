@@ -10,7 +10,8 @@ public record DefaultStatementProperties(
     @Valid Period timeToLive,
     @Valid StatuslistProperties statuslist,
     @Valid NonComplianceTrustListStatementProperties nonComplianceTrustListStatement,
-    @Valid ProtectedIssuanceTrustListStatementProperties protectedIssuanceTrustListStatement
+    @Valid ProtectedIssuanceTrustListStatementProperties protectedIssuanceTrustListStatement,
+    @Valid Period refreshPeriod
 ) {
     /**
      * @param timeToLive Period after which a statuslist expires

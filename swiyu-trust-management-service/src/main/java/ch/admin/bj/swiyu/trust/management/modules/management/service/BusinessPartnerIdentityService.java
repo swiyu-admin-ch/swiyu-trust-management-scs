@@ -1,5 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
+import static ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper.today;
 import static ch.admin.bj.swiyu.trust.management.modules.common.persistence.TransactionManagerNames.MANAGEMENT_TRANSACTION_MANAGER;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.BusinessPartnerIdentityMapper.*;
@@ -72,6 +73,15 @@ public class BusinessPartnerIdentityService {
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public List<UUID> findAllBusinessPartnerIdentityIdToDeactivate() {
+        return businessPartnerIdentityRepository
+            .findAllByStatusAndValidUntilBefore(BusinessPartnerIdentityStatus.ACTIVE, today().toInstant())
+            .stream()
+            .map(BusinessPartnerIdentity::getId)
+            .toList();
+    }
+
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void deactivateTrustStatements(UUID businessPartnerId, String reason) {
         var bpi = businessPartnerIdentityRepository
             .findById(businessPartnerId)
@@ -129,6 +139,17 @@ public class BusinessPartnerIdentityService {
         outboxEventPublisher.publishBusinessPartnerIdentityUpdatedEvent(
             TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build()
         );
+    }
+
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    @SuppressWarnings("java:S6809") // bypass SonarQube Method with Spring proxy should not be called via "this"
+    public void renewTrustStatementsOfBusinessPartnerIdentities() {
+        var lastIssuanceLimit = today().minus(defaultStatementProperties.refreshPeriod()).toInstant();
+        var identitiesToRenew = businessPartnerIdentityRepository.findAllByStatusAndLastIssuanceAtLessThanEqual(
+            BusinessPartnerIdentityStatus.ACTIVE,
+            lastIssuanceLimit
+        );
+        identitiesToRenew.forEach(identity -> renewTrustStatements(identity.getId()));
     }
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
@@ -264,6 +285,7 @@ public class BusinessPartnerIdentityService {
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    @SuppressWarnings("java:S6809") // bypass SonarQube Method with Spring proxy should not be called via "this"
     public ProtectedVerificationAuthorizationDto addProtectedVerificationAuthorization(
         @Valid @NotNull ProtectedVerificationAuthorizationRequestDto request
     ) {
@@ -301,6 +323,7 @@ public class BusinessPartnerIdentityService {
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    @SuppressWarnings("java:S6809") // bypass SonarQube Method with Spring proxy should not be called via "this"
     public void removeProtectedVerificationAuthorization(@Valid @NotNull UUID protectedVerificationAuthorizationId) {
         var pva = protectedVerificationAuthorizationRepository
             .findById(protectedVerificationAuthorizationId)

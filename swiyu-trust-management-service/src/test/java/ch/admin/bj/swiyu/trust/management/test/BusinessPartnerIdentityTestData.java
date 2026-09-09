@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.test;
 
-import ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper;
+import static ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper.today;
+
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink;
@@ -44,7 +45,51 @@ public class BusinessPartnerIdentityTestData {
             "de-CH",
             status,
             false,
-            DateTimeHelper.today().plusYears(3).toInstant(), // 5 min
+            today().plusYears(3).toInstant(),
+            null,
+            Set.of("Some-did")
+        );
+    }
+
+    public static BusinessPartnerIdentity businessPartnerIdentityLastIssuance7MonthsAgo() {
+        return businessPartnerIdentityLastIssuance7MonthsAgo(BusinessPartnerIdentityStatus.ACTIVE);
+    }
+
+    public static BusinessPartnerIdentity businessPartnerIdentityLastIssuance7MonthsAgo(
+        BusinessPartnerIdentityStatus status
+    ) {
+        return new BusinessPartnerIdentity(
+            UUID.randomUUID(),
+            BUSINESS_PARTNER_NAME,
+            today().minusYears(3).toInstant(),
+            "CHE-123-456-789",
+            false,
+            "de-CH",
+            status,
+            false,
+            today().plusYears(3).toInstant(),
+            today().minusMonths(7).toInstant(),
+            Set.of("Some-did")
+        );
+    }
+
+    public static BusinessPartnerIdentity businessPartnerIdentityValidUntilYesterday() {
+        return businessPartnerIdentityValidUntilYesterday(BusinessPartnerIdentityStatus.ACTIVE);
+    }
+
+    public static BusinessPartnerIdentity businessPartnerIdentityValidUntilYesterday(
+        BusinessPartnerIdentityStatus status
+    ) {
+        return new BusinessPartnerIdentity(
+            UUID.randomUUID(),
+            BUSINESS_PARTNER_NAME,
+            today().minusYears(3).minusDays(1).toInstant(),
+            "CHE-123-456-789",
+            false,
+            "de-CH",
+            status,
+            false,
+            today().minusDays(1).toInstant(),
             null,
             Set.of("Some-did")
         );

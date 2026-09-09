@@ -181,6 +181,8 @@ http:
   max-redirects: 5
 
 app:
+  business-partner-defaults:
+    deactivation-cron: "0 0 1 * * *" # once a day at 01:00
   frontend:
     auth:
       useSilentRefresh: true
@@ -215,6 +217,8 @@ app:
       # We have a max lifetime of time-to-live for token. If we have an error in the refresh of this token, this is
       # the MAX time we have, to solve the problem before the ecosystem is in disarray.
       time-to-live: P6M # 6 Months
+    refresh-cron: "0 0 1 * * *" # once a day at 01:00
+    refresh-period: P6M # 6 Months
   identity-defaults:
     validity: P3Y # 3 years
 
