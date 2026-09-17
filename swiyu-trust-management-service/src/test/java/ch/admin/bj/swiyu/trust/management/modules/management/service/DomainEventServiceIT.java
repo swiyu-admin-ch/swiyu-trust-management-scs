@@ -10,6 +10,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAd
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
+import ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData;
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +53,9 @@ class DomainEventServiceIT {
         trustAddDidTaskRepository.deleteAllInBatch();
         trustOnboardingTaskRepository.deleteAllInBatch();
         this.task = trustOnboardingTaskRepository.save(trustOnboardingTask());
-        this.addDidTask = trustAddDidTaskRepository.save(trustAddDidTask());
+        this.addDidTask = trustAddDidTaskRepository.save(
+            trustAddDidTask(BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity())
+        );
     }
 
     @Test

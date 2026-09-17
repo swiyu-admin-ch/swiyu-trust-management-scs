@@ -4,7 +4,12 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMappe
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.validateActionAllowed;
 
 import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustAddDidsSubmissionInternalApi;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProofOfPossessionDto;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustAdditionalDidsSubmissionInternalDtoDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustAddDidTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto;
@@ -17,10 +22,12 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
 @Service
@@ -31,6 +38,8 @@ public class TrustAddDidTaskService {
     private final OutboxEventPublisher outboxEventPublisher;
     private final DomainEventService domainEventService;
     private final AuditPublisher auditPublisher;
+    private final BusinessPartnerIdentityService businessPartnerIdentityService;
+    private final TrustAddDidsSubmissionInternalApi trustAddDidsSubmissionApi;
 
     @Transactional(readOnly = true)
     public TrustAddDidTaskDto getTask(UUID taskId) {
@@ -80,11 +89,29 @@ public class TrustAddDidTaskService {
         validateActionAllowed(task, triggeredBy, TaskActionDto.APPROVE);
         task.approve();
         trustAddDidTaskRepository.save(task);
+
+        // As the DIDs to add are not saved to the TMS DB we need to fetch them first
+        TrustAdditionalDidsSubmissionInternalDtoDto submission;
+        try {
+            submission = trustAddDidsSubmissionApi.getSubmission(task.getTrustAddDidSubmissionId());
+        } catch (RestClientResponseException exception) {
+            throw new ExternalSystemException(
+                exception.getMessage(),
+                ExternalSystem.CORE_BUSINESS_SERVICE,
+                exception.getStatusCode()
+            );
+        }
+        businessPartnerIdentityService.addTrustedIdentifiers(
+            task.getPartnerId(),
+            submission.getDidsToAdd().stream().map(ProofOfPossessionDto::getDid).collect(Collectors.toSet())
+        );
+
         outboxEventPublisher.publishTrustAddDidSubmissionAcceptedEvent(
             TiTrustAddDidSubmissionAcceptedEventBuilder.create()
                 .trustAddDidSubmissionId(task.getTrustAddDidSubmissionId())
                 .build()
         );
+
         domainEventService.trustAddDidSubmissionSucceeded(task.getId(), triggeredBy);
         auditPublisher.taskApproved(
             task.getPartnerId(),
@@ -93,6 +120,9 @@ public class TrustAddDidTaskService {
             task.getTaskType().toString(),
             toAuditJson(task)
         );
+
+        // Send out the BPI update event
+        businessPartnerIdentityService.renewTrustStatements(task.getPartnerId());
     }
 
     @Transactional

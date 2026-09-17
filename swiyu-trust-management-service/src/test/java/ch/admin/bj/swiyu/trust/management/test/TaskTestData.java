@@ -1,6 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.test;
 
-import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData.TEST_PARTNER_NAME;
+import static ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData.BUSINESS_PARTNER_NAME;
 import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData.ZONE_ID_ZURICH;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -21,7 +21,7 @@ public class TaskTestData {
     public static ProtectedVerificationRequestTask protectedVerificationRequestTask() {
         return new ProtectedVerificationRequestTask(
             UUID.randomUUID(),
-            TEST_PARTNER_NAME,
+            BUSINESS_PARTNER_NAME,
             UUID.randomUUID(),
             Instant.now(),
             Instant.now().plus(12, ChronoUnit.DAYS)
@@ -33,7 +33,7 @@ public class TaskTestData {
         return TrustOnboardingTask.createRegistrationTask(
             UUID.randomUUID(),
             UUID.randomUUID(),
-            TEST_PARTNER_NAME,
+            BUSINESS_PARTNER_NAME,
             UUID.randomUUID(),
             submittedAt.plus(12, ChronoUnit.DAYS),
             submittedAt
@@ -45,7 +45,7 @@ public class TaskTestData {
         var task = TrustOnboardingTask.createRegistrationTask(
             UUID.randomUUID(),
             UUID.randomUUID(),
-            TEST_PARTNER_NAME,
+            BUSINESS_PARTNER_NAME,
             UUID.randomUUID(),
             submittedAt.plus(12, ChronoUnit.DAYS),
             submittedAt
@@ -72,7 +72,7 @@ public class TaskTestData {
         return TrustOnboardingTask.createRegistrationTask(
             UUID.randomUUID(),
             UUID.randomUUID(),
-            TEST_PARTNER_NAME,
+            BUSINESS_PARTNER_NAME,
             UUID.randomUUID(),
             LocalDate.now().atStartOfDay(ZONE_ID_ZURICH).toInstant().plus(12, ChronoUnit.DAYS),
             submittedAt
@@ -83,7 +83,7 @@ public class TaskTestData {
         return TrustOnboardingTask.createRegistrationTask(
             id,
             UUID.randomUUID(),
-            TEST_PARTNER_NAME,
+            BUSINESS_PARTNER_NAME,
             UUID.randomUUID(),
             dueAt,
             LocalDate.now().atStartOfDay(ZONE_ID_ZURICH).toInstant().minus(12, ChronoUnit.DAYS)

@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.time.Period;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -79,6 +80,15 @@ public class BusinessPartnerIdentityService {
             .stream()
             .map(BusinessPartnerIdentity::getId)
             .toList();
+    }
+
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public void addTrustedIdentifiers(UUID businessPartnerId, Set<String> trustedIdentifiers) {
+        var bpi = businessPartnerIdentityRepository
+            .findById(businessPartnerId)
+            .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
+        bpi.getTrustedIdentifier().addAll(trustedIdentifiers);
+        businessPartnerIdentityRepository.save(bpi);
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
@@ -337,13 +347,7 @@ public class BusinessPartnerIdentityService {
         );
     }
 
-    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
-    public void addTrustedIdentifier(UUID partnerId, String trustedIdentifier) {
-        var bpi = getBusinessPartnerIdentity(partnerId);
-        bpi.getTrustedIdentifier().add(trustedIdentifier);
-        businessPartnerIdentityRepository.save(bpi);
-    }
-
+    @NotNull
     public BusinessPartnerIdentityDto getBusinessPartnerIdentityByTrustedIdentifier(String identifier) {
         var businessPartnerIdentity = businessPartnerIdentityRepository
             .findByTrustedIdentifier(identifier)

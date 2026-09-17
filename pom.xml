@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -10,35 +9,36 @@
             Attention: when ever you update this version, check whether we can remove a CVE-OVERRIDE
             from the dependencyManagement section
          -->
-        <version>40.10.0</version>
+        <!-- see https://github.com/jeap-admin-ch/jeap-spring-boot-parent/blob/main/CHANGELOG.md -->
+        <version>41.5.0</version>
         <relativePath/>
     </parent>
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>3.36.5-SNAPSHOT</version>
+    <version>3.37.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
         <java-uuid-generator.version>5.2.0</java-uuid-generator.version>
         <didresolver.version>2.6.0</didresolver.version>
-        <swiyu-jws-signature-service.version>1.7.0</swiyu-jws-signature-service.version>
+        <swiyu-jws-signature-service.version>1.8.4</swiyu-jws-signature-service.version>
         <com-securosys-primus-jce.version>2.4.4</com-securosys-primus-jce.version>
         <!-- Keep didresolver and adapter in sync https://github.com/swiyu-admin-ch/swiyu-generic-java-lib/blob/main/swiyu-did-resolver-adapter/pom.xml -->
-        <swiyu-did-resolver-adapter.version>1.7.0</swiyu-did-resolver-adapter.version>
-        <swiyu-did-resolver.version>2.8.2</swiyu-did-resolver.version>
+        <swiyu-did-resolver-adapter.version>1.8.4</swiyu-did-resolver-adapter.version>
+        <swiyu-did-resolver.version>2.9.0</swiyu-did-resolver.version>
 
-        <archunit-junit5.version>1.4.2</archunit-junit5.version>
+        <archunit-junit5.version>1.5.0</archunit-junit5.version>
         <nimbus-jose-jwt.version>10.9.1</nimbus-jose-jwt.version>
         <sd-jwt.version>1.9</sd-jwt.version>
-        <jackson-databind-nullable.version>0.2.10</jackson-databind-nullable.version>
-        <openapi-generator-maven-plugin.version>7.23.0</openapi-generator-maven-plugin.version>
+        <jackson-databind-nullable.version>0.2.11</jackson-databind-nullable.version>
+        <openapi-generator-maven-plugin.version>7.25.0</openapi-generator-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-        <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
+        <spotless-maven-plugin.version>3.10.2</spotless-maven-plugin.version>
         <cleanthat.version>2.25</cleanthat.version>
         <prettier.version>3.8.1</prettier.version>
         <prettier-plugin-java.version>2.8.1</prettier-plugin-java.version>
-        <openfeign.querydsl.version>7.4.0</openfeign.querydsl.version>
+        <openfeign.querydsl.version>7.6</openfeign.querydsl.version>
         <!-- Sonar Rules -->
         <sonar.cpd.exclusions>
             **/*Dto.java
@@ -59,7 +59,7 @@
         <sonar.issue.ignore.multicriteria.ignore-secrets.resourceKey>**/application-*.yml
         </sonar.issue.ignore.multicriteria.ignore-secrets.resourceKey>
 
-        <sonar-maven-plugin.version>5.7.0.6970</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
         <java.version>25</java.version>
         <maven.compiler.release>25</maven.compiler.release>
     </properties>
@@ -134,7 +134,7 @@
                         <importOrder>
                             <order>java,javax,com,de,lombok,net,org</order>
                         </importOrder>
-                        <removeUnusedImports/>
+                        <removeUnusedImports />
                         <prettier>
                             <devDependencies>
                                 <prettier>${prettier.version}</prettier>

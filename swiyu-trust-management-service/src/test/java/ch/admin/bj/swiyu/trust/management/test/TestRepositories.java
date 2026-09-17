@@ -4,6 +4,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.NonComplianceListRepository;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.StatementRepository;
@@ -34,6 +35,7 @@ public class TestRepositories {
     public final ProtectedVerificationRequestTaskRepository protectedVerificationRequestTask;
     public final ProtectedVerificationAuthorizationRepository protectedVerificationAuthorization;
     public final TrustOnboardingTaskRepository trustOnboardingTask;
+    public final TrustAddDidTaskRepository trustAddDidTask;
 
     /**
      * Opens a new Transaction. Might be useful if there are multiple transactions are needed within a test.

@@ -1,28 +1,17 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
-import static ch.admin.bj.swiyu.trust.management.modules.common.persistence.TransactionManagerNames.MANAGEMENT_TRANSACTION_MANAGER;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserFullName;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserName;
 
-import ch.admin.bit.jeap.messaging.idempotence.messagehandler.IdempotentMessageHandler;
-import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
 import ch.admin.bj.swiyu.messagetype.ti.TiTrustAddDidSubmissionSubmittedEvent;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustAddDidsSubmissionInternalApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustAdditionalDidsSubmissionInternalDtoDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
-import ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapUtil;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkRepository;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkStatus;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType;
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
@@ -30,14 +19,10 @@ import org.springframework.web.client.RestClientResponseException;
 @AllArgsConstructor
 public class TrustAddDidSubmissionEventProcessor {
 
-    public static final String UNKNOWN_PARTNER_NAME = "Unknown";
     private final TrustAddDidTaskService taskService;
     private final TrustAddDidsSubmissionInternalApi trustAddDidsSubmissionApi;
-    private final TrustStatementPartnerLinkRepository trustStatementPartnerLinkRepository;
-    private final TrustStatementService trustStatementService;
+    private final BusinessPartnerIdentityService businessPartnerIdentityService;
 
-    @IdempotentMessageHandler
-    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void processTiTrustAddDidSubmissionSubmittedEvent(TiTrustAddDidSubmissionSubmittedEvent event) {
         var submissionId = event.getPayload().getTrustAddDidSubmissionId();
         log.info("Processing Trust Add DID Submission Submitted Event with ID: {}", submissionId);
@@ -52,87 +37,22 @@ public class TrustAddDidSubmissionEventProcessor {
                 exception.getStatusCode()
             );
         }
-
         var permissionDid = submission.getPermissionDid().getDid();
 
-        // Look up partner info from the permissionDid's existing identity trust statement
-        var existingIdentityStatement = trustStatementPartnerLinkRepository
-            .findAllBySubjectAndTypeInAndStatus(
-                permissionDid,
-                List.of(
-                    TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V1,
-                    TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V2
-                ),
-                TrustStatementPartnerLinkStatus.ACTIVE
-            )
-            .stream()
-            .findAny()
-            .orElse(null);
-
-        // Create the task
-        Map<String, String> partnerName;
-        UUID partnerId;
-        if (existingIdentityStatement != null) {
-            partnerId = existingIdentityStatement.getPartnerId();
-            partnerName = BusinessPartnerIdentityMapper.toLocalizedEntityName(existingIdentityStatement.getDetails());
-        } else {
-            partnerId = null;
-            partnerName = LocalizedMapUtil.fromSingleName(UNKNOWN_PARTNER_NAME);
-        }
+        var businessPartnerIdentity = businessPartnerIdentityService.getBusinessPartnerIdentityByTrustedIdentifier(
+            permissionDid
+        );
 
         var taskId = taskService.createTask(
-            partnerId,
-            partnerName,
+            businessPartnerIdentity.id(),
+            businessPartnerIdentity.entityName(),
             submissionId,
             permissionDid,
             submission.getUpdatedAt() != null ? submission.getUpdatedAt() : Instant.now(),
             getCurrentUserName()
         );
-
-        // Validate permissionDid is trusted
-        if (existingIdentityStatement == null) {
-            log.warn(
-                "Permission DID {} is not trusted (no active identity trust statement found). Rejecting.",
-                permissionDid
-            );
-            taskService.reject(taskId, RejectReason.UNKNOWN, getCurrentUserFullName());
-            return;
-        }
-
-        var businessPartnerIdentity = BusinessPartnerIdentityMapper.toBusinessPartnerIdentity(
-            existingIdentityStatement
-        );
-
-        // Issue identity trust statement for each new DID
-        try {
-            for (var didToAdd : submission.getDidsToAdd()) {
-                var newDid = didToAdd.getDid();
-                log.info("Issuing identity trust statement V1 or new DID: {}", newDid);
-                var request = BusinessPartnerIdentityMapper.toTrustStatementPartnerLinkIdentityV1RequestDto(
-                    newDid,
-                    businessPartnerIdentity
-                );
-                trustStatementService.issueAndPublishIdentityV1TrustStatement(partnerId, request);
-
-                log.info("Issuing identity trust statement V2 or new DID: {}", newDid);
-                var request2 = BusinessPartnerIdentityMapper.toTrustStatementPartnerLinkIdentityV2RequestDto(
-                    newDid,
-                    businessPartnerIdentity
-                );
-                trustStatementService.issueAndPublishIdentityV2TrustStatement(request2);
-            }
-        } catch (Exception e) {
-            log.error(
-                "Failed to issue identity trust statement for add-DID submission {}. Rejecting.",
-                submissionId,
-                e
-            );
-            taskService.reject(taskId, RejectReason.UNKNOWN, getCurrentUserFullName());
-            return;
-        }
-
-        // All DIDs processed successfully
         taskService.approve(taskId, getCurrentUserFullName());
+
         log.info("Trust Add DID submission {} processed successfully.", submissionId);
     }
 }

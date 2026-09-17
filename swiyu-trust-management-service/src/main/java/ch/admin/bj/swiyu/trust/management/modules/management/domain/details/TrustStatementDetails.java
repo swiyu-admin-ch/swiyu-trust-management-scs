@@ -18,7 +18,12 @@ import lombok.Getter;
     isGetterVisibility = NONE,
     creatorVisibility = NONE
 )
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, visible = true, property = "type")
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
+    visible = true,
+    property = "type"
+)
 @JsonSubTypes(
     {
         @JsonSubTypes.Type(value = IdentityV1Details.class, name = "TRUST_STATEMENT_IDENTITY_V1"),

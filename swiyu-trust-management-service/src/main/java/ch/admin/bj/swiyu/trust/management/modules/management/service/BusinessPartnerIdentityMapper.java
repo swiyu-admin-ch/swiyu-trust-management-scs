@@ -49,61 +49,6 @@ public class BusinessPartnerIdentityMapper {
         );
     }
 
-    // must be fully adapted in EID-6610
-    public static BusinessPartnerIdentity toBusinessPartnerIdentity(TrustStatementPartnerLink partnerLink) {
-        return switch (partnerLink.getType()) {
-            case TRUST_STATEMENT_IDENTITY_V1 -> {
-                var details = (IdentityV1Details) partnerLink.getDetails();
-                var uid = details
-                    .getRegistryIds()
-                    .stream()
-                    .filter(registryId -> "UID".equals(registryId.type()))
-                    .map(IdentityV1Details.RegistryId::value)
-                    .findFirst()
-                    .orElse(null);
-                yield new BusinessPartnerIdentity(
-                    partnerLink.getPartnerId(),
-                    toLocalizedEntityName(details),
-                    Instant.now(), // must be adapted in EID-6609
-                    uid,
-                    false,
-                    "de-DE",
-                    BusinessPartnerIdentityStatus.ACTIVE,
-                    details.getIsStateActor(),
-                    partnerLink.getValidUntil(),
-                    Instant.now(),
-                    Set.of(partnerLink.getSubject())
-                );
-            }
-            case TRUST_STATEMENT_IDENTITY_V2 -> {
-                var details = (IdentityV2Details) partnerLink.getDetails();
-                var uid = details
-                    .getRegistryIds()
-                    .stream()
-                    .filter(registryId -> "UID".equals(registryId.type()))
-                    .map(IdentityV2Details.RegistryId::value)
-                    .findFirst()
-                    .orElse(null);
-                yield new BusinessPartnerIdentity(
-                    partnerLink.getPartnerId(),
-                    toLocalizedEntityName(details),
-                    Instant.now(), // must be adapted in EID-6609
-                    uid,
-                    false,
-                    "de-DE",
-                    BusinessPartnerIdentityStatus.ACTIVE,
-                    details.getIsStateActor(),
-                    partnerLink.getValidUntil(),
-                    Instant.now(),
-                    Set.of(partnerLink.getSubject())
-                );
-            }
-            default -> throw new IllegalArgumentException(
-                "Cannot get business partner identity from partner link type: " + partnerLink.getType()
-            );
-        };
-    }
-
     public static Map<String, String> toLocalizedEntityName(TrustStatementDetails details) {
         var localized = new LinkedHashMap<String, String>();
         switch (details) {

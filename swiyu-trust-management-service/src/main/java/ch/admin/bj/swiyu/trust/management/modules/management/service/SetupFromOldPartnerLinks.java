@@ -158,7 +158,7 @@ public class SetupFromOldPartnerLinks {
                     createBusinessPartnerIdentity(idTS);
                     createdBusinessPartnerIdentityIds.add(idTS.partnerId());
                 }
-                businessPartnerIdentityService.addTrustedIdentifier(idTS.partnerId(), idTS.subject());
+                businessPartnerIdentityService.addTrustedIdentifiers(idTS.partnerId(), Set.of(idTS.subject()));
             }
         }
         return createdBusinessPartnerIdentityIds;

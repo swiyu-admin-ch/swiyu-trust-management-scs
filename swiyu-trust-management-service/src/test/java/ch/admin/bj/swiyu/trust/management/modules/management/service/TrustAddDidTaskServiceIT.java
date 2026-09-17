@@ -6,21 +6,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ch.admin.bj.swiyu.messagetype.ti.RejectReason;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustAddDidsSubmissionInternalApi;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProofOfPossessionDto;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProofOfPossessionStatusDto;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustAdditionalDidsSubmissionInternalDtoDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTaskRepository;
+import ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData;
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +63,38 @@ class TrustAddDidTaskServiceIT {
 
     @MockitoBean // mocked so we don't need to bootstrap kafka
     private AuditPublisher auditPublisher;
+
+    @MockitoBean
+    private BusinessPartnerIdentityService businessPartnerIdentityService;
+
+    @MockitoBean
+    private TrustAddDidsSubmissionInternalApi trustAddDidsSubmissionInternalApi;
+
+    @NotNull
+    private TrustAddDidTask createAddDidTestTask() {
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity();
+        var task = trustAddDidTask(bpi);
+        var did = "did:test:example:%s".formatted(UUID.randomUUID());
+        when(businessPartnerIdentityService.getBusinessPartnerIdentity(task.getPartnerId())).thenReturn(bpi);
+        when(businessPartnerIdentityService.getBusinessPartnerIdentityByTrustedIdentifier(did)).thenReturn(
+            BusinessPartnerIdentityMapper.toBusinessPartnerIdentityDto(bpi)
+        );
+        when(trustAddDidsSubmissionInternalApi.getSubmission(task.getTrustAddDidSubmissionId())).thenAnswer(mock -> {
+            var ret = new TrustAdditionalDidsSubmissionInternalDtoDto();
+            var pop = new ProofOfPossessionDto();
+            pop.setDid(did);
+            pop.setVerifiedAt(Instant.now());
+            pop.setStatus(ProofOfPossessionStatusDto.VALID);
+            ret.setDidsToAdd(List.of(pop));
+            ret.setStatus(TrustAdditionalDidsSubmissionInternalDtoDto.StatusEnum.SUBMITTED);
+            ret.setId(task.getTrustAddDidSubmissionId());
+            ret.setPermissionDid(pop);
+            return ret;
+        });
+        var ret = trustAddDidTaskRepository.save(task);
+        commit();
+        return ret;
+    }
 
     @BeforeEach
     void setUp() {
@@ -133,15 +174,15 @@ class TrustAddDidTaskServiceIT {
     @Test
     void getTask() {
         // given
-        var saved = trustAddDidTaskRepository.save(trustAddDidTask());
+        var testTask = createAddDidTestTask();
 
         // when
-        var dto = trustAddDidTaskService.getTask(saved.getId());
+        var dto = trustAddDidTaskService.getTask(testTask.getId());
 
         // then
-        assertThat(dto.id()).isEqualTo(saved.getId());
-        assertThat(dto.permissionDid()).isEqualTo(saved.getPermissionDid());
-        assertThat(dto.trustAddDidSubmissionId()).isEqualTo(saved.getTrustAddDidSubmissionId());
+        assertThat(dto.id()).isEqualTo(testTask.getId());
+        assertThat(dto.permissionDid()).isEqualTo(testTask.getPermissionDid());
+        assertThat(dto.trustAddDidSubmissionId()).isEqualTo(testTask.getTrustAddDidSubmissionId());
         assertThat(dto.state()).isEqualTo(TaskStatusDto.OPENED);
     }
 
@@ -155,15 +196,15 @@ class TrustAddDidTaskServiceIT {
     @Test
     void accept() {
         // given
-        var saved = trustAddDidTaskRepository.save(trustAddDidTask());
+        var testTask = createAddDidTestTask();
 
         // when
-        trustAddDidTaskService.approve(saved.getId(), "test user");
+        trustAddDidTaskService.approve(testTask.getId(), "test user");
 
         // then
-        var task = trustAddDidTaskRepository.findById(saved.getId()).orElseThrow();
-        assertThat(task.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
-        assertThat(task.getDueAt()).isNull();
+        var approvedTask = trustAddDidTaskRepository.findById(testTask.getId()).orElseThrow();
+        assertThat(approvedTask.getStatus()).isEqualTo(TaskStatus.ACCEPTED);
+        assertThat(approvedTask.getDueAt()).isNull();
 
         verify(outboxEventPublisher).publishTrustAddDidSubmissionAcceptedEvent(any());
     }
@@ -178,13 +219,13 @@ class TrustAddDidTaskServiceIT {
     @Test
     void reject() {
         // given
-        var saved = trustAddDidTaskRepository.save(trustAddDidTask());
+        var testTask = createAddDidTestTask();
 
         // when
-        trustAddDidTaskService.reject(saved.getId(), RejectReason.UNKNOWN, "test user");
+        trustAddDidTaskService.reject(testTask.getId(), RejectReason.UNKNOWN, "test user");
 
         // then
-        var task = trustAddDidTaskRepository.findById(saved.getId()).orElseThrow();
+        var task = trustAddDidTaskRepository.findById(testTask.getId()).orElseThrow();
         assertThat(task.getStatus()).isEqualTo(TaskStatus.REJECTED);
         assertThat(task.getDueAt()).isNull();
         verify(outboxEventPublisher).publishTrustAddDidSubmissionRejectedEvent(any());

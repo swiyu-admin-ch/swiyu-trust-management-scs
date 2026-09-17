@@ -5,6 +5,7 @@ import ch.admin.bit.jeap.domainevent.avro.AvroDomainEventPublisher;
 import ch.admin.bit.jeap.domainevent.avro.AvroDomainEventType;
 import ch.admin.bj.swiyu.messagetype.ti.*;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.*;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTask;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,21 +20,6 @@ import lombok.experimental.UtilityClass;
 public class TrustOnboardingTestData {
 
     public static final ZoneId ZONE_ID_ZURICH = ZoneId.of("Europe/Zurich");
-
-    public static final Map<String, String> TEST_PARTNER_NAME = Map.of(
-        "default",
-        "Test Partner",
-        "de-CH",
-        "Test Partner",
-        "fr-CH",
-        "Test Partner FR",
-        "it-CH",
-        "Test Partner IT",
-        "en",
-        "Test Partner EN",
-        "rm-CH",
-        "Test Partner RM"
-    );
 
     public static TrustOnboardingSubmissionDto trustOnboardingSubmissionDto() {
         return trustOnboardingSubmissionDto(UUID.randomUUID());
@@ -78,11 +64,11 @@ public class TrustOnboardingTestData {
             );
     }
 
-    public static TrustAddDidTask trustAddDidTask() {
+    public static TrustAddDidTask trustAddDidTask(BusinessPartnerIdentity bpi) {
         var submittedAt = LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant();
         return new TrustAddDidTask(
-            UUID.randomUUID(),
-            TEST_PARTNER_NAME,
+            bpi.getId(),
+            bpi.getEntityName(),
             UUID.randomUUID(),
             "did:example:permission123",
             submittedAt.plus(30, ChronoUnit.DAYS),
