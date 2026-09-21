@@ -291,7 +291,7 @@ class BusinessPartnerIdentityServiceIT {
         repos.businessPartnerIdentity.save(bpi);
         repos.commit();
 
-        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdToDeactivate();
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsToDeactivate();
         identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
 
         var updatedBpi = repos.businessPartnerIdentity.findById(bpi.getId()).orElse(null);
@@ -309,7 +309,7 @@ class BusinessPartnerIdentityServiceIT {
         repos.businessPartnerIdentity.save(bpi);
         repos.commit();
 
-        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdToDeactivate();
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsToDeactivate();
         identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
 
         verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityDeactivatedEvent(any());
@@ -321,7 +321,7 @@ class BusinessPartnerIdentityServiceIT {
         repos.businessPartnerIdentity.save(bpi);
         repos.commit();
 
-        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdToDeactivate();
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsToDeactivate();
         identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
 
         verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityDeactivatedEvent(any());
@@ -334,7 +334,9 @@ class BusinessPartnerIdentityServiceIT {
         );
         repos.commit();
 
-        businessPartnerIdentityService.renewTrustStatementsOfBusinessPartnerIdentities();
+        var identityIdsToRenew =
+            businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsWithTrustStatementToRenew();
+        identityIdsToRenew.forEach(identityId -> businessPartnerIdentityService.renewTrustStatements(identityId));
 
         var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityUpdatedEvent.class);
         verify(outboxEventPublisher).publishBusinessPartnerIdentityUpdatedEvent(captor.capture());
@@ -349,7 +351,9 @@ class BusinessPartnerIdentityServiceIT {
         );
         repos.commit();
 
-        businessPartnerIdentityService.renewTrustStatementsOfBusinessPartnerIdentities();
+        var identityIdsToRenew =
+            businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsWithTrustStatementToRenew();
+        identityIdsToRenew.forEach(identityId -> businessPartnerIdentityService.renewTrustStatements(identityId));
 
         verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityUpdatedEvent(any());
     }
@@ -359,7 +363,9 @@ class BusinessPartnerIdentityServiceIT {
         repos.businessPartnerIdentity.save(BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity());
         repos.commit();
 
-        businessPartnerIdentityService.renewTrustStatementsOfBusinessPartnerIdentities();
+        var identityIdsToRenew =
+            businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsWithTrustStatementToRenew();
+        identityIdsToRenew.forEach(identityId -> businessPartnerIdentityService.renewTrustStatements(identityId));
 
         verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityUpdatedEvent(any());
     }

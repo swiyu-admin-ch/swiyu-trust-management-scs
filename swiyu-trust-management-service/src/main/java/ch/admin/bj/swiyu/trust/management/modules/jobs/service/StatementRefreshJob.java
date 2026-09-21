@@ -60,7 +60,7 @@ public class StatementRefreshJob {
     @SchedulerLock(name = Lock.DEACTIVATE_EXPIRED_BUSINESS_PARTNER_IDENTITIES)
     public void deactivateExpiredBusinessPartnerIdentities() {
         SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
-        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdToDeactivate();
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsToDeactivate();
         identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
     }
 
@@ -68,6 +68,8 @@ public class StatementRefreshJob {
     @SchedulerLock(name = Lock.STATEMENT_REFRESH)
     public void renewTrustStatementsOfBusinessPartnerIdentities() {
         SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
-        businessPartnerIdentityService.renewTrustStatementsOfBusinessPartnerIdentities();
+        var identityIdsToRenew =
+            businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsWithTrustStatementToRenew();
+        identityIdsToRenew.forEach(identityId -> businessPartnerIdentityService.renewTrustStatements(identityId));
     }
 }

@@ -74,7 +74,7 @@ public class BusinessPartnerIdentityService {
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
-    public List<UUID> findAllBusinessPartnerIdentityIdToDeactivate() {
+    public List<UUID> findAllBusinessPartnerIdentityIdsToDeactivate() {
         return businessPartnerIdentityRepository
             .findAllByStatusAndValidUntilBefore(BusinessPartnerIdentityStatus.ACTIVE, today().toInstant())
             .stream()
@@ -152,14 +152,13 @@ public class BusinessPartnerIdentityService {
     }
 
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
-    @SuppressWarnings("java:S6809") // bypass SonarQube Method with Spring proxy should not be called via "this"
-    public void renewTrustStatementsOfBusinessPartnerIdentities() {
+    public List<UUID> findAllBusinessPartnerIdentityIdsWithTrustStatementToRenew() {
         var lastIssuanceLimit = today().minus(defaultStatementProperties.refreshPeriod()).toInstant();
-        var identitiesToRenew = businessPartnerIdentityRepository.findAllByStatusAndLastIssuanceAtLessThanEqual(
-            BusinessPartnerIdentityStatus.ACTIVE,
-            lastIssuanceLimit
-        );
-        identitiesToRenew.forEach(identity -> renewTrustStatements(identity.getId()));
+        return businessPartnerIdentityRepository
+            .findAllByStatusAndLastIssuanceAtLessThanEqual(BusinessPartnerIdentityStatus.ACTIVE, lastIssuanceLimit)
+            .stream()
+            .map(BusinessPartnerIdentity::getId)
+            .toList();
     }
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
