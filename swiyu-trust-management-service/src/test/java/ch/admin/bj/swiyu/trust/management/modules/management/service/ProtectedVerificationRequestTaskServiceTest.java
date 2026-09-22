@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 
 import ch.admin.bj.swiyu.messagetype.ti.TiProtectedVerificationSubmissionApprovedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiProtectedVerificationSubmissionRejectedEvent;
-import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionInternalApi;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationCategoryDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationSubmissionDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.api.UsnApi;
@@ -54,7 +54,7 @@ class ProtectedVerificationRequestTaskServiceTest {
     private ProtectedVerificationRequestTaskRepository taskRepository;
 
     @Mock
-    private ProtectedVerificationSubmissionInternalApi protectedVerificationSubmissionApi;
+    private ProtectedVerificationSubmissionApi protectedVerificationSubmissionApi;
 
     @Mock
     private UsnApi usnApi;

@@ -5,7 +5,7 @@ import static ch.admin.bj.swiyu.trust.management.modules.management.service.Task
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.validateActionAllowed;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskMapper.*;
 
-import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionInternalApi;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationSubmissionDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.api.UsnApi;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
@@ -44,7 +44,7 @@ public class ProtectedVerificationRequestTaskService {
         "Your organization is not yet onboarded to the trust registry. Please complete onboarding and resubmit this protected verification request.";
 
     private final ProtectedVerificationRequestTaskRepository taskRepository;
-    private final ProtectedVerificationSubmissionInternalApi protectedVerificationSubmissionApi;
+    private final ProtectedVerificationSubmissionApi protectedVerificationSubmissionApi;
     private final UsnApi usnApi;
     private final BusinessPartnerIdentityService businessPartnerIdentityService;
     private final ProtectedVerificationTaskProperties protectedVerificationTaskProperties;

@@ -1,7 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusiness;
 
 import ch.admin.bit.jeap.security.restclient.JeapOAuth2RestClientBuilderFactory;
-import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionInternalApi;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustAddDidsSubmissionInternalApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.VcSchemaSubmissionApi;
@@ -56,9 +56,9 @@ public class CoreBusinessServiceInternalConfig {
     }
 
     @Bean
-    ProtectedVerificationSubmissionInternalApi protectedVerificationSubmissionInternalApi(
+    ProtectedVerificationSubmissionApi protectedVerificationSubmissionInternalApi(
         ApiClient coreBusinessServiceApiClient
     ) {
-        return new ProtectedVerificationSubmissionInternalApi(coreBusinessServiceApiClient);
+        return new ProtectedVerificationSubmissionApi(coreBusinessServiceApiClient);
     }
 }

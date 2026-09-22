@@ -1,0 +1,20 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.1
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JS-IMAGESIZE-17295816:
+    - '*':
+        reason: 'No update path as of now'
+        expires: 2026-11-09T09:00:00.000Z
+        created: 2026-06-23T14:51:45.487Z
+  SNYK-JS-IMAGESIZE-17295814:
+    - '*':
+        reason: 'No update path as of now'
+        expires: 2026-11-09T09:00:00.000Z
+        created: 2026-06-23T14:52:11.176Z
+  SNYK-JS-BRACES-19963945:
+    - '*':
+        reason: No fixed version available; braces only used by dev/build tooling (not shipped to production bundle). Tracked in EID-6915.
+        expires: 2026-11-09T09:00:00.000Z
+        created: 2026-09-21T12:10:03.000Z
+patch: { }

@@ -1,6 +1,6 @@
 {
   "name": "swiyu-trust-management-ui",
-  "version": "3.37.1",
+  "version": "4.0.0",
   "private": true,
   "scripts": {
     "build": "ng build",
@@ -8,7 +8,7 @@
     "build-prod": "ng build -c production",
     "format": "ng lint --fix && stylelint --fix \"src/**/*.scss\" && npm run prettier",
     "pregenerate:api": "rimraf src/app/api/generated",
-    "generate:api": "openapi-generator-cli generate --generator-key angular-client-api",
+    "generate:api": "NODE_USE_SYSTEM_CA=1 openapi-generator-cli generate --generator-key angular-client-api",
     "postgenerate:api": "./node_modules/.bin/prettier --write \"src/app/api/generated/**/*.ts\"",
     "generate:translations": "ngx-translate-extract --sort --input ./src/app --output ./src/assets/i18n/{de,fr,it}.json --clean --format json",
     "postgenerate:translations": "./node_modules/.bin/prettier --write \"src/assets/i18n/*.json\"",

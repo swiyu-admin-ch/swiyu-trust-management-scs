@@ -2,6 +2,7 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusines
 
 import ch.admin.bit.jeap.security.restclient.JeapOAuth2RestClientBuilderFactory;
 import ch.admin.bj.swiyu.trust.client.core.business.b2b.api.StatusB2BApi;
+import ch.admin.bj.swiyu.trust.client.core.business.b2b.api.StatusB2BV2Api;
 import ch.admin.bj.swiyu.trust.client.core.business.b2b.invoker.ApiClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,5 +28,10 @@ public class StatusRegistryApiConfig {
     @Bean
     StatusB2BApi statusB2bApi(ApiClient coreBusinessServiceB2bApiClient) {
         return new StatusB2BApi(coreBusinessServiceB2bApiClient);
+    }
+
+    @Bean
+    StatusB2BV2Api statusB2bV2Api(ApiClient coreBusinessServiceB2bApiClient) {
+        return new StatusB2BV2Api(coreBusinessServiceB2bApiClient);
     }
 }

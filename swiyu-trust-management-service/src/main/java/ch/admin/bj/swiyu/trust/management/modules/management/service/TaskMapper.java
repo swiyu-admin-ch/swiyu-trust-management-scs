@@ -1,5 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
+import static ch.admin.bj.swiyu.trust.client.core.business.internal.model.BusinessPartnerTypeDto.BUSINESS;
 import static java.util.Collections.emptyList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -222,13 +223,12 @@ public class TaskMapper {
     private static BusinessPartnerTypeDto toBusinessPartnerTypeDto(TrustOnboardingSubmissionDto submission) {
         var partnerType = submission.getBusinessPartnerType();
         if (partnerType == null) {
-            return BusinessPartnerTypeDto.UNKNOWN;
+            throw new IllegalArgumentException("Submission should never have null business partner type");
         }
         return switch (partnerType) {
             case BUSINESS -> BusinessPartnerTypeDto.BUSINESS;
             case INDIVIDUAL -> BusinessPartnerTypeDto.INDIVIDUAL;
             case GOVERNMENTAL_INSTITUTION -> BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION;
-            case UNKNOWN -> BusinessPartnerTypeDto.UNKNOWN;
         };
     }
 

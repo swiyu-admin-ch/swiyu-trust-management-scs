@@ -163,7 +163,7 @@ app:
       require-https: false
       use-silent-refresh: false # not supported by the jeap mock service
   functionality:
-    automatic-approval-enabled: true
+    automatic-approval-enabled: false
   issuer:
     jwt:
       trust-issuer:

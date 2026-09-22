@@ -240,7 +240,7 @@ public class SetupFromOldPartnerLinks {
         pop.setVerifiedAt(idTSv2.createdAt());
         submission.setProofOfPossessions(List.of(pop));
         submission.setSubmittedAt(Instant.now());
-        submission.setType(TrustOnboardingSubmissionTypeDto.REGISTRATION);
+        submission.setType(TrustOnboardingSubmissionDto.TypeEnum.REGISTRATION);
 
         businessPartnerIdentityService.handleTrustOnboardingApproval(submission);
     }

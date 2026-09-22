@@ -9,11 +9,11 @@ import ch.admin.bit.jeap.messaging.kafka.interceptor.JeapKafkaMessageCallback;
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.messagetype.ti.TiVqpsPublicationSucceededEvent;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.VqpsSubmissionInternalApi;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.JsonNodeDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.VqpsSubmissionInternalDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiVqpsSubmissionAcceptedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.VqpsSubmissionEventProcessor;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -109,7 +109,7 @@ class VqpsSubmissionEventProcessorIT {
             .purposeName(Map.of("default", "Purpose", "en", "Purpose EN"))
             .purposeDescription(Map.of("default", "Description", "en", "Description EN"))
             .scope("some-scope")
-            .query(Map.of("credentials", List.of()));
+            .query(new JsonNodeDto());
     }
 
     private void verifySucceededEventSent(UUID submissionId) {

@@ -3,7 +3,7 @@
   "info": {
     "title": "Business Status API",
     "description": "IF-011 - B2B Status API.",
-    "version": "3.22.6-20260410114908-3aa33550"
+    "version": "4.0.4-20260917152100-be779104"
   },
   "servers": [
     {
@@ -20,16 +20,85 @@
     {
       "name": "Status B2B",
       "description": "Status B2B API"
+    },
+    {
+      "name": "Status B2B V2",
+      "description": "Status B2B API V2 — Enforces Swiss profile 1.0.0 conformity"
     }
   ],
   "paths": {
+    "/api/v2/status/business-entities/{businessEntityId}/status-list-entries/{statusRegistryEntryId}": {
+      "put": {
+        "tags": [
+          "Status B2B V2"
+        ],
+        "summary": "Upload a status list with Swiss profile conformity validation.",
+        "description": "Uploads a Token Status List JWT and validates Swiss profile conformity in addition to the base checks:\n- JWT header `typ` must be `statuslist+jwt`\n- JWT header `profile_version` must be `swiss-profile-vc:1.0.0`\n- `exp` claim must be set\n- Decompressed `lst` must not exceed 200KB\n- Decompressed bit count must be byte-aligned (size-in-bits % 8 = 0) and aligned with `bits`-per-entry\n",
+        "operationId": "updateStatusListEntry",
+        "parameters": [
+          {
+            "name": "businessEntityId",
+            "in": "path",
+            "description": "The business partner id provided by the self service api.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "8432e1f3-8119-4fb9-a879-190ab2cb9deb"
+          },
+          {
+            "name": "statusRegistryEntryId",
+            "in": "path",
+            "description": "The status registry entry ID provided by /api/v1/status-list-entries/",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "18fa7c77-9dd1-4e20-a147-fb1bec146085"
+          }
+        ],
+        "requestBody": {
+          "description": "Token status list VC according to spec:\nhttps://www.ietf.org/archive/id/draft-ietf-oauth-status-list-02.html#name-status-list-request\nThe JWT header must include `typ: statuslist+jwt` and `profile_version: swiss-profile-vc:1.0.0`.\nThe payload must include an `exp` claim.\n",
+          "content": {
+            "application/statuslist+jwt": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "eyJraWQiOiJkaWQ6dGR3Oi4uLiIsInR5cCI6InN0YXR1c2xpc3Qrand0IiwiYWxnIjoiRVMyNTYiLCJwcm9maWxlX3ZlcnNpb24iOiJzd2lzcy1wcm9maWxlLXZjOjEuMC4wIn0.eyJpc3MiOiJkaWQ6dGR3Oi4uLiIsInN1YiI6Imh0dHBzOi8vc3RhdHVzLi4uL2FwaS92MS9zdGF0dXNsaXN0Ly4uLmp3dCIsImlhdCI6MTc0NzM5MjM1NCwiZXhwIjoxNzc4OTI4MzU0LCJzdGF0dXNfbGlzdCI6eyJsc3QiOiJlTnJ0elFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSIsImJpdHMiOjJ9fQ.signature"
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/status/business-entities/{businessEntityId}/status-list-entries/{statusRegistryEntryId}": {
       "put": {
         "tags": [
           "Status B2B"
         ],
-        "summary": "Get a new entry on the status registry to store a status list.",
-        "operationId": "updateStatusListEntry",
+        "summary": "Upload a status list to the status registry.",
+        "description": "Deprecated: Use /api/v2/status/... instead. This endpoint does not enforce Swiss profile conformity.",
+        "operationId": "updateStatusListEntry_1",
         "parameters": [
           {
             "name": "businessEntityId",
@@ -70,10 +139,21 @@
           "500": {
             "description": "Internal Server Error"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/v1/status/business-entities/{businessEntityId}/status-list-entries/": {
@@ -129,6 +209,16 @@
           "500": {
             "description": "Internal Server Error"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK",
             "content": {
@@ -164,6 +254,16 @@
           "500": {
             "description": "Internal Server Error"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK",
             "content": {
@@ -180,6 +280,50 @@
   },
   "components": {
     "schemas": {
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "$ref": "#/components/schemas/ApiErrorCode"
+          },
+          "message": {
+            "type": "string"
+          },
+          "additionalDetails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiErrorCode": {
+        "type": "string",
+        "description": "       | Value                                       | Description                                                                           |\n       | ------------------------------------------- | ------------------------------------------------------------------------------------- |\n       | data_invalid                                | Indicates that the given data was invalid in syntax or semantic.                      |\n       | data_invalid_virus_detected                 | Indicates that the given data contains a virus.                                       |\n       | resource_not_found                          | Indicates that the requested data was not found in the given context.                 |\n       | resource_forbidden                          | Indicates that the requested data is not available with the permissions used.         |\n       | action_forbidden                            | Indicates that the requested action could not be processed with the permissions used. |\n       | partner_is_not_governmental                 | Indicates that the partner is not governmental.                                       |\n       | partner_is_not_trusted                      | Indicates that the partner is not trusted.                                            |\n       | business_data_integrity_violation           | Indicates that a business data integrity violation occurred.                          |\n       | crypto_integrity_validation_failed          | Indicates that the crypto integrity validation failed.                                |\n       | did_resolve_failed                          | Indicates that the DID resolution failed.                                             |\n       | document_not_found                          | Indicates that the document was not found.                                            |\n       | identifier_validation_failed                | Indicates that the identifier validation failed.                                      |\n       | invalid_pagination                          | Indicates that the pagination parameters are invalid.                                 |\n       | max_size_exceeded                           | Indicates that the maximum size was exceeded.                                         |\n       | object_count_limit_reached                  | Indicates that the object count limit was reached.                                    |\n       | status_list_validation_failed               | Indicates that the status list validation failed.                                     |\n       | trust_onboarding_document_validation_failed | Indicates that the trust onboarding document validation failed.                       |\n       | vc_schema_submission_not_found              | Indicates that the VC schema submission was not found.                                |\n       | vc_type_metadata_validation_failed          | Indicates that the VC type metadata validation failed.                                |\n",
+        "enum": [
+          "data_invalid",
+          "data_invalid_virus_detected",
+          "resource_not_found",
+          "resource_forbidden",
+          "action_forbidden",
+          "partner_is_not_governmental",
+          "partner_is_not_trusted",
+          "business_data_integrity_violation",
+          "crypto_integrity_validation_failed",
+          "did_resolve_failed",
+          "document_not_found",
+          "identifier_validation_failed",
+          "invalid_pagination",
+          "max_size_exceeded",
+          "object_count_limit_reached",
+          "status_list_validation_failed",
+          "trust_onboarding_document_validation_failed",
+          "vc_schema_submission_not_found",
+          "vc_type_metadata_validation_failed",
+          "vqps_publication_failed",
+          "vqps_publication_wait_timeout"
+        ]
+      },
       "StatusListEntryCreationDto": {
         "type": "object",
         "properties": {
@@ -197,13 +341,13 @@
       "PageStatusListEntryDto": {
         "type": "object",
         "properties": {
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
           "totalPages": {
             "type": "integer",
             "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
           },
           "size": {
             "type": "integer",
@@ -219,21 +363,21 @@
             "type": "integer",
             "format": "int32"
           },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
-          },
-          "numberOfElements": {
-            "type": "integer",
-            "format": "int32"
-          },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
           },
           "pageable": {
             "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
           },
           "empty": {
             "type": "boolean"
@@ -247,21 +391,21 @@
             "type": "integer",
             "format": "int64"
           },
-          "unpaged": {
+          "paged": {
             "type": "boolean"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
           },
           "pageNumber": {
             "type": "integer",
             "format": "int32"
           },
-          "paged": {
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "unpaged": {
             "type": "boolean"
           }
         }
@@ -272,10 +416,10 @@
           "empty": {
             "type": "boolean"
           },
-          "unsorted": {
+          "sorted": {
             "type": "boolean"
           },
-          "sorted": {
+          "unsorted": {
             "type": "boolean"
           }
         }
@@ -315,6 +459,11 @@
       "prometheus": {
         "type": "http",
         "scheme": "basic"
+      },
+      "OIDC": {
+        "type": "openIdConnect",
+        "description": "OAuth2-Authentication",
+        "openIdConnectUrl": "https://swiyu-oauth-mock-server-d.apps.p-szb-ros-shrd-npr-01.cloud.admin.ch/.well-known/openid-configuration"
       }
     }
   }

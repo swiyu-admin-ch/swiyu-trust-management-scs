@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionInternalApi;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationCategoryDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationSubmissionDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationSubmissionStatusDto;
@@ -83,7 +83,7 @@ class ProtectedVerificationRequestTaskServiceIT {
     private TestRepositories repos;
 
     @MockitoBean
-    private ProtectedVerificationSubmissionInternalApi protectedVerificationSubmissionApi;
+    private ProtectedVerificationSubmissionApi protectedVerificationSubmissionApi;
 
     @MockitoBean
     private UsnApi usnApi;

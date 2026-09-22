@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
 import ch.admin.bj.swiyu.trust.client.core.business.b2b.api.StatusB2BApi;
+import ch.admin.bj.swiyu.trust.client.core.business.b2b.api.StatusB2BV2Api;
 import ch.admin.bj.swiyu.trust.client.core.business.b2b.model.StatusListEntryCreationDtoDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
@@ -27,6 +28,7 @@ public class StatusListDomainService {
     private final TrustStatementPartnerLinkRepository trustStatementPartnerLinkRepository;
     private final JwtStatementDomainService jwtStatementDomainService;
     private final StatusB2BApi statusB2bApi;
+    private final StatusB2BV2Api statusB2bV2Api;
     private final IssuerTrustRootProperties issuerTrustRootProperties;
     private final DefaultStatementProperties defaultStatementProperties;
 
@@ -105,7 +107,7 @@ public class StatusListDomainService {
         );
         log.debug("Publishing status list {} to api", statusListMetadata.getStatusRegistryUrl());
         try {
-            statusB2bApi.updateStatusListEntry(
+            statusB2bV2Api.updateStatusListEntry(
                 issuerTrustRootProperties.businessPartnerId(),
                 statusListMetadata.getId(),
                 tokenStatusList.serialize()

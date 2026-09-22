@@ -11,7 +11,6 @@
 export const PartnerType = {
   GovernmentalInstitution: 'GOVERNMENTAL_INSTITUTION',
   Business: 'BUSINESS',
-  Individual: 'INDIVIDUAL',
-  Unknown: 'UNKNOWN'
+  Individual: 'INDIVIDUAL'
 } as const;
 export type PartnerType = (typeof PartnerType)[keyof typeof PartnerType];

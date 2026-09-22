@@ -7,5 +7,4 @@ public enum BusinessPartnerTypeDto {
     GOVERNMENTAL_INSTITUTION,
     BUSINESS,
     INDIVIDUAL,
-    UNKNOWN, // Temporary type as part of migration for existing legacy partners
 }
