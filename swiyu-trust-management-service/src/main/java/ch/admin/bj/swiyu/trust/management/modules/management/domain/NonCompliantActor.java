@@ -26,8 +26,9 @@ public class NonCompliantActor {
     @Version
     private Long version;
 
-    @NotNull
     private String did;
+
+    private UUID businessPartnerId;
 
     private Instant flaggedAsNonCompliantAt;
 
@@ -35,8 +36,13 @@ public class NonCompliantActor {
     private NonCompliantReasonText reason;
 
     public NonCompliantActor(UUID id, String did, NonCompliantReasonText reason) {
+        this(id, did, null, reason);
+    }
+
+    public NonCompliantActor(UUID id, String did, UUID businessPartnerId, NonCompliantReasonText reason) {
         this.id = id;
         this.did = did;
+        this.businessPartnerId = businessPartnerId;
         this.reason = reason;
         this.flaggedAsNonCompliantAt = Instant.now();
     }

@@ -17,15 +17,15 @@ import lombok.experimental.UtilityClass;
 public class NonCompliantActorMapper {
 
     public static List<NonComplianceV2Details.NonCompliantActor> toNonComplianceV2Details(
-        List<NonCompliantActor> nonCompliantActors
+        List<NonCompliantActorPublicationEntry> nonCompliantActors
     ) {
         return nonCompliantActors
             .stream()
             .map(nonCompliantActor ->
                 new NonComplianceV2Details.NonCompliantActor(
-                    nonCompliantActor.getDid(),
-                    nonCompliantActor.getFlaggedAsNonCompliantAt(),
-                    toNonComplianceV2DetailsActorReason(nonCompliantActor.getReason())
+                    nonCompliantActor.did(),
+                    nonCompliantActor.flaggedAsNonCompliantAt(),
+                    toNonComplianceV2DetailsActorReason(nonCompliantActor.reason())
                 )
             )
             .toList();

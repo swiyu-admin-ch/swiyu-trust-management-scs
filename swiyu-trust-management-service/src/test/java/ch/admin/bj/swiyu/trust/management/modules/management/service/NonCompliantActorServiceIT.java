@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMapper;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
@@ -35,6 +36,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @ActiveProfiles("test")
@@ -46,6 +48,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     {
         DataJpaTestConfiguration.class,
         NonCompliantActorService.class,
+        NonCompliantActorDidsResolver.class,
         NonComplianceListService.class,
         DomainEventService.class,
         MockAuditPublisherTestConfiguration.class,
@@ -54,6 +57,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class NonCompliantActorServiceIT {
 
     private static final String CURRENT_USER = "Alice Admin";
+
+    @MockitoBean
+    IdentifierApi identifierApi;
 
     @Autowired
     private NonCompliantActorService service;
@@ -66,6 +72,28 @@ class NonCompliantActorServiceIT {
 
     @Autowired
     private AuditPublisher auditPublisher;
+
+    private static void verifyNonCompliantActorCreatedAudit(
+        AuditPublisher auditPublisher,
+        UUID actorId,
+        Long version,
+        String expectedJson
+    ) {
+        var jsonCaptor = ArgumentCaptor.forClass(String.class);
+        verify(auditPublisher).nonCompliantActorAdded(eq(actorId.toString()), eq(version), jsonCaptor.capture());
+        assertThat(jsonCaptor.getValue()).isEqualTo(expectedJson);
+    }
+
+    private static void verifyNonCompliantActorDeletedAudit(
+        AuditPublisher auditPublisher,
+        UUID actorId,
+        Long version,
+        String expectedJson
+    ) {
+        var jsonCaptor = ArgumentCaptor.forClass(String.class);
+        verify(auditPublisher).nonCompliantActorDeleted(eq(actorId.toString()), eq(version), jsonCaptor.capture());
+        assertThat(jsonCaptor.getValue()).isEqualTo(expectedJson);
+    }
 
     @BeforeEach
     void setup() {
@@ -107,12 +135,71 @@ class NonCompliantActorServiceIT {
     void createNonCompliantActor_fails_when_no_reason_in_any_language() {
         var req = new NonCompliantActorRequestDto(
             "did:tdw:noreason",
+            null,
             new NonCompliantReasonTextDto(null, " ", null, "", null)
         );
 
         assertThatThrownBy(() -> service.createNonCompliantActor(req, CURRENT_USER))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("at least one reason");
+
+        assertThat(domainEventLogRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    void createNonCompliantActor_byBusinessPartnerId_success() {
+        var businessPartnerId = UUID.randomUUID();
+        var req = new NonCompliantActorRequestDto(
+            null,
+            businessPartnerId,
+            new NonCompliantReasonTextDto(null, null, null, "Violation of policy", null)
+        );
+
+        var dto = service.createNonCompliantActor(req, CURRENT_USER);
+
+        assertThat(dto.did()).isNull();
+        assertThat(dto.businessPartnerId()).isEqualTo(businessPartnerId);
+        assertThat(nonCompliantActorRepository.existsNonCompliantActorByBusinessPartnerId(businessPartnerId)).isTrue();
+    }
+
+    @Test
+    void createNonCompliantActor_fails_when_did_and_businessPartnerId_both_set() {
+        var bpId = UUID.randomUUID();
+        var reason = new NonCompliantReasonTextDto(null, null, null, "Both", null);
+        assertThatThrownBy(() -> new NonCompliantActorRequestDto("did:tdw:both", bpId, reason))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("exactly one");
+    }
+
+    @Test
+    void createNonCompliantActor_fails_when_neither_did_nor_businessPartnerId_set() {
+        var reason = new NonCompliantReasonTextDto(null, null, null, "Neither", null);
+        assertThatThrownBy(() -> new NonCompliantActorRequestDto(null, null, reason))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("exactly one");
+    }
+
+    @Test
+    void createNonCompliantActor_fails_on_duplicate_businessPartnerId() {
+        var businessPartnerId = UUID.randomUUID();
+        nonCompliantActorRepository.save(
+            new NonCompliantActor(
+                UUID.randomUUID(),
+                null,
+                businessPartnerId,
+                new NonCompliantReasonText(null, null, null, "Vorfall", null)
+            )
+        );
+
+        var req = new NonCompliantActorRequestDto(
+            null,
+            businessPartnerId,
+            new NonCompliantReasonTextDto(null, null, null, "Duplicate", null)
+        );
+
+        assertThatThrownBy(() -> service.createNonCompliantActor(req, CURRENT_USER))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("already exists");
 
         assertThat(domainEventLogRepository.count()).isEqualTo(0);
     }
@@ -130,6 +217,7 @@ class NonCompliantActorServiceIT {
 
         var req = new NonCompliantActorRequestDto(
             "did:tdw:dup",
+            null,
             new NonCompliantReasonTextDto(null, null, null, "Duplicate", null)
         );
 
@@ -252,27 +340,5 @@ class NonCompliantActorServiceIT {
         service.deleteNonCompliantActor(saved.getId(), CURRENT_USER);
 
         verifyNonCompliantActorDeletedAudit(auditPublisher, saved.getId(), saved.getVersion(), expectedJson);
-    }
-
-    private static void verifyNonCompliantActorCreatedAudit(
-        AuditPublisher auditPublisher,
-        UUID actorId,
-        Long version,
-        String expectedJson
-    ) {
-        var jsonCaptor = ArgumentCaptor.forClass(String.class);
-        verify(auditPublisher).nonCompliantActorAdded(eq(actorId.toString()), eq(version), jsonCaptor.capture());
-        assertThat(jsonCaptor.getValue()).isEqualTo(expectedJson);
-    }
-
-    private static void verifyNonCompliantActorDeletedAudit(
-        AuditPublisher auditPublisher,
-        UUID actorId,
-        Long version,
-        String expectedJson
-    ) {
-        var jsonCaptor = ArgumentCaptor.forClass(String.class);
-        verify(auditPublisher).nonCompliantActorDeleted(eq(actorId.toString()), eq(version), jsonCaptor.capture());
-        assertThat(jsonCaptor.getValue()).isEqualTo(expectedJson);
     }
 }

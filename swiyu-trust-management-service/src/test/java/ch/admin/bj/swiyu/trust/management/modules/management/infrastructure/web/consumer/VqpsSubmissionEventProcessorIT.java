@@ -9,7 +9,6 @@ import ch.admin.bit.jeap.messaging.kafka.interceptor.JeapKafkaMessageCallback;
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.messagetype.ti.TiVqpsPublicationSucceededEvent;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.VqpsSubmissionInternalApi;
-import ch.admin.bj.swiyu.trust.client.core.business.internal.model.JsonNodeDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.VqpsSubmissionInternalDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiVqpsSubmissionAcceptedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.VqpsSubmissionEventProcessor;
@@ -45,6 +44,23 @@ class VqpsSubmissionEventProcessorIT {
 
     @MockitoBean
     VqpsSubmissionInternalApi vqpsSubmissionInternalApi;
+
+    private VqpsSubmissionInternalDto validSubmission(UUID submissionId) {
+        return new VqpsSubmissionInternalDto()
+            .id(submissionId)
+            .partnerId(UUID.randomUUID())
+            .sub("did:example:subject-" + submissionId)
+            .purposeName(Map.of("default", "Purpose", "en", "Purpose EN"))
+            .purposeDescription(Map.of("default", "Description", "en", "Description EN"))
+            .scope("some-scope")
+            .query(new Object());
+    }
+
+    private void verifySucceededEventSent(UUID submissionId) {
+        var captor = ArgumentCaptor.forClass(TiVqpsPublicationSucceededEvent.class);
+        verify(kafkaMsgCallback, times(1)).onSend(captor.capture(), any());
+        assertThat(captor.getValue().getOptionalPayload().orElseThrow().getVqpsSubmissionId()).isEqualTo(submissionId);
+    }
 
     @Test
     @WithJeapAuthenticationToken(username = "test")
@@ -99,22 +115,5 @@ class VqpsSubmissionEventProcessorIT {
         // then — CBS fetched only once, only one succeeded event sent
         verify(vqpsSubmissionInternalApi, times(1)).getVqpsSubmission(submissionId);
         verify(kafkaMsgCallback, times(1)).onSend(any(TiVqpsPublicationSucceededEvent.class), any());
-    }
-
-    private VqpsSubmissionInternalDto validSubmission(UUID submissionId) {
-        return new VqpsSubmissionInternalDto()
-            .id(submissionId)
-            .partnerId(UUID.randomUUID())
-            .sub("did:example:subject-" + submissionId)
-            .purposeName(Map.of("default", "Purpose", "en", "Purpose EN"))
-            .purposeDescription(Map.of("default", "Description", "en", "Description EN"))
-            .scope("some-scope")
-            .query(new JsonNodeDto());
-    }
-
-    private void verifySucceededEventSent(UUID submissionId) {
-        var captor = ArgumentCaptor.forClass(TiVqpsPublicationSucceededEvent.class);
-        verify(kafkaMsgCallback, times(1)).onSend(captor.capture(), any());
-        assertThat(captor.getValue().getOptionalPayload().orElseThrow().getVqpsSubmissionId()).isEqualTo(submissionId);
     }
 }

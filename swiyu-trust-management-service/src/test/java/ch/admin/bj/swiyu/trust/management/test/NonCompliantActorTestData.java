@@ -10,6 +10,7 @@ public class NonCompliantActorTestData {
     public static NonCompliantActorRequestDto nonCompliantActorRequestDto() {
         return new NonCompliantActorRequestDto(
             "did:tdw:alpha123",
+            null,
             new NonCompliantReasonTextDto(null, null, null, "Violation of policy", null)
         );
     }

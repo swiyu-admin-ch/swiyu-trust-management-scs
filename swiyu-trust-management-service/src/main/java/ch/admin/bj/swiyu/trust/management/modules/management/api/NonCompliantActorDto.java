@@ -8,7 +8,16 @@ import java.util.UUID;
 @Schema(name = "NonCompliantActor")
 public record NonCompliantActorDto(
     @NotNull UUID id,
-    @NotNull String did,
+    String did,
+    UUID businessPartnerId,
     @NotNull Instant flaggedAsNonCompliantAt,
     @NotNull NonCompliantReasonTextDto reason
-) {}
+) {
+    public NonCompliantActorDto {
+        if ((did == null) == (businessPartnerId == null)) {
+            throw new IllegalArgumentException(
+                "Validation failed: exactly one of 'did' or 'businessPartnerId' must be set."
+            );
+        }
+    }
+}

@@ -35,6 +35,7 @@ public class NonCompliantActorService {
     private final DomainEventService domainEventService;
     private final NonComplianceListService nonComplianceListService;
     private final AuditPublisher auditPublisher;
+    private final NonCompliantActorDidsResolver nonCompliantActorDidsResolver;
 
     @Transactional(readOnly = true)
     public NonCompliantActorDto getNonCompliantActor(@Valid @NotNull UUID nonCompliantActorId) {
@@ -77,18 +78,29 @@ public class NonCompliantActorService {
             );
         }
 
-        // Check for already existing non-compliant actor for given did.
+        // Check for already existing non-compliant actor for given did or business partner id.
         // Uniqueness is enforced at the DB level (unique DID), but we also check here to provide a
         // friendly 400 error instead of a low-level constraint violation.
-        if (this.nonCompliantActorRepository.existsNonCompliantActorByDid(request.did())) {
+        if (request.did() != null && this.nonCompliantActorRepository.existsNonCompliantActorByDid(request.did())) {
             throw new IllegalArgumentException(
                 "Validation failed: non-compliant actor with given DID '" + request.did() + "' already exists."
+            );
+        }
+        if (
+            request.businessPartnerId() != null &&
+            this.nonCompliantActorRepository.existsNonCompliantActorByBusinessPartnerId(request.businessPartnerId())
+        ) {
+            throw new IllegalArgumentException(
+                "Validation failed: non-compliant actor with given business partner id '" +
+                    request.businessPartnerId() +
+                    "' already exists."
             );
         }
 
         var nonCompliantActor = new NonCompliantActor(
             UUID.randomUUID(),
             request.did(),
+            request.businessPartnerId(),
             new NonCompliantReasonText(
                 reason.reasonDe(),
                 reason.reasonFr(),
@@ -123,19 +135,19 @@ public class NonCompliantActorService {
 
     @Transactional
     public void issueAndPublishNonComplianceV1() {
-        var nonCompliantActors = this.nonCompliantActorRepository.findAll();
+        var nonCompliantActors = this.nonCompliantActorDidsResolver.resolve(this.nonCompliantActorRepository.findAll());
         var nonComplianceList = nonCompliantActors
             .stream()
             .map(nonCompliantActor -> {
                 var reason = new HashMap<String, String>();
-                reason.put("de", nonCompliantActor.getReason().getReasonDe());
-                reason.put("fr", nonCompliantActor.getReason().getReasonFr());
-                reason.put("it", nonCompliantActor.getReason().getReasonIt());
-                reason.put("en", nonCompliantActor.getReason().getReasonEn());
-                reason.put("rm", nonCompliantActor.getReason().getReasonRm());
+                reason.put("de", nonCompliantActor.reason().getReasonDe());
+                reason.put("fr", nonCompliantActor.reason().getReasonFr());
+                reason.put("it", nonCompliantActor.reason().getReasonIt());
+                reason.put("en", nonCompliantActor.reason().getReasonEn());
+                reason.put("rm", nonCompliantActor.reason().getReasonRm());
                 return new ch.admin.bj.swiyu.trust.management.modules.registry.api.NonCompliantActorDto(
-                    nonCompliantActor.getDid(),
-                    nonCompliantActor.getFlaggedAsNonCompliantAt(),
+                    nonCompliantActor.did(),
+                    nonCompliantActor.flaggedAsNonCompliantAt(),
                     reason
                 );
             })

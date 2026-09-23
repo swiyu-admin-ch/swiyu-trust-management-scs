@@ -12,6 +12,7 @@ public class NonCompliantActorMapper {
         return new NonCompliantActorDto(
             nonCompliantActor.getId(),
             nonCompliantActor.getDid(),
+            nonCompliantActor.getBusinessPartnerId(),
             nonCompliantActor.getFlaggedAsNonCompliantAt(),
             new NonCompliantReasonTextDto(
                 nonCompliantActor.getReason().getReasonDe(),

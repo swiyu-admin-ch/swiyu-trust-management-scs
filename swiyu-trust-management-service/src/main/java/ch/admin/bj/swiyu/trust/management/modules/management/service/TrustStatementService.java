@@ -60,6 +60,7 @@ public class TrustStatementService {
     private final IssuerTrustRootProperties issuerTrustRootProperties;
     private final DefaultStatementProperties defaultStatementProperties;
     private final NonCompliantActorRepository nonCompliantActorRepository;
+    private final NonCompliantActorDidsResolver nonCompliantActorDidsResolver;
     private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
     private final AuditPublisher auditPublisher;
 
@@ -186,7 +187,7 @@ public class TrustStatementService {
 
         // 2/3: issue and publish new ones
         log.debug("Issue and publish NonComplianceV2TrustListStatement trust statement partner link");
-        var nonCompliantActors = this.nonCompliantActorRepository.findAll();
+        var nonCompliantActors = nonCompliantActorDidsResolver.resolve(this.nonCompliantActorRepository.findAll());
         var result = this.issueAndPublishTrustStatement(
             createNonComplianceV2(
                 issuerTrustRootProperties.businessPartnerId(),

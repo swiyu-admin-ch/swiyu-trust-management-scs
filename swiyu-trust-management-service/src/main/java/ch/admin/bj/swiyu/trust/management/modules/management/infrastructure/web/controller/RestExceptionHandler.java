@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.SimpleErrors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -74,6 +75,22 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void handleUnexpectedErrors(final Exception exception, HttpServletRequest request) {
         log.error("Detected unhandled exception for URL {}", request.getRequestURL(), exception);
+    }
+
+    @Override
+    protected ResponseEntity<@NonNull Object> handleHttpMessageNotReadable(
+        HttpMessageNotReadableException ex,
+        @NonNull HttpHeaders headers,
+        @NonNull HttpStatusCode status,
+        @NonNull WebRequest request
+    ) {
+        var cause = ex.getMostSpecificCause();
+
+        if (cause instanceof IllegalArgumentException iae) {
+            return new ResponseEntity<>(iae.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+        return super.handleHttpMessageNotReadable(ex, headers, status, request);
     }
 
     @Override

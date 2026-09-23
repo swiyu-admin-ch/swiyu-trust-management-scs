@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.48.1
+
+### Changed
+
+- Fixes interpretation of vqpsSubmission query parameter
+
+## 3.48.0
+
+### Changed
+
+- Add capability to add a whole BP as a NonCompliant actor
+
 ## 3.36.5
 
 ### Changed

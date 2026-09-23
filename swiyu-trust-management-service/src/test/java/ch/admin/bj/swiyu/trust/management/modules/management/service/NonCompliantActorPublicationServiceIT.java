@@ -3,7 +3,16 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.TRUST_LIST_STATEMENT_NON_COMPLIANCE_V2;
 import static ch.admin.bj.swiyu.trust.management.test.NonCompliantActorTestData.nonCompliantActorRequestDto;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.IdentifierEntryDto;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.PageMetadataDto;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.PagedModelIdentifierEntryDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorRequestDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantReasonTextDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.issuer.IssuerJwtConfig;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.issuer.IssuerJwtProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.statements.DefaultStatementProperties;
@@ -16,6 +25,8 @@ import ch.admin.bj.swiyu.trust.management.modules.registry.service.JsonJwtDeseri
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.NonComplianceListService;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.TrustRegistryService;
 import ch.admin.bj.swiyu.trust.management.test.*;
+import java.util.List;
+import java.util.UUID;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +38,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
@@ -38,6 +50,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         IssuerJwtConfig.class,
         DomainEventService.class,
         NonCompliantActorService.class,
+        NonCompliantActorDidsResolver.class,
         NonComplianceListService.class,
         NonCompliantActorPublicationService.class,
         JwtStatementDomainService.class,
@@ -59,6 +72,9 @@ class NonCompliantActorPublicationServiceIT {
 
     private static final String CURRENT_USER = "Alice Admin";
 
+    @MockitoBean
+    IdentifierApi identifierApi;
+
     @Autowired
     private NonCompliantActorPublicationService nonCompliantActorPublicationService;
 
@@ -70,6 +86,19 @@ class NonCompliantActorPublicationServiceIT {
 
     @Autowired
     private TestRepositories repos;
+
+    private static @NonNull Sort orderByPublishedAt() {
+        return Sort.by(Sort.Direction.DESC, "publishedAt");
+    }
+
+    private NonComplianceV2Details getCurrentNonComplianceListV2() {
+        var all = repos.trustStatementPartnerLink.findAllByTypeAndStatus(
+            TRUST_LIST_STATEMENT_NON_COMPLIANCE_V2,
+            TrustStatementPartnerLinkStatus.ACTIVE
+        );
+        assertThat(all).as("Expected at most one ACTIVE NonComplianceV2 statement").hasSizeLessThanOrEqualTo(1);
+        return all.isEmpty() ? null : (NonComplianceV2Details) all.getFirst().getDetails();
+    }
 
     @BeforeEach
     void setup() {
@@ -149,16 +178,31 @@ class NonCompliantActorPublicationServiceIT {
             .doesNotContain(req.did());
     }
 
-    private NonComplianceV2Details getCurrentNonComplianceListV2() {
-        var all = repos.trustStatementPartnerLink.findAllByTypeAndStatus(
-            TRUST_LIST_STATEMENT_NON_COMPLIANCE_V2,
-            TrustStatementPartnerLinkStatus.ACTIVE
+    @Test
+    void triggerPublication_resolvesActorFlaggedByBusinessPartnerId() {
+        var businessPartnerId = UUID.randomUUID();
+        var did = "did:tdw:resolved-from-cbs";
+        var req = new NonCompliantActorRequestDto(
+            null,
+            businessPartnerId,
+            new NonCompliantReasonTextDto(null, null, null, "Violation of policy", null)
         );
-        assertThat(all).as("Expected at most one ACTIVE NonComplianceV2 statement").hasSizeLessThanOrEqualTo(1);
-        return all.isEmpty() ? null : (NonComplianceV2Details) all.getFirst().getDetails();
-    }
+        nonCompliantActorService.createNonCompliantActor(req, CURRENT_USER);
+        var page = new PagedModelIdentifierEntryDto()
+            .content(List.of(new IdentifierEntryDto().did(did)))
+            .page(new PageMetadataDto().totalPages(1L));
+        when(identifierApi.getAllIdentifierEntries(eq(businessPartnerId), eq(0), any(), any())).thenReturn(page);
+        repos.commit();
 
-    private static @NonNull Sort orderByPublishedAt() {
-        return Sort.by(Sort.Direction.DESC, "publishedAt");
+        // when
+        nonCompliantActorPublicationService.triggerPublication();
+
+        // then
+        var nonComplianceListV1 = repos.nonComplianceList.findAll(orderByPublishedAt()).getFirst();
+        var nonComplianceListV2 = getCurrentNonComplianceListV2();
+        assertThat(nonComplianceListV1.getPayload()).contains(did);
+        assertThat(nonComplianceListV2.getNonCompliantActors())
+            .extracting(NonComplianceV2Details.NonCompliantActor::actor)
+            .contains(did);
     }
 }

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.*;
 import ch.admin.bit.jeap.messaging.avro.security.AvroClassSecurity;
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingRejectReasonDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskFilterDto;
@@ -58,6 +59,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Import(
     {
         AsyncTestConfig.class,
+        NonCompliantActorDidsResolver.class,
         BusinessPartnerIdentityDomainService.class,
         BusinessPartnerIdentityService.class,
         DataJpaTestConfiguration.class,
@@ -96,6 +98,9 @@ class TrustOnboardingTaskServiceIT {
 
     @Autowired
     AsyncTestConfig asyncTestConfig;
+
+    @MockitoBean
+    IdentifierApi identifierApi;
 
     @Autowired
     private TrustOnboardingTaskService trustOnboardingTaskService;

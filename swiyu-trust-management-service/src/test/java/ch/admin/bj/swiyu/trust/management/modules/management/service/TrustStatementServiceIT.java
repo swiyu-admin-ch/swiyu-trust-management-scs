@@ -9,6 +9,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.springframework.data.domain.Pageable.unpaged;
 
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.issuer.IssuerJwtConfig;
@@ -35,6 +36,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -56,6 +58,7 @@ import tools.jackson.databind.ObjectMapper;
         StatusListServiceTestConfiguration.class,
         AsyncTestConfig.class,
         MockAuditPublisherTestConfiguration.class,
+        NonCompliantActorDidsResolver.class,
     }
 )
 @EnableConfigurationProperties(
@@ -81,6 +84,9 @@ class TrustStatementServiceIT {
 
     @Autowired
     StatementRepository statementRepository;
+
+    @MockitoBean
+    IdentifierApi identifierApi;
 
     private static void verifyTrustStatementPublishedAudit(
         AuditPublisher auditPublisher,

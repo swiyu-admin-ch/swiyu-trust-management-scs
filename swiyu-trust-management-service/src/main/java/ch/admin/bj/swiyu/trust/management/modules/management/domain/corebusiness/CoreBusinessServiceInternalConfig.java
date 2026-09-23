@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusiness;
 
 import ch.admin.bit.jeap.security.restclient.JeapOAuth2RestClientBuilderFactory;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustAddDidsSubmissionInternalApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
@@ -33,6 +34,11 @@ public class CoreBusinessServiceInternalConfig {
     @Bean
     public VcSchemaSubmissionApi vcSchemaSubmissionApi(ApiClient coreBusinessServiceApiClient) {
         return new VcSchemaSubmissionApi(coreBusinessServiceApiClient);
+    }
+
+    @Bean
+    public IdentifierApi identifierApi(ApiClient coreBusinessServiceApiClient) {
+        return new IdentifierApi(coreBusinessServiceApiClient);
     }
 
     @Bean

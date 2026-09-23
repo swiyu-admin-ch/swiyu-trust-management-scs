@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.issuer.management.api.CredentialApi;
 import ch.admin.bj.swiyu.trust.client.issuer.management.model.CredentialStatusTypeDto;
@@ -55,6 +56,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Import(
     {
         BusinessPartnerIdentityDomainService.class,
+        NonCompliantActorDidsResolver.class,
         TrustStatementService.class,
         TrustStatementPartnerLinkValidator.class,
         TrustRegistryService.class,
@@ -82,6 +84,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     }
 )
 class BusinessPartnerIdentityServiceIT {
+
+    @MockitoBean
+    IdentifierApi identifierApi;
 
     @MockitoBean
     IssuerClient issuerClient;

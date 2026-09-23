@@ -164,7 +164,7 @@ public class TrustStatementPartnerLink {
         UUID partnerId,
         Instant validFrom,
         Instant validUntil,
-        List<NonCompliantActor> nonCompliantActors,
+        List<NonCompliantActorPublicationEntry> nonCompliantActors,
         StatusListEntry newStatusListEntry
     ) {
         var type = TrustStatementPartnerLinkType.TRUST_LIST_STATEMENT_NON_COMPLIANCE_V2;

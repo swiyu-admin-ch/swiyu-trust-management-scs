@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationCategoryDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProtectedVerificationSubmissionDto;
@@ -54,6 +55,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     {
         ProtectedVerificationRequestTaskService.class,
         BusinessPartnerIdentityDomainService.class,
+        NonCompliantActorDidsResolver.class,
         BusinessPartnerIdentityService.class,
         DataJpaTestConfiguration.class,
         TrustStatementService.class,
@@ -75,6 +77,9 @@ class ProtectedVerificationRequestTaskServiceIT {
     private static final UUID PARTNER_ID = UUID.randomUUID();
     private static final UUID SUBMISSION_ID = UUID.randomUUID();
     private static final UUID SBN_ID = UUID.randomUUID();
+
+    @MockitoBean
+    IdentifierApi identifierApi;
 
     @Autowired
     private ProtectedVerificationRequestTaskService service;
