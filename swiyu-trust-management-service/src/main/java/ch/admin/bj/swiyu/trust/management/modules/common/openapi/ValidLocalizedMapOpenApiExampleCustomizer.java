@@ -20,7 +20,7 @@ public class ValidLocalizedMapOpenApiExampleCustomizer implements PropertyCustom
 
     static {
         LOCALIZED_MAP_EXAMPLE.put("default", "value: default");
-        LOCALIZED_MAP_EXAMPLE.put("en", "value: english");
+        LOCALIZED_MAP_EXAMPLE.put("en-CH", "value: english");
         LOCALIZED_MAP_EXAMPLE.put("de-CH", "value: german");
         LOCALIZED_MAP_EXAMPLE.put("fr-CH", "value: french");
         LOCALIZED_MAP_EXAMPLE.put("it-CH", "value: italian");

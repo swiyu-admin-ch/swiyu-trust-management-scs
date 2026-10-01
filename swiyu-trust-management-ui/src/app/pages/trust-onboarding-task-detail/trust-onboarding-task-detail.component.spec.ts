@@ -10,7 +10,7 @@ import {
 } from '@oblique/oblique';
 import {of} from 'rxjs';
 import {
-  Language,
+  CorrespondenceLanguage,
   PagedModelTrustOnboardingSubmissionDocumentListItemDto,
   PartnerType,
   TaskAction,
@@ -234,7 +234,7 @@ function getTestTask(id: string): TrustOnboardingTask {
     state: TaskStatus.Accepted,
     partnerType: PartnerType.GovernmentalInstitution,
     uid: undefined,
-    correspondenceLanguage: Language.DeCh,
+    correspondenceLanguage: CorrespondenceLanguage.DeCh,
     entityName: {
       default: 'test de',
       'de-CH': 'test de',

@@ -184,36 +184,10 @@ public class SetupFromOldPartnerLinks {
 
         Object entityNameSource = partnerLink.getDetails().get("entityName");
         if (entityNameSource instanceof Map<?, ?> tsEntityNameSource) {
-            var entityNameTarget = new MultiLanguageTextDto();
             var nameTarget = new HashMap<String, String>();
 
-            for (var lang : List.of("de", "de-CH")) {
+            for (var lang : List.of("de", "de-CH", "en", "en-CH", "fr", "fr-CH", "it", "it-CH", "rm", "rm-CH")) {
                 if (tsEntityNameSource.containsKey(lang)) {
-                    entityNameTarget.setDe(tsEntityNameSource.get(lang).toString());
-                    nameTarget.put(lang, tsEntityNameSource.get(lang).toString());
-                }
-            }
-            for (var lang : List.of("en", "en-CH")) {
-                if (tsEntityNameSource.containsKey(lang)) {
-                    entityNameTarget.setEn(tsEntityNameSource.get(lang).toString());
-                    nameTarget.put(lang, tsEntityNameSource.get(lang).toString());
-                }
-            }
-            for (var lang : List.of("fr", "fr-CH")) {
-                if (tsEntityNameSource.containsKey(lang)) {
-                    entityNameTarget.setFr(tsEntityNameSource.get(lang).toString());
-                    nameTarget.put(lang, tsEntityNameSource.get(lang).toString());
-                }
-            }
-            for (var lang : List.of("it", "it-CH")) {
-                if (tsEntityNameSource.containsKey(lang)) {
-                    entityNameTarget.setIt(tsEntityNameSource.get(lang).toString());
-                    nameTarget.put(lang, tsEntityNameSource.get(lang).toString());
-                }
-            }
-            for (var lang : List.of("rm", "rm-CH")) {
-                if (tsEntityNameSource.containsKey(lang)) {
-                    entityNameTarget.setRm(tsEntityNameSource.get(lang).toString());
                     nameTarget.put(lang, tsEntityNameSource.get(lang).toString());
                 }
             }
@@ -231,7 +205,6 @@ public class SetupFromOldPartnerLinks {
             }
 
             submission.setName(nameTarget);
-            submission.setEntityName(entityNameTarget);
         }
         var pop = new ProofOfPossessionDto();
         pop.setDid(idTSv2.subject());

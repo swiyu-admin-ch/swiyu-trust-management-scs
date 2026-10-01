@@ -1,4 +1,4 @@
-package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
+package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.controller;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Names.EDITOR;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,7 +63,7 @@ class NonCompliantActorControllerIT {
 
         // When
         var requestActions = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/non-compliant-actors")
+            MockMvcRequestBuilders.post("/ui-api/non-compliant-actors/")
                 .content(RequestTestData.objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
         );
@@ -84,7 +84,7 @@ class NonCompliantActorControllerIT {
     void get_NonComplianceActor() throws Exception {
         // Given
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/non-compliant-actors")
+            MockMvcRequestBuilders.post("/ui-api/non-compliant-actors/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     RequestTestData.objectMapper.writeValueAsString(
@@ -96,7 +96,7 @@ class NonCompliantActorControllerIT {
 
         // When
         var requestActions = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v1/non-compliant-actors/{id}", entry.getId()).contentType(
+            MockMvcRequestBuilders.get("/ui-api/non-compliant-actors/{id}", entry.getId()).contentType(
                 MediaType.APPLICATION_JSON
             )
         );
@@ -107,10 +107,10 @@ class NonCompliantActorControllerIT {
 
     @Test
     @WithJeapAuthenticationToken(userRoles = { EDITOR })
-    void list_NonComplianceActor() throws Exception {
+    void list_NonComplianceActor_filterByDid() throws Exception {
         // Given
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/non-compliant-actors")
+            MockMvcRequestBuilders.post("/ui-api/non-compliant-actors/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     RequestTestData.objectMapper.writeValueAsString(
@@ -120,7 +120,7 @@ class NonCompliantActorControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
         );
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/non-compliant-actors")
+            MockMvcRequestBuilders.post("/ui-api/non-compliant-actors/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     RequestTestData.objectMapper.writeValueAsString(
@@ -131,7 +131,7 @@ class NonCompliantActorControllerIT {
 
         // When
         var requestActions = mockMvc.perform(
-            MockMvcRequestBuilders.get("/api/v1/non-compliant-actors").contentType(MediaType.APPLICATION_JSON)
+            MockMvcRequestBuilders.get("/ui-api/non-compliant-actors/").contentType(MediaType.APPLICATION_JSON)
         );
 
         // Then
@@ -144,11 +144,44 @@ class NonCompliantActorControllerIT {
 
     @Test
     @WithJeapAuthenticationToken(userRoles = { EDITOR })
+    void list_NonComplianceActor_filterByBusinessPartnerId() throws Exception {
+        // Given
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/ui-api/non-compliant-actors/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    RequestTestData.objectMapper.writeValueAsString(
+                        RequestTestData.tsNonComplianceActorCreateRequestWithBusinessPartnerId(
+                            RequestTestData.BUSINESS_PARTNER_A_ID
+                        )
+                    )
+                )
+        );
+        var entry = nonCompliantActorRepository
+            .findNonCompliantActorByBusinessPartnerId(RequestTestData.BUSINESS_PARTNER_A_ID)
+            .get();
+
+        // When
+        var requestActions = mockMvc.perform(
+            MockMvcRequestBuilders.get("/ui-api/non-compliant-actors/")
+                .param("businessPartnerId", entry.getBusinessPartnerId().toString())
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // Then
+        requestActions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].id").value(entry.getId().toString()));
+    }
+
+    @Test
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
     void delete_NonComplianceActor() throws Exception {
         // Given
         mockMvc
             .perform(
-                MockMvcRequestBuilders.post("/api/v1/non-compliant-actors")
+                MockMvcRequestBuilders.post("/ui-api/non-compliant-actors/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         RequestTestData.objectMapper.writeValueAsString(
@@ -162,7 +195,7 @@ class NonCompliantActorControllerIT {
 
         // When
         var requestActions = mockMvc.perform(
-            MockMvcRequestBuilders.delete("/api/v1/non-compliant-actors/{id}", entry.getId()).contentType(
+            MockMvcRequestBuilders.delete("/ui-api/non-compliant-actors/{id}", entry.getId()).contentType(
                 MediaType.APPLICATION_JSON
             )
         );

@@ -1,6 +1,11 @@
 package ch.admin.bj.swiyu.trust.management.modules.common.i18n;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.DEFAULT_VALUE_KEY;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.DE_CH;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.EN_CH;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.FR_CH;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.IT_CH;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.RM_CH;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,11 +32,11 @@ public class LocalizedMapUtil {
     ) {
         var map = new LinkedHashMap<String, String>();
         map.put(DEFAULT_VALUE_KEY, defaultValue);
-        putIfPresent(map, "de-CH", de);
-        putIfPresent(map, "fr-CH", fr);
-        putIfPresent(map, "it-CH", it);
-        putIfPresent(map, "en", en);
-        putIfPresent(map, "rm-CH", rm);
+        putIfPresent(map, DE_CH, de);
+        putIfPresent(map, FR_CH, fr);
+        putIfPresent(map, IT_CH, it);
+        putIfPresent(map, EN_CH, en);
+        putIfPresent(map, RM_CH, rm);
         return Map.copyOf(map);
     }
 

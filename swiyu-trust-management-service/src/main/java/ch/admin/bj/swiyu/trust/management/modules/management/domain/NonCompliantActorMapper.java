@@ -2,7 +2,7 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.DEFAULT_VALUE_KEY;
 import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.DE_CH;
-import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.EN;
+import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.EN_CH;
 import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.FR_CH;
 import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.IT_CH;
 import static ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants.RM_CH;
@@ -47,7 +47,7 @@ public class NonCompliantActorMapper {
             ret.put(DEFAULT_VALUE_KEY, reason.getReasonFr());
         }
         if (reason.getReasonEn() != null && !reason.getReasonEn().isBlank()) {
-            ret.put(EN, reason.getReasonEn());
+            ret.put(EN_CH, reason.getReasonEn());
             ret.put(DEFAULT_VALUE_KEY, reason.getReasonEn());
         }
         if (reason.getReasonDe() != null && !reason.getReasonDe().isBlank()) {

@@ -1,5 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.api;
 
+import ch.admin.bj.swiyu.trust.management.modules.common.i18n.ValidLocalizedMap;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.UUID;
 @Schema(name = "BusinessPartnerIdentity")
 public record BusinessPartnerIdentityDto(
     UUID id,
-    Map<String, String> entityName,
+    @ValidLocalizedMap Map<String, String> entityName,
     Instant lastActivated,
     String uid,
     Boolean isRegisteredInCommercialRegister,

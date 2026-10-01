@@ -29,7 +29,7 @@ class LocalizedMapUtilTest {
         assertThat(result)
             .containsEntry("default", "Acme")
             .containsEntry("de-CH", "Acme DE")
-            .containsEntry("en", "Acme EN")
+            .containsEntry("en-CH", "Acme EN")
             .doesNotContainKeys("fr-CH", "it-CH", "rm-CH");
     }
 }

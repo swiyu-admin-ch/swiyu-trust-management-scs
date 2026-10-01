@@ -8,6 +8,7 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustAddDidsSub
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustAdditionalDidsSubmissionInternalDtoDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystem;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemException;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorFilterDto;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,8 @@ public class TrustAddDidSubmissionEventProcessor {
     private final TrustAddDidTaskService taskService;
     private final TrustAddDidsSubmissionInternalApi trustAddDidsSubmissionApi;
     private final BusinessPartnerIdentityService businessPartnerIdentityService;
+    private final NonCompliantActorService nonCompliantActorService;
+    private final NonCompliantActorPublicationService nonCompliantActorPublicationService;
 
     public void processTiTrustAddDidSubmissionSubmittedEvent(TiTrustAddDidSubmissionSubmittedEvent event) {
         var submissionId = event.getPayload().getTrustAddDidSubmissionId();
@@ -52,6 +55,15 @@ public class TrustAddDidSubmissionEventProcessor {
             getCurrentUserName()
         );
         taskService.approve(taskId, getCurrentUserFullName());
+
+        // If the did was added to a non-compliant BP we need to add the DID to the list statement
+        if (
+            nonCompliantActorService.existsNonCompliantActor(
+                new NonCompliantActorFilterDto(null, businessPartnerIdentity.id())
+            )
+        ) {
+            nonCompliantActorPublicationService.triggerPublicationAsync();
+        }
 
         log.info("Trust Add DID submission {} processed successfully.", submissionId);
     }

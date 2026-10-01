@@ -9,6 +9,7 @@ import ch.admin.bj.swiyu.trust.client.zas.sbn.model.NullableTranslationDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.OrganisationDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.TranslationDto;
 import ch.admin.bj.swiyu.trust.client.zas.sbn.model.UsnDto;
+import ch.admin.bj.swiyu.trust.management.modules.common.i18n.LocalizedMapConstants;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.*;
@@ -56,7 +57,7 @@ public class TaskMapper {
             toAddressZipCodeCity(submission.getAddress()),
             toAddressCountry(submission.getAddress()),
             submission.getEntityEmail(),
-            toCorrespondanceLanguageDto(
+            toCorrespondenceLanguageDto(
                 submission.getContactPerson() == null ? null : submission.getContactPerson().getCorrespondingLanguage()
             ),
             toContactDto(submission),
@@ -159,13 +160,13 @@ public class TaskMapper {
     private static Map<String, String> toTranslationMap(String de, String fr, String it) {
         var map = new LinkedHashMap<String, String>();
         if (de != null) {
-            map.put("de-CH", de);
+            map.put(LocalizedMapConstants.DE_CH, de);
         }
         if (fr != null) {
-            map.put("fr-CH", fr);
+            map.put(LocalizedMapConstants.FR_CH, fr);
         }
         if (it != null) {
-            map.put("it-CH", it);
+            map.put(LocalizedMapConstants.IT_CH, it);
         }
         return Map.copyOf(map);
     }
@@ -267,17 +268,16 @@ public class TaskMapper {
         return contacts;
     }
 
-    @SuppressWarnings("java:S5738") // EID-6303
-    private static TrustOnboardingTaskDto.LanguageDto toCorrespondanceLanguageDto(LanguageDto source) {
+    private static TrustOnboardingTaskDto.CorrespondenceLanguageDto toCorrespondenceLanguageDto(LanguageDto source) {
         if (source == null) {
-            return TrustOnboardingTaskDto.LanguageDto.EN_CH;
+            return TrustOnboardingTaskDto.CorrespondenceLanguageDto.EN_CH;
         }
         return switch (source) {
-            case DE -> TrustOnboardingTaskDto.LanguageDto.DE_CH;
-            case EN -> TrustOnboardingTaskDto.LanguageDto.EN;
-            case FR -> TrustOnboardingTaskDto.LanguageDto.FR_CH;
-            case IT -> TrustOnboardingTaskDto.LanguageDto.IT_CH;
-            case RM -> TrustOnboardingTaskDto.LanguageDto.RM_CH;
+            case DE -> TrustOnboardingTaskDto.CorrespondenceLanguageDto.DE_CH;
+            case EN -> TrustOnboardingTaskDto.CorrespondenceLanguageDto.EN_CH;
+            case FR -> TrustOnboardingTaskDto.CorrespondenceLanguageDto.FR_CH;
+            case IT -> TrustOnboardingTaskDto.CorrespondenceLanguageDto.IT_CH;
+            case RM -> TrustOnboardingTaskDto.CorrespondenceLanguageDto.RM_CH;
         };
     }
 

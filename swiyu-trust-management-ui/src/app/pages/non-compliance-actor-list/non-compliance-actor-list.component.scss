@@ -1,0 +1,21 @@
+@use "@oblique/oblique/styles/scss/core/variables";
+
+.filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.table-container.is-loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.ob-table th {
+  white-space: nowrap;
+}

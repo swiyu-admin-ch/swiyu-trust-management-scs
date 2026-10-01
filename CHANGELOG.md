@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.1.0
+
+### Added
+
+- Add Non-Compliant UI
+
+## 4.0.4
+
+### Added
+
+- add GitHub action for SBOM generation
+
+## 4.0.3
+
+### Fixed
+
+- Pin shell-quote to 1.11.0 to fix Snyk critical severity finding SNYK-JS-SHELLQUOTE-20250993 (command injection)
+
+## 4.0.2
+
+### Fixed
+
+- Pin Jackson to patched versions (tools.jackson.core 3.2.3, com.fasterxml.jackson.core 2.22.3) to fix Snyk high severity findings CVE-2026-89425 / CVE-2026-91777
+
+## 4.0.1
+
+### Changed
+
+- Remove deprecated language 'en' from the trust onboarding task contract; EN correspondence language now maps to en-CH
+- Align localized map locale keys with the core business service: LocalizedMapUtil and the non-compliance reason use
+  en-CH instead of en
+
 ## 3.48.1
 
 ### Changed

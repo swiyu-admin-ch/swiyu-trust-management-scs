@@ -1,0 +1,69 @@
+@if (loading()) {
+  <div class="sw-flex-center">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+} @else if (notFoundError()) {
+  <div class="sw-flex-center">
+    <ob-alert type="error">
+      {{ "nonCompliance.detail.alert.resource-not-found" | translate }}
+    </ob-alert>
+  </div>
+} @else if (actor().id) {
+  <div class="sw-flex-space-between">
+    <div>
+      <a [routerLink]="'/non-compliance-actors'" class="back-link" data-cy="backToNonComplianceList">
+        <mat-icon svgIcon="chevron_left"></mat-icon>
+        <span>{{ "app.menu.nonComplianceActors" | translate }}</span>
+      </a>
+      <h1 data-cy="nonComplianceTitle">{{ actor().did || actor().businessPartnerId }}</h1>
+    </div>
+    <button [matMenuTriggerFor]="menu" data-cy="btnNonComplianceDetailMore" mat-icon-button obButton="secondary">
+      <mat-icon svgIcon="show-more_vertical"></mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button (click)="shareLink()" data-cy="btnNonComplianceDetailShare" mat-menu-item>
+        <mat-icon svgIcon="share"></mat-icon>
+        <span>{{ "app.trust-onboarding-task.actions.share-link" | translate }}</span>
+      </button>
+    </mat-menu>
+  </div>
+
+  <hr />
+  <section>
+    <div class="ob-flex">
+      <div>
+        <small>{{ "nonCompliance.detail.fields.flaggedAt.label" | translate }}</small
+        ><br />
+        <span data-cy="flaggedAt">{{ actor().flaggedAsNonCompliantAt | date: "dd.MM.yyyy HH:mm" }}</span>
+      </div>
+    </div>
+    <hr />
+    <div class="ob-flex">
+      <div>
+        <small>{{ "nonCompliance.detail.fields.did.label" | translate }}</small
+        ><br />
+        <span data-cy="did">{{ actor().did || "-" }}</span>
+      </div>
+      <div>
+        <small>{{ "nonCompliance.detail.fields.businessPartnerId.label" | translate }}</small
+        ><br />
+        <span data-cy="businessPartnerId">{{ actor().businessPartnerId || "-" }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>{{ "nonCompliance.detail.reason" | translate }}</h2>
+    <div class="ob-flex">
+      <div>
+        @for (reason of reasonLanguages(); track reason.key) {
+          <div class="sw-padding-sm">
+            <small>{{ reason.labelKey | translate }}</small
+            ><br />
+            <span [attr.data-cy]="'reason' + reason.key">{{ reason.value || "-" }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}

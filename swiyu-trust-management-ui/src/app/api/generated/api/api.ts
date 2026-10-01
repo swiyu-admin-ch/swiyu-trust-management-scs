@@ -1,6 +1,7 @@
 export * from './business-partner-identity-api';
 export * from './domain-event-log-api';
 export * from './frontend-configuration-api';
+export * from './non-compliant-actor-api';
 export * from './protected-issuance-authorization-api';
 export * from './protected-verification-authorization-api';
 export * from './task-api';
@@ -9,6 +10,7 @@ export * from './trust-statement-issuance-api';
 import {BusinessPartnerIdentityApi} from './business-partner-identity-api';
 import {DomainEventLogApi} from './domain-event-log-api';
 import {FrontendConfigurationApi} from './frontend-configuration-api';
+import {NonCompliantActorApi} from './non-compliant-actor-api';
 import {ProtectedIssuanceAuthorizationApi} from './protected-issuance-authorization-api';
 import {ProtectedVerificationAuthorizationApi} from './protected-verification-authorization-api';
 import {TaskApi} from './task-api';
@@ -18,6 +20,7 @@ export const APIS = [
   BusinessPartnerIdentityApi,
   DomainEventLogApi,
   FrontendConfigurationApi,
+  NonCompliantActorApi,
   ProtectedIssuanceAuthorizationApi,
   ProtectedVerificationAuthorizationApi,
   TaskApi,

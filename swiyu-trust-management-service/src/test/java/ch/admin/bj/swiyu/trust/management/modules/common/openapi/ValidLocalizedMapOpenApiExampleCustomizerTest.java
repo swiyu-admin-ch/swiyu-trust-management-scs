@@ -34,7 +34,7 @@ class ValidLocalizedMapOpenApiExampleCustomizerTest {
         @SuppressWarnings("unchecked")
         var example = (Map<String, String>) schema.getExample();
         assertThat(example.keySet()).first().isEqualTo("default");
-        assertThat(example).containsKeys("default", "de-CH", "fr-CH", "it-CH", "en");
+        assertThat(example).containsKeys("default", "de-CH", "fr-CH", "it-CH", "en-CH");
     }
 
     @Test

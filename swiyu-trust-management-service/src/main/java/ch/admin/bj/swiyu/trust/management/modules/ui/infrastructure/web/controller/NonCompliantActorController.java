@@ -1,4 +1,4 @@
-package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
+package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.controller;
 
 import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR;
 import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Expressions.HAS_ROLE_EDITOR_OR_READER;
@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @Tag(name = "NonCompliantActor")
 @RestController
-@RequestMapping("/api/v1/non-compliant-actors")
+@RequestMapping("/ui-api/non-compliant-actors")
 @PreAuthorize("isAuthenticated()")
 public class NonCompliantActorController {
 
@@ -44,7 +44,7 @@ public class NonCompliantActorController {
         return this.nonCompliantActorService.getNonCompliantActor(nonCompliantActorId);
     }
 
-    @GetMapping
+    @GetMapping("/")
     @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     @PageableAsQueryParam
     public PagedModel<NonCompliantActorDto> getNonCompliantActors(
@@ -56,7 +56,7 @@ public class NonCompliantActorController {
         return new PagedModel<>(this.nonCompliantActorService.getNonCompliantActors(filters, pageable));
     }
 
-    @PostMapping
+    @PostMapping("/")
     @PreAuthorize(HAS_ROLE_EDITOR)
     public ResponseEntity<NonCompliantActorDto> createNonCompliantActor(
         @RequestBody @Valid @NotNull NonCompliantActorRequestDto request

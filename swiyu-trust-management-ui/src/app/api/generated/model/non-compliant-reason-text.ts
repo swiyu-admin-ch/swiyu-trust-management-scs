@@ -8,12 +8,10 @@
  * Do not edit the class manually.
  */
 
-export const Language = {
-  En: 'en',
-  EnCh: 'en-CH',
-  DeCh: 'de-CH',
-  FrCh: 'fr-CH',
-  ItCh: 'it-CH',
-  RmCh: 'rm-CH'
-} as const;
-export type Language = (typeof Language)[keyof typeof Language];
+export interface NonCompliantReasonText {
+  reasonDe?: string;
+  reasonFr?: string;
+  reasonIt?: string;
+  reasonEn?: string;
+  reasonRm?: string;
+}

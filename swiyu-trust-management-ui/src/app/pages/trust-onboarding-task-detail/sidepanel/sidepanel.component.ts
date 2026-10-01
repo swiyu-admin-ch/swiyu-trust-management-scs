@@ -199,7 +199,7 @@ export class SidepanelComponent {
     this.translateService.get('app.trust-onboarding-task.sidepanel.submit.reject-request');
 
     this.translateService.get('app.trust-onboarding-task.sidepanel.message.hint.de-CH');
-    this.translateService.get('app.trust-onboarding-task.sidepanel.message.hint.en');
+    this.translateService.get('app.trust-onboarding-task.sidepanel.message.hint.en-CH');
     this.translateService.get('app.trust-onboarding-task.sidepanel.message.hint.fr-CH');
     this.translateService.get('app.trust-onboarding-task.sidepanel.message.hint.it-CH');
     this.translateService.get('app.trust-onboarding-task.sidepanel.message.hint.rm-CH');

@@ -28,7 +28,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MatPaginator, MatPaginatorModule, PageEvent} from '@angular/material/paginator';
 import {catchError, filter, finalize, mergeMap, take, tap} from 'rxjs';
 import {
-  Language,
+  CorrespondenceLanguage,
   PageMetadata,
   TaskAction,
   TaskApi,
@@ -105,7 +105,7 @@ export class TrustOnboardingTaskDetailComponent {
   });
 
   protected readonly TaskStatus = TaskStatus;
-  protected readonly Language = Language;
+  protected readonly CorrespondenceLanguage = CorrespondenceLanguage;
   protected readonly TaskAction = TaskAction;
 
   constructor() {
@@ -241,14 +241,13 @@ export class TrustOnboardingTaskDetailComponent {
   private translateSetup() {
     // Required for translate service auto collection of i18n keys
     // @see: NameLanguage
-    this.translateService.get('app.trust-onboarding-task.fields.name.en.label');
     this.translateService.get('app.trust-onboarding-task.fields.name.en-CH.label');
     this.translateService.get('app.trust-onboarding-task.fields.name.de-CH.label');
     this.translateService.get('app.trust-onboarding-task.fields.name.fr-CH.label');
     this.translateService.get('app.trust-onboarding-task.fields.name.it-CH.label');
     this.translateService.get('app.trust-onboarding-task.fields.name.rm-CH.label');
     // @see: CorrespondanceLanguage
-    this.translateService.get('app.trust-onboarding-task.fields.correspondance_language.value.en');
+    this.translateService.get('app.trust-onboarding-task.fields.correspondance_language.value.en-CH');
     this.translateService.get('app.trust-onboarding-task.fields.correspondance_language.value.de-CH');
     this.translateService.get('app.trust-onboarding-task.fields.correspondance_language.value.fr-CH');
     this.translateService.get('app.trust-onboarding-task.fields.correspondance_language.value.it-CH');

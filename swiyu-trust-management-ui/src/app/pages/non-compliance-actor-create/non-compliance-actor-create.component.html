@@ -1,0 +1,58 @@
+<form class="sidepanel" [formGroup]="form" (ngSubmit)="submit()">
+  <div class="sidepanel-container">
+    <h1>{{ "nonCompliance.create.title" | translate }}</h1>
+    <mat-radio-group [formControl]="form.controls.identifierType" class="identifier-type" data-cy="identifierType">
+      <mat-radio-button value="did">{{ "nonCompliance.create.did" | translate }}</mat-radio-button>
+      <mat-radio-button value="businessPartnerId">{{
+        "nonCompliance.create.businessPartnerId" | translate
+      }}</mat-radio-button>
+    </mat-radio-group>
+    @if (form.controls.identifierType.value === "did") {
+      <mat-form-field>
+        <mat-label>{{ "nonCompliance.create.did" | translate }}</mat-label>
+        <input matInput [formControl]="form.controls.did" data-cy="nonComplianceDid" />
+      </mat-form-field>
+    } @else {
+      <mat-form-field>
+        <mat-label>{{ "nonCompliance.create.businessPartnerId" | translate }}</mat-label>
+        <input matInput [formControl]="form.controls.businessPartnerId" data-cy="nonComplianceBpId" />
+      </mat-form-field>
+      @if (form.controls.businessPartnerId.hasError("invalidUuid")) {
+        <div class="field-error" data-cy="businessPartnerIdError">
+          {{ "nonCompliance.create.businessPartnerId.invalidUuid" | translate }}
+        </div>
+      }
+    }
+    <div class="reason-hint" data-cy="reasonHint">{{ "nonCompliance.create.reason.requiredHint" | translate }}</div>
+    @for (lang of reasonLanguages; track lang) {
+      <mat-form-field>
+        <mat-label>{{ "nonCompliance.create.reason" | translate }} ({{ lang }})</mat-label>
+        <textarea
+          matInput
+          [formControl]="form.controls[reasonKey(lang)]"
+          [attr.data-cy]="'nonComplianceReason' + lang"
+        ></textarea>
+      </mat-form-field>
+    }
+    <div class="actions">
+      <button
+        routerLink="/non-compliance-actors"
+        mat-button
+        obButton="secondary"
+        type="button"
+        data-cy="cancelNonCompliantActor"
+      >
+        {{ "app.common.cancel" | translate }}
+      </button>
+      <button
+        mat-button
+        obButton="primary"
+        type="submit"
+        [disabled]="loading() || !form.valid"
+        data-cy="submitNonCompliantActor"
+      >
+        {{ "nonCompliance.create.submit" | translate }}
+      </button>
+    </div>
+  </div>
+</form>

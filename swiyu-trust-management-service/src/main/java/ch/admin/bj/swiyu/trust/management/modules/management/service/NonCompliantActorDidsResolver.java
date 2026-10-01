@@ -84,7 +84,7 @@ public class NonCompliantActorDidsResolver {
                 businessPartnerId,
                 page,
                 PAGE_SIZE,
-                List.of("created_at")
+                List.of("createdAt")
             );
             if (result.getContent() != null) {
                 for (var entry : result.getContent()) {

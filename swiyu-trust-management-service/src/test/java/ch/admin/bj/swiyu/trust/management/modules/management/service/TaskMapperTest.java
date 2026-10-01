@@ -70,7 +70,7 @@ class TaskMapperTest {
         var result = toTrustOnboardingTaskDto(allowedActions, task, submission);
 
         // Then
-        assertThat(result.correspondenceLanguage()).isEqualTo(TrustOnboardingTaskDto.LanguageDto.FR_CH);
+        assertThat(result.correspondenceLanguage()).isEqualTo(TrustOnboardingTaskDto.CorrespondenceLanguageDto.FR_CH);
     }
 
     @Test

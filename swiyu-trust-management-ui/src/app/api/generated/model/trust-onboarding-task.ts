@@ -8,8 +8,8 @@
  * Do not edit the class manually.
  */
 import {Contact} from './contact';
+import {CorrespondenceLanguage} from './correspondence-language';
 import {Did} from './did';
-import {Language} from './language';
 import {PartnerType} from './partner-type';
 import {TaskAction} from './task-action';
 import {TaskStatus} from './task-status';
@@ -28,7 +28,7 @@ export interface TrustOnboardingTask {
   zipCodeCity?: string;
   country?: string;
   email?: string;
-  correspondenceLanguage: Language;
+  correspondenceLanguage: CorrespondenceLanguage;
   contacts: Array<Contact>;
   dids: Array<Did>;
   allowedActions: Set<TaskAction>;

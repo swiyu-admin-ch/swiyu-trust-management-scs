@@ -13,4 +13,6 @@ public interface NonCompliantActorRepository
     boolean existsNonCompliantActorByBusinessPartnerId(UUID businessPartnerId);
 
     Optional<NonCompliantActor> findNonCompliantActorByDid(String did);
+
+    Optional<NonCompliantActor> findNonCompliantActorByBusinessPartnerId(UUID businessPartnerId);
 }

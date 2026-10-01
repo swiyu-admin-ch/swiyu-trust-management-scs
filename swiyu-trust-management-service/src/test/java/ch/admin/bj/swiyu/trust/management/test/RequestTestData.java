@@ -327,6 +327,15 @@ public class RequestTestData {
         return dto;
     }
 
+    public static ObjectNode tsNonComplianceActorCreateRequestWithBusinessPartnerId(UUID businessPartnerId) {
+        var dto = objectMapper.createObjectNode();
+        dto.put("businessPartnerId", businessPartnerId.toString());
+        ObjectNode reason = objectMapper.createObjectNode();
+        reason.put("reasonEn", "Dummy actor");
+        dto.set("reason", reason);
+        return dto;
+    }
+
     public static @Valid ProtectedIssuanceAuthorizationV2RequestDto tsProtectedIssuanceAuthorizationV2RequestDto(
         UUID buisnessPartnerId,
         String subject,

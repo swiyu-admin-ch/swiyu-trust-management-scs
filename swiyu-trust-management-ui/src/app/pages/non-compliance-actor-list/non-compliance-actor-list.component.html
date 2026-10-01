@@ -1,0 +1,86 @@
+<h1>{{ "app.menu.nonComplianceActors" | translate }}</h1>
+<form [formGroup]="filterForm" class="ob-inline-form filter-form">
+  <mat-form-field>
+    <mat-label>{{ "nonCompliance.list.filter.did" | translate }}</mat-label>
+    <input
+      matInput
+      [formControl]="filterForm.controls.did"
+      placeholder="{{ 'nonCompliance.list.filter.did' | translate }}"
+    />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ "nonCompliance.list.filter.businessPartnerId" | translate }}</mat-label>
+    <input
+      matInput
+      [formControl]="filterForm.controls.businessPartnerId"
+      placeholder="{{ 'nonCompliance.list.filter.businessPartnerId' | translate }}"
+    />
+  </mat-form-field>
+  <button (click)="resetFilter()" mat-button obButton="secondary" type="button">
+    {{ "app.common.reset" | translate }}
+  </button>
+  <button
+    routerLink="/non-compliance-actors/create"
+    mat-button
+    obButton="primary"
+    type="button"
+    data-cy="addNonCompliantActor"
+  >
+    {{ "nonCompliance.list.add" | translate }}
+  </button>
+</form>
+
+<div class="table-container mat-elevation-z8" [class.is-loading]="loading()">
+  <table [dataSource]="dataSource" class="ob-table" mat-table>
+    <ng-container matColumnDef="did">
+      <th *matHeaderCellDef mat-header-cell scope="col">{{ "nonCompliance.list.header.did" | translate }}</th>
+      <td *matCellDef="let actor" mat-cell>{{ actor.did }}</td>
+    </ng-container>
+    <ng-container matColumnDef="businessPartnerId">
+      <th *matHeaderCellDef mat-header-cell scope="col">
+        {{ "nonCompliance.list.header.businessPartnerId" | translate }}
+      </th>
+      <td *matCellDef="let actor" mat-cell>{{ actor.businessPartnerId }}</td>
+    </ng-container>
+    <ng-container matColumnDef="reason">
+      <th *matHeaderCellDef mat-header-cell scope="col">{{ "nonCompliance.list.header.reason" | translate }}</th>
+      <td *matCellDef="let actor" mat-cell>{{ actor.reason | nonComplianceReason }}</td>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <th *matHeaderCellDef mat-header-cell scope="col">{{ "nonCompliance.list.header.actions" | translate }}</th>
+      <td *matCellDef="let actor" class="action-cell" mat-cell>
+        <div class="actions sw-flex-right">
+          <button [matMenuTriggerFor]="menu" mat-icon-button obButton="secondary" data-cy="nonComplianceActorActions">
+            <mat-icon svgIcon="show-more_vertical"></mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="delete(actor)" data-cy="deleteNonCompliantActor">
+              <mat-icon svgIcon="delete"></mat-icon>
+              <span>{{ "nonCompliance.list.actions.delete" | translate }}</span>
+            </button>
+          </mat-menu>
+          <button
+            [routerLink]="detailRoute(actor)"
+            mat-icon-button
+            obButton="secondary"
+            data-cy="openNonCompliantActor"
+          >
+            <mat-icon svgIcon="chevron_right"></mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
+    <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+    <tr *matRowDef="let row; columns: displayedColumns" mat-row [attr.data-cy]="row.id"></tr>
+    <tr *matNoDataRow>
+      <td class="mat-cell" colspan="4" data-cy="noDataRow">{{ "nonCompliance.list.empty" | translate }}</td>
+    </tr>
+  </table>
+  <mat-paginator
+    [length]="totalItems"
+    [pageSizeOptions]="[10, 25, 50]"
+    [pageSize]="pageSize"
+    [disabled]="loading()"
+    showFirstLastButtons
+  ></mat-paginator>
+</div>

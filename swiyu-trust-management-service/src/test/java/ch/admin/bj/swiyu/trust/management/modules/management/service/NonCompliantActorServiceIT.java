@@ -277,7 +277,7 @@ class NonCompliantActorServiceIT {
             )
         );
 
-        var filters = new NonCompliantActorFilterDto("abc");
+        var filters = new NonCompliantActorFilterDto("abc", null);
         var page = service.getNonCompliantActors(filters, PageRequest.of(0, 10));
 
         assertThat(page.getTotalElements()).isEqualTo(2);
@@ -303,7 +303,7 @@ class NonCompliantActorServiceIT {
             )
         );
 
-        var page = service.getNonCompliantActors(new NonCompliantActorFilterDto(null), PageRequest.of(0, 10));
+        var page = service.getNonCompliantActors(new NonCompliantActorFilterDto(null, null), PageRequest.of(0, 10));
 
         assertThat(page.getTotalElements()).isEqualTo(2);
     }

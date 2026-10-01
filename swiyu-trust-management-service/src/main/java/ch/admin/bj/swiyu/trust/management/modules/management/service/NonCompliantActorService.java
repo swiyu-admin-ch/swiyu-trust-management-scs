@@ -50,12 +50,14 @@ public class NonCompliantActorService {
         @Valid @NotNull NonCompliantActorFilterDto filters,
         @Valid @NotNull Pageable pageable
     ) {
-        QNonCompliantActor q = QNonCompliantActor.nonCompliantActor;
-        BooleanBuilder where = new BooleanBuilder();
-        if (filters.did() != null) {
-            where.and(q.did.containsIgnoreCase(filters.did()));
-        }
+        var where = getQuery(filters);
         return this.nonCompliantActorRepository.findAll(where, pageable).map(NonCompliantActorMapper::map);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsNonCompliantActor(@Valid @NotNull NonCompliantActorFilterDto filters) {
+        var where = getQuery(filters);
+        return this.nonCompliantActorRepository.exists(where);
     }
 
     @Transactional
@@ -153,6 +155,19 @@ public class NonCompliantActorService {
             })
             .toList();
         this.nonComplianceListService.createNonComplianceList(new NonCompliantActorsDto(nonComplianceList));
+    }
+
+    @NotNull
+    private static BooleanBuilder getQuery(NonCompliantActorFilterDto filters) {
+        QNonCompliantActor q = QNonCompliantActor.nonCompliantActor;
+        BooleanBuilder where = new BooleanBuilder();
+        if (filters.did() != null) {
+            where.and(q.did.containsIgnoreCase(filters.did()));
+        }
+        if (filters.businessPartnerId() != null) {
+            where.and(q.businessPartnerId.eq(filters.businessPartnerId()));
+        }
+        return where;
     }
 
     private static Supplier<ResourceNotFoundException> nonCompliantActorNotFound(UUID id) {

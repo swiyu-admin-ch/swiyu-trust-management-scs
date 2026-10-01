@@ -31,3 +31,5 @@ target/
 /swiyu-trust-management-ui/src/app/api/generated/.openapi-generator/
 /swiyu-trust-management-ui/src/app/api/generated/git_push.sh
 /swiyu-trust-management-ui/src/app/api/generated/README.md
+
+docs/superpowers/

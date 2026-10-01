@@ -55,6 +55,12 @@ describe('SidepanelComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('renders nothing when no panel data is active', () => {
+    expect(component.panelData()).toBeNull();
+    expect(fixture.nativeElement.querySelector('.ob-flex')).toBeNull();
+    expect(fixture.nativeElement.querySelector('form')).toBeNull();
+  });
+
   it('calls the onboarding approve endpoint for a non-protected-verification task', () => {
     sidepanelService.approve(getTaskListItem('ONBOARDING'));
     fixture.detectChanges();

@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>{{ "nonCompliance.list.delete.title" | translate }}</h2>
+<mat-dialog-content>
+  <p>{{ "nonCompliance.list.delete.message" | translate }}</p>
+  <p>
+    <strong>{{ data.did || data.businessPartnerId }}</strong>
+  </p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button obButton="secondary" mat-dialog-close>{{ "app.common.cancel" | translate }}</button>
+  <button mat-button obButton="primary" [mat-dialog-close]="true" data-cy="confirmDelete">
+    {{ "nonCompliance.list.delete.confirm" | translate }}
+  </button>
+</mat-dialog-actions>

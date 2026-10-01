@@ -29,17 +29,15 @@ public record TrustOnboardingTaskDto(
     String zipCodeCity,
     String country,
     String email,
-    @NotNull LanguageDto correspondenceLanguage,
+    @NotNull CorrespondenceLanguageDto correspondenceLanguage,
     @NotNull List<ContactDto> contacts,
     @NotNull List<DidDto> dids,
     @NotNull Set<TaskActionDto> allowedActions,
     int timesResubmitted
 ) {
     @RequiredArgsConstructor
-    @Schema(name = "Language", enumAsRef = true)
-    public enum LanguageDto {
-        @Deprecated(forRemoval = true, since = "3.29.1") // Remove in EID-6303
-        EN("en"),
+    @Schema(name = "CorrespondenceLanguage", enumAsRef = true)
+    public enum CorrespondenceLanguageDto {
         EN_CH("en-CH"),
         DE_CH("de-CH"),
         FR_CH("fr-CH"),
