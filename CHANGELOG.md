@@ -11,6 +11,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Add Non-Compliant UI
 
+### Fixed
+
+- Update Angular from 21.2.23 to 21.2.25 to fix Snyk finding on @angular/router
+- Update jeap-spring-boot-parent from 41.5.0 to 41.14.0, which already provides the patched Jackson versions
+  (tools.jackson.core 3.2.3, com.fasterxml.jackson.core 2.22.3); the local Jackson CVE-OVERRIDE is therefore removed
+
 ## 4.0.4
 
 ### Added
