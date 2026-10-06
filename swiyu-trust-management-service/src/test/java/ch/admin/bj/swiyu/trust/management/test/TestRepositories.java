@@ -35,6 +35,7 @@ public class TestRepositories {
     public final ProtectedVerificationRequestTaskRepository protectedVerificationRequestTask;
     public final ProtectedVerificationAuthorizationRepository protectedVerificationAuthorization;
     public final TrustOnboardingTaskRepository trustOnboardingTask;
+    public final StatusListMetadataRepository statusListMetadata;
     public final TrustAddDidTaskRepository trustAddDidTask;
 
     /**

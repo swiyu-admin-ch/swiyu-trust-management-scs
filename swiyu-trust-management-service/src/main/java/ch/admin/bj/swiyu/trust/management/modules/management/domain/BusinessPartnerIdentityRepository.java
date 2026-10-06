@@ -21,6 +21,8 @@ public interface BusinessPartnerIdentityRepository
     )
     Optional<BusinessPartnerIdentity> findByTrustedIdentifier(String identifier);
 
+    long countByStatus(BusinessPartnerIdentityStatus status);
+
     List<BusinessPartnerIdentity> findAllByStatusAndValidUntilBefore(
         BusinessPartnerIdentityStatus status,
         Instant validUntilBefore

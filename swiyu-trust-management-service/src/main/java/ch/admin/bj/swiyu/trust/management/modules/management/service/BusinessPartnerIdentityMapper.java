@@ -193,12 +193,21 @@ public class BusinessPartnerIdentityMapper {
         target.put(languageCode, text);
     }
 
-    private static BusinessPartnerIdentityStatusDto toBusinessPartnerIdentityStatusDto(
+    public static BusinessPartnerIdentityStatusDto toBusinessPartnerIdentityStatusDto(
         BusinessPartnerIdentityStatus status
     ) {
         return switch (status) {
             case ACTIVE -> BusinessPartnerIdentityStatusDto.ACTIVE;
             case DEACTIVATED -> BusinessPartnerIdentityStatusDto.DEACTIVATED;
+        };
+    }
+
+    public static BusinessPartnerIdentityStatus toBusinessPartnerIdentityStatus(
+        BusinessPartnerIdentityStatusDto status
+    ) {
+        return switch (status) {
+            case ACTIVE -> BusinessPartnerIdentityStatus.ACTIVE;
+            case DEACTIVATED -> BusinessPartnerIdentityStatus.DEACTIVATED;
         };
     }
 }

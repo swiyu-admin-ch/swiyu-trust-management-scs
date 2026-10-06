@@ -1,7 +1,7 @@
 spring:
   flyway:
     enabled: true
-    locations: []  # no afterMigrate script in test environment
+    locations: [ ]  # no afterMigrate script in test environment
   autoconfigure:
     exclude: ch.admin.bit.jeap.monitor.metrics.health.HealthMetricsAutoConfig # since it invokes external health endpoints which are available in local profile
   jpa:
@@ -90,6 +90,10 @@ app:
     external-url: "http://test.trust.management.scs"
   functionality:
     automatic-approval-enabled: false
+  jobs:
+    statistics:
+      enabled: false
+      export-interval: "0 * * * * *"
   issuer:
     trust-root:
       business-partner-id: 00000000-0000-0000-0000-000000000000

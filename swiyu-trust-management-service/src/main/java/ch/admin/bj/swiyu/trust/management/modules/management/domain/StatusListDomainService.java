@@ -32,6 +32,11 @@ public class StatusListDomainService {
     private final IssuerTrustRootProperties issuerTrustRootProperties;
     private final DefaultStatementProperties defaultStatementProperties;
 
+    @Transactional(readOnly = true)
+    public long count() {
+        return statusListMetadataRepository.count();
+    }
+
     @Transactional
     public void triggerPublications() {
         log.debug("Triggering status list publications ...");

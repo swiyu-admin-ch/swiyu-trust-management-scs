@@ -142,7 +142,6 @@ springdoc:
     operations-sorter: alpha # sort methods within an API in swagger ui by paths
     tags-sorter: alpha
   default-produces-media-type: application/json
-  show-actuator: false
 
 database-migration: # see https://confluence.bit.admin.ch/display/JEAP/RHOS+PostgreSQL
   expected-count-of-flyway-migrations: 2
@@ -229,6 +228,9 @@ app:
     statement-non-compliance-trust-list-refresh-interval: "0 15 0,6,12,18 * * *"
     # The interval MUST be a fraction of ${app.statement-defaults.protected-issuance-trust-list-statement.time-to-live}.
     statement-protected-issuance-trust-list-refresh-interval: "0 0 0,6,12,18 * * *"
+    statistics:
+      enabled: true
+      export-interval: "0 */5 * * * *" # every 5 min
   issuer:
     trust-root:
       business-partner-id: ${TRUST_ROOT_BUSINESS_PARTNER_ID:}

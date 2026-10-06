@@ -52,6 +52,8 @@ public interface TrustStatementPartnerLinkRepository
         TrustStatementPartnerLinkStatus status
     );
 
+    long countByType(TrustStatementPartnerLinkType type);
+
     List<TrustStatementPartnerLink> findAllByTypeAndStatus(
         TrustStatementPartnerLinkType type,
         TrustStatementPartnerLinkStatus status

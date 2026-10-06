@@ -58,6 +58,16 @@ public class BusinessPartnerIdentityService {
         return businessPartnerIdentityRepository.existsById(businessPartnerId);
     }
 
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public long count() {
+        return businessPartnerIdentityRepository.count();
+    }
+
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public long countByStatus(BusinessPartnerIdentityStatusDto status) {
+        return businessPartnerIdentityRepository.countByStatus(toBusinessPartnerIdentityStatus(status));
+    }
+
     public void activate(UUID businessPartnerId) {
         var bpi = businessPartnerIdentityDomainService.activate(businessPartnerId);
         var event = TiBusinessPartnerIdentityActivatedEventBuilder.create().businessPartnerIdentity(bpi).build();

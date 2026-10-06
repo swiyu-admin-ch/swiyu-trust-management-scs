@@ -11,6 +11,11 @@ public class StatusListService {
 
     private final StatusListDomainService statusListDomainService;
 
+    @Transactional(readOnly = true)
+    public long count() {
+        return statusListDomainService.count();
+    }
+
     @Transactional
     public void triggerPublications() {
         statusListDomainService.triggerPublications();

@@ -109,6 +109,16 @@ public class TrustStatementService {
         return toTrustStatementPartnerLinkDto(partnerLink);
     }
 
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public long count() {
+        return trustStatementPartnerLinkRepository.count();
+    }
+
+    @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public long countByType(TrustStatementTypeDto type) {
+        return trustStatementPartnerLinkRepository.countByType(toTrustStatementType(type));
+    }
+
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public TrustStatementPartnerLinkDto deactivateTrustStatement(UUID partnerLinkId, DeactivationRequestDto request) {
         var partnerLink = trustStatementPartnerLinkRepository
