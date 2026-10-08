@@ -88,6 +88,8 @@ public class SetupFromOldPartnerLinks {
                 log.debug("Nothing to do as no bpi exists for partnerLink / pvaTS {}", pvaTS.id());
             } catch (IllegalArgumentException e) {
                 log.debug("Nothing to do as Authorization is already set for partnerLink / pvaTS {}", pvaTS.id());
+            } catch (Exception e) {
+                log.error("Error creating for pvaTS: %s".formatted(pvaTS.id()), e);
             }
         }
     }
@@ -134,6 +136,8 @@ public class SetupFromOldPartnerLinks {
                 log.debug("Nothing to do as no bpi exists for partnerLink / piaTS {}", piaTS.id());
             } catch (IllegalArgumentException e) {
                 log.debug("Nothing to do as Authorization is already set for partnerLink / piaTS {}", piaTS.id());
+            } catch (Exception e) {
+                log.error("Error creating for piaTS: %s".formatted(piaTS.id()), e);
             }
         }
     }
@@ -154,11 +158,15 @@ public class SetupFromOldPartnerLinks {
         );
         for (var idTS : idTSList) {
             if (idTS.partnerId() != null) {
-                if (!businessPartnerIdentityService.businessPartnerIdentityExists(idTS.partnerId())) {
-                    createBusinessPartnerIdentity(idTS);
-                    createdBusinessPartnerIdentityIds.add(idTS.partnerId());
+                try {
+                    if (!businessPartnerIdentityService.businessPartnerIdentityExists(idTS.partnerId())) {
+                        createBusinessPartnerIdentity(idTS);
+                        createdBusinessPartnerIdentityIds.add(idTS.partnerId());
+                    }
+                    businessPartnerIdentityService.addTrustedIdentifiers(idTS.partnerId(), Set.of(idTS.subject()));
+                } catch (Exception e) {
+                    log.error("Error creating BPI for idTS: %s".formatted(idTS.id()), e);
                 }
-                businessPartnerIdentityService.addTrustedIdentifiers(idTS.partnerId(), Set.of(idTS.subject()));
             }
         }
         return createdBusinessPartnerIdentityIds;

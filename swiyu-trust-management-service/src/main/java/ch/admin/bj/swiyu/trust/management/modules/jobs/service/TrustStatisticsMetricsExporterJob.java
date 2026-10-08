@@ -12,7 +12,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,11 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Exports the total number of business partner identities, status lists and partner links as Prometheus
  * metrics, broken down by business partner identity status and partner link type. The values are
- * (re-)evaluated by a scheduler every {@code app.jobs.statistics.export-interval} (unit defined by the value).
- * Active only when {@code app.jobs.statistics.enabled=true}.
+ * (re-)evaluated by a scheduler according to {@code app.jobs.statistics.export-cron}. Set the cron
+ * expression to {@code -} to disable scheduled updates; the initial update still runs at startup.
  */
 @Configuration
-@ConditionalOnProperty(prefix = "app.jobs.statistics", name = "enabled", havingValue = "true")
 @ConfigurationPropertiesScan
 @RequiredArgsConstructor
 public class TrustStatisticsMetricsExporterJob {
@@ -78,23 +76,23 @@ public class TrustStatisticsMetricsExporterJob {
         refreshStatistics();
     }
 
-    @Scheduled(cron = "${app.jobs.statistics.export-interval}")
+    @Scheduled(cron = "${app.jobs.trust-statistics-metrics-exporter-cron}")
     @Transactional(readOnly = true)
     public void refreshStatisticsJob() {
         refreshStatistics();
     }
 
-    public void refreshStatistics() {
+    void refreshStatistics() {
         businessPartnerIdentityCount.set(businessPartnerIdentityService.count());
         statusListCount.set(statusListService.count());
         partnerLinkCount.set(trustStatementService.count());
 
-        for (BusinessPartnerIdentityStatusDto status : businessPartnerIdentityCountByStatus.keySet()) {
-            businessPartnerIdentityCountByStatus.get(status).set(businessPartnerIdentityService.countByStatus(status));
+        for (var entry : businessPartnerIdentityCountByStatus.entrySet()) {
+            entry.getValue().set(businessPartnerIdentityService.countByStatus(entry.getKey()));
         }
 
-        for (TrustStatementTypeDto type : partnerLinkCountByType.keySet()) {
-            partnerLinkCountByType.get(type).set(trustStatementService.countByType(type));
+        for (var entry : partnerLinkCountByType.entrySet()) {
+            entry.getValue().set(trustStatementService.countByType(entry.getKey()));
         }
     }
 }

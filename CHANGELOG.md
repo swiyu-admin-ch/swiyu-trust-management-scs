@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.2.4
+
+### Fixed
+
+- Override Tomcat to 11.0.26 to fix Snyk critical severity finding SNYK-JAVA-ORGAPACHETOMCATEMBED-20552494 (authentication bypass by alternate name)
+
+## 4.2.3
+
+### Changed
+
+- Allow SetupFromOldPartnerLinks to skip tasks on errors
+- add logging to SetupFromOldPartnerLinks errors
+
+## 4.2.2
+
+### Changed
+
+- minor consistency update regarding jobs implementation and their config
+
 ## 4.2.1
 
 ### Changed
@@ -16,12 +35,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Statistics Module
-
-## 4.1.1
-
-### Changed
-
-- Frontend dependency updates
 
 ## 4.1.0
 

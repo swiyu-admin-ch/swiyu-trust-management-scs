@@ -91,9 +91,7 @@ app:
   functionality:
     automatic-approval-enabled: false
   jobs:
-    statistics:
-      enabled: false
-      export-interval: "0 * * * * *"
+    trust-statistics-metrics-exporter-cron: "-"
   issuer:
     trust-root:
       business-partner-id: 00000000-0000-0000-0000-000000000000

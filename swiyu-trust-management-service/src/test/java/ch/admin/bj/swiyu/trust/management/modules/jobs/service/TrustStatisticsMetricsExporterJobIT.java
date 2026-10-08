@@ -1,4 +1,4 @@
-package ch.admin.bj.swiyu.trust.management.modules.management.domain.statistics;
+package ch.admin.bj.swiyu.trust.management.modules.jobs.service;
 
 import static ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity;
 import static ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData.partnerLinkIdentityV1;
@@ -9,7 +9,6 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.issuer.management.api.CredentialApi;
 import ch.admin.bj.swiyu.trust.client.issuer.oid4vci.api.IssuerOid4VciApi;
-import ch.admin.bj.swiyu.trust.management.modules.jobs.service.TrustStatisticsMetricsExporterJob;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerIdentityStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustStatementTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.config.DefaultIdentityProperties;
@@ -52,7 +51,6 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -97,7 +95,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         StatusRegistryProperties.class,
     }
 )
-@TestPropertySource(properties = { "app.jobs.statistics.enabled=true" })
 @ActiveProfiles("test")
 @RequiredArgsConstructor
 class TrustStatisticsMetricsExporterJobIT {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -16,7 +17,7 @@
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.2.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -62,6 +63,12 @@
         <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
         <java.version>25</java.version>
         <maven.compiler.release>25</maven.compiler.release>
+        <!-- CVE-OVERRIDE start -->
+        <!-- Override Tomcat to >= 11.0.26 to fix SNYK-JAVA-ORGAPACHETOMCATEMBED-20552494
+             (Authentication Bypass by Alternate Name). Spring Boot 4.1.1 manages 11.0.25.
+             Remove when a jEAP parent manages Spring Boot with Tomcat >= 11.0.26. -->
+        <tomcat.version>11.0.26</tomcat.version>
+        <!-- CVE-OVERRIDE end -->
     </properties>
 
     <modules>
@@ -134,7 +141,7 @@
                         <importOrder>
                             <order>java,javax,com,de,lombok,net,org</order>
                         </importOrder>
-                        <removeUnusedImports />
+                        <removeUnusedImports/>
                         <prettier>
                             <devDependencies>
                                 <prettier>${prettier.version}</prettier>

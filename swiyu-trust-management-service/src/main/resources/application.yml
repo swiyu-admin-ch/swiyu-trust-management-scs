@@ -180,8 +180,6 @@ http:
   max-redirects: 5
 
 app:
-  business-partner-defaults:
-    deactivation-cron: "0 0 1 * * *" # once a day at 01:00
   frontend:
     auth:
       useSilentRefresh: true
@@ -196,9 +194,6 @@ app:
   trust-onboarding-task:
     due-date-period: 5 # 5 Days
     rejection-enforcement-period: 30 # 30 Days
-    #* We have a max lifetime of rejection-enforcement-period for a task awaiting resubmission.
-    #* The rejection-enforcement-check-cron MUST therefore be a fraction of the rejection-enforcement-period.
-    rejection-enforcement-check-cron: "0 0 1 * * *" # once a day at 01:00
   protected-verification-task:
     due-date-period: 30 # 30 Days
   statement-defaults:
@@ -216,21 +211,22 @@ app:
       # We have a max lifetime of time-to-live for token. If we have an error in the refresh of this token, this is
       # the MAX time we have, to solve the problem before the ecosystem is in disarray.
       time-to-live: P6M # 6 Months
-    refresh-cron: "0 0 1 * * *" # once a day at 01:00
     refresh-period: P6M # 6 Months
   identity-defaults:
     validity: P3Y # 3 years
 
   jobs:
+    statement-renew-all-businesspartner-trust-statements-cron: "0 0 1 * * *" # once a day at 01:00
     # The interval MUST be a fraction of ${app.statement-defaults.statuslist.time-to-live}.
-    statement-status-list-refresh-interval: "0 30 0,6,12,18 * * *"
+    statement-status-list-refresh-cron: "0 30 0,6,12,18 * * *"
     # The interval MUST be a fraction of ${app.statement-defaults.protected-issuance-trust-list-statement.time-to-live}.
-    statement-non-compliance-trust-list-refresh-interval: "0 15 0,6,12,18 * * *"
+    statement-non-compliance-trust-list-refresh-cron: "0 15 0,6,12,18 * * *"
     # The interval MUST be a fraction of ${app.statement-defaults.protected-issuance-trust-list-statement.time-to-live}.
-    statement-protected-issuance-trust-list-refresh-interval: "0 0 0,6,12,18 * * *"
-    statistics:
-      enabled: true
-      export-interval: "0 */5 * * * *" # every 5 min
+    statement-protected-issuance-trust-list-refresh-cron: "0 0 0,6,12,18 * * *"
+    statement-deactivate-expired-business-partner-cron: "0 0 1 * * *" # once a day at 01:00
+    # The rejection-enforcement-check-cron MUST be a fraction of the app.trust-onboarding-task.rejection-enforcement-period.
+    trust-onboarding-task-rejection-enforcement-check-cron: "0 0 1 * * *" # once a day at 01:00
+    trust-statistics-metrics-exporter-cron: "0 */5 * * * *" # every 5 min
   issuer:
     trust-root:
       business-partner-id: ${TRUST_ROOT_BUSINESS_PARTNER_ID:}

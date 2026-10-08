@@ -35,41 +35,41 @@ public class StatementRefreshJob {
     private final StatusListService statusListService;
     private final TrustStatementService trustStatementService;
 
-    @Scheduled(cron = "${app.jobs.statement-non-compliance-trust-list-refresh-interval}")
+    @Scheduled(cron = "${app.jobs.statement-non-compliance-trust-list-refresh-cron}")
     @SchedulerLock(name = Lock.NON_COMPLIANCE_TRUST_LIST_PUBLISHING)
     public void refreshNonComplianceList() {
         setSystemUserAuthentication();
         nonCompliantActorPublicationService.triggerPublication();
     }
 
-    @Scheduled(cron = "${app.jobs.statement-protected-issuance-trust-list-refresh-interval}")
+    @Scheduled(cron = "${app.jobs.statement-protected-issuance-trust-list-refresh-cron}")
     @SchedulerLock(name = Lock.PROTECTED_ISSUANCE_TRUST_LIST_PUBLISHING)
     public void refreshProtectedIssuanceTrustList() {
         setSystemUserAuthentication();
         trustStatementService.issueAndPublishProtectedIssuanceV2TrustListStatement();
     }
 
-    @Scheduled(cron = "${app.jobs.statement-status-list-refresh-interval}")
+    @Scheduled(cron = "${app.jobs.statement-status-list-refresh-cron}")
     @SchedulerLock(name = Lock.STATUS_LIST_PUBLISHING)
     public void refreshStatusLists() {
         setSystemUserAuthentication();
         statusListService.triggerPublications();
     }
 
-    @Scheduled(cron = "${app.business-partner-defaults.deactivation-cron}")
+    @Scheduled(cron = "${app.jobs.statement-deactivate-expired-business-partner-cron}")
     @SchedulerLock(name = Lock.DEACTIVATE_EXPIRED_BUSINESS_PARTNER_IDENTITIES)
     public void deactivateExpiredBusinessPartnerIdentities() {
         SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
         var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsToDeactivate();
-        identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
+        identityIdsToDeactivate.forEach(businessPartnerIdentityService::deactivate);
     }
 
-    @Scheduled(cron = "${app.statement-defaults.refresh-cron}")
+    @Scheduled(cron = "${app.jobs.statement-renew-all-businesspartner-trust-statements-cron}")
     @SchedulerLock(name = Lock.STATEMENT_REFRESH)
     public void renewTrustStatementsOfBusinessPartnerIdentities() {
         SecurityContextHolder.getContext().setAuthentication(new SystemUserAuthentication());
         var identityIdsToRenew =
             businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsWithTrustStatementToRenew();
-        identityIdsToRenew.forEach(identityId -> businessPartnerIdentityService.renewTrustStatements(identityId));
+        identityIdsToRenew.forEach(businessPartnerIdentityService::renewTrustStatements);
     }
 }
