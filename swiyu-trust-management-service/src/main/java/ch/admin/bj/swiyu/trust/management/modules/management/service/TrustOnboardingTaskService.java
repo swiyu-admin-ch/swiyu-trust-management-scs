@@ -3,7 +3,7 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMapper.toAuditJson;
 import static ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport.getCurrentUserName;
 import static ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto.*;
-import static ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus.*;
+import static ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus.INFORMATION_REQUESTED;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.resolvePossibleActions;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.validateActionAllowed;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskMapper.toTrustOnboardingTaskDto;
@@ -24,7 +24,9 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrus
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustOnboardingRejectedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiTrustOnboardingSucceededEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.*;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.QTrustOnboardingTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +69,7 @@ public class TrustOnboardingTaskService {
                 dueAt,
                 trustOnboardingSubmission.getSubmittedAt()
             );
-            case PROFILE_CHANGE -> TrustOnboardingTask.createProfileChangeTask(
+            case PROFILE_CHANGE_MANDATORY, PROFILE_CHANGE_VOLUNTARY -> TrustOnboardingTask.createProfileChangeTask(
                 UUID.randomUUID(),
                 trustOnboardingSubmission.getPartnerId(),
                 Map.copyOf(trustOnboardingSubmission.getName()),

@@ -223,7 +223,7 @@ public class BusinessPartnerIdentityService {
                     bpi.applyRelevantInformationUpdate(relevantInformationUpdate);
                 }
             }
-            case PROFILE_CHANGE, RENEWAL -> {
+            case PROFILE_CHANGE_MANDATORY, PROFILE_CHANGE_VOLUNTARY, RENEWAL -> {
                 if (bpiOpt.isEmpty()) {
                     throw new IllegalStateException(
                         "Business partner identity for id '%s' must exist for a %s state change".formatted(

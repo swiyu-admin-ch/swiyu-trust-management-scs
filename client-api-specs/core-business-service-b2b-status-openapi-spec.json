@@ -3,7 +3,7 @@
   "info": {
     "title": "Business Status API",
     "description": "IF-011 - B2B Status API.",
-    "version": "4.0.4-20260917152100-be779104"
+    "version": "4.2.5-20261002102712-e901106b"
   },
   "servers": [
     {
@@ -448,6 +448,9 @@
           "id",
           "updatedAt"
         ]
+      },
+      "JsonNode": {
+        "description": "An arbitrary valid JSON value (object, array, or primitive)"
       }
     },
     "securitySchemes": {

@@ -27,7 +27,7 @@ public class DemoDataMapper {
                 onboarding.task().dueAt(),
                 onboarding.task().submittedAt()
             );
-            case PROFILE_CHANGE -> TrustOnboardingTask.createProfileChangeTask(
+            case PROFILE_CHANGE_MANDATORY, PROFILE_CHANGE_VOLUNTARY -> TrustOnboardingTask.createProfileChangeTask(
                 onboarding.task().id(),
                 bp.id(),
                 bp.names(),
@@ -62,7 +62,7 @@ public class DemoDataMapper {
     private static TaskType toTaskType(DemoData.DemoBusinessPartner.DemoTrustOnboarding onboarding) {
         return switch (onboarding.submissionType()) {
             case REGISTRATION -> TaskType.REGISTRATION;
-            case PROFILE_CHANGE -> TaskType.PROFILE_CHANGE;
+            case PROFILE_CHANGE_MANDATORY, PROFILE_CHANGE_VOLUNTARY -> TaskType.PROFILE_CHANGE;
             case RENEWAL -> TaskType.RENEWAL;
         };
     }

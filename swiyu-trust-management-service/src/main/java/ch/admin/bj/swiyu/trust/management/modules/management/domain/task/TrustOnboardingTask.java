@@ -61,6 +61,25 @@ public class TrustOnboardingTask extends Task {
         );
     }
 
+    public static TrustOnboardingTask createProfileChangeMandatoryTask(
+        UUID id,
+        UUID partnerId,
+        Map<String, String> partnerName,
+        UUID trustOnboardingSubmissionId,
+        Instant dueAt,
+        Instant submittedAt
+    ) {
+        return new TrustOnboardingTask(
+            id,
+            partnerId,
+            partnerName,
+            trustOnboardingSubmissionId,
+            TaskType.PROFILE_CHANGE,
+            dueAt,
+            submittedAt
+        );
+    }
+
     public static TrustOnboardingTask createProfileChangeTask(
         UUID id,
         UUID partnerId,

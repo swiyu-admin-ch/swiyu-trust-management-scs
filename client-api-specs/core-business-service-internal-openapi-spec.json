@@ -3,7 +3,7 @@
   "info": {
     "title": "Internal API",
     "description": "IF-009 - Internal API",
-    "version": "4.0.4-20260917152100-be779104"
+    "version": "4.2.5-20261002102712-e901106b"
   },
   "servers": [
     {
@@ -164,6 +164,92 @@
           },
           "401": {
             "description": "Missing authorization token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPartner"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Business partner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPartner"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/internal/management/business-partners/{id}/allow-hard-delete": {
+      "put": {
+        "tags": [
+          "Business Partner V2"
+        ],
+        "summary": "Toggle the hard-delete safeguard of a business partner.",
+        "description": "Governmental institutions cannot be armed. Every change is audited.",
+        "operationId": "allowHardDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessPartnerAllowHardDelete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "400": {
+            "description": "Business validation failed. Possible error codes: BUSINESS_DATA_INTEGRITY_VIOLATION.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPartner"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authorization token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPartner"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -1898,11 +1984,6 @@
             "description": "Key of the partner under which it is registered with ePortal",
             "minLength": 1
           },
-          "name": {
-            "type": "string",
-            "deprecated": true,
-            "description": "Unique name of the partner. Deprecated: use entityName."
-          },
           "entityName": {
             "type": "object",
             "additionalProperties": {
@@ -1969,6 +2050,10 @@
           "businessPartnerIdentity": {
             "$ref": "#/components/schemas/BusinessPartnerIdentity",
             "description": "Business partner identity as managed by the trust management service"
+          },
+          "hardDeleteAllowed": {
+            "type": "boolean",
+            "description": "Hard delete is refused while false. Always false for governmental institutions."
           }
         },
         "required": [
@@ -2041,6 +2126,18 @@
           "GOVERNMENTAL_INSTITUTION",
           "BUSINESS",
           "INDIVIDUAL"
+        ]
+      },
+      "BusinessPartnerAllowHardDelete": {
+        "type": "object",
+        "properties": {
+          "hardDeleteAllowed": {
+            "type": "boolean",
+            "description": "Arms or locks the hard-delete safeguard. Governmental institutions cannot be armed."
+          }
+        },
+        "required": [
+          "hardDeleteAllowed"
         ]
       },
       "Signatory": {
@@ -2163,11 +2260,6 @@
             "description": "Whether or not the entity is registered in the commercial register",
             "example": false
           },
-          "correspondingLanguage": {
-            "$ref": "#/components/schemas/Language",
-            "description": "The preferred language for correspondence.",
-            "example": "DE"
-          },
           "dids": {
             "type": "array",
             "description": "Selected DIDs to be onboarded initially",
@@ -2178,26 +2270,17 @@
           "requestedPartnerType": {
             "$ref": "#/components/schemas/BusinessPartnerType",
             "description": "The requested partner type. Can be different than the current partner type of the business partner."
-          }
-        }
-      },
-      "MultiLanguageText": {
-        "type": "object",
-        "properties": {
-          "de": {
-            "type": "string"
           },
-          "fr": {
-            "type": "string"
-          },
-          "it": {
-            "type": "string"
-          },
-          "en": {
-            "type": "string"
-          },
-          "rm": {
-            "type": "string"
+          "submissionType": {
+            "type": "string",
+            "description": "The submission type for trust onboarding",
+            "enum": [
+              "REGISTRATION",
+              "PROFILE_CHANGE_MANDATORY",
+              "PROFILE_CHANGE_VOLUNTARY",
+              "RENEWAL"
+            ],
+            "example": "REGISTRATION"
           }
         }
       },
@@ -2250,10 +2333,6 @@
               "type": "string"
             }
           },
-          "entityName": {
-            "$ref": "#/components/schemas/MultiLanguageText",
-            "deprecated": true
-          },
           "entityEmail": {
             "type": "string"
           },
@@ -2268,7 +2347,8 @@
             "description": "Submission type for trust onboarding",
             "enum": [
               "REGISTRATION",
-              "PROFILE_CHANGE",
+              "PROFILE_CHANGE_MANDATORY",
+              "PROFILE_CHANGE_VOLUNTARY",
               "RENEWAL"
             ]
           },
@@ -2352,7 +2432,6 @@
           "address",
           "createdAt",
           "entityEmail",
-          "entityName",
           "id",
           "name",
           "partnerId",
@@ -2716,12 +2795,6 @@
             "description": "Key of the partner under which it is registered with ePortal",
             "minLength": 1
           },
-          "name": {
-            "type": "string",
-            "deprecated": true,
-            "description": "Unique name of the partner. Deprecated: use entityName.",
-            "minLength": 1
-          },
           "entityName": {
             "type": "object",
             "additionalProperties": {
@@ -2760,13 +2833,16 @@
             "type": "string",
             "format": "date-time",
             "description": "Time limit, if necessary, of the current aggregated state of the trust process"
+          },
+          "hardDeleteAllowed": {
+            "type": "boolean",
+            "description": "Hard delete is refused while false. Always false for governmental institutions."
           }
         },
         "required": [
           "createdAt",
           "entityName",
           "id",
-          "name",
           "type",
           "updatedAt"
         ]
@@ -2806,7 +2882,9 @@
           }
         }
       },
-      "JsonNode": {},
+      "JsonNode": {
+        "description": "An arbitrary valid JSON value (object, array, or primitive)"
+      },
       "VqpsSubmissionInternal": {
         "type": "object",
         "properties": {
