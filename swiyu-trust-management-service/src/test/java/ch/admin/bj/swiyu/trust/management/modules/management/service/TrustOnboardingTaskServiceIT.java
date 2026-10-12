@@ -4,6 +4,7 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.security.Securit
 import static ch.admin.bj.swiyu.trust.management.test.TestTransactionSupport.commit;
 import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData.trustOnboardingSubmissionDto;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -25,6 +26,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.config.issuer.Issue
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusiness.IssuerTrustRootProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.event.TiBusinessPartnerIdentityUpdatedEventBuilder;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.IssuerProperties;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.MockIssuerClient;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
@@ -269,6 +271,23 @@ class TrustOnboardingTaskServiceIT {
                         s.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE
                 )
         ).hasSize(2);
+    }
+
+    @Test
+    void processTiBusinessPartnerIdentityUpdatedEvent_bpiNotActive_isTolerated() {
+        // given: a Business Partner Identity that is currently not active
+        var bpi = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.DEACTIVATED)
+        );
+        commit();
+
+        var event = TiBusinessPartnerIdentityUpdatedEventBuilder.create().businessPartnerIdentity(bpi).build();
+
+        // when/then: processing an Updated event for a non-active BPI must be tolerated (logged warning only) and
+        // must NOT poison the surrounding transaction, otherwise the message is routed to the error service
+        assertThatCode(() ->
+            businessPartnerIdentityEventProcessor.processTiBusinessPartnerIdentityUpdatedEvent(event)
+        ).doesNotThrowAnyException();
     }
 
     @Test

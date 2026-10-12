@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.2.6
+
+### Fixed
+
+- Business partner identity "updated" events for non-active business partner identities are now processed successfully
+  instead of being sent to the error service.
+
 ## 4.2.5
 
 ### Changed
@@ -15,7 +22,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- Override Tomcat to 11.0.26 to fix Snyk critical severity finding SNYK-JAVA-ORGAPACHETOMCATEMBED-20552494 (authentication bypass by alternate name)
+- Override Tomcat to 11.0.26 to fix Snyk critical severity finding SNYK-JAVA-ORGAPACHETOMCATEMBED-20552494 (
+  authentication bypass by alternate name)
 
 ## 4.2.3
 
