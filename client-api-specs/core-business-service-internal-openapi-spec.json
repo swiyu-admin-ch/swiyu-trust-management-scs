@@ -3,7 +3,7 @@
   "info": {
     "title": "Internal API",
     "description": "IF-009 - Internal API",
-    "version": "4.2.5-20261002102712-e901106b"
+    "version": "4.3.0-20261007072758-8f12d392"
   },
   "servers": [
     {

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.3.0
+
+### Added
+
+- Local business partner projection, synced from the core business service on `TiBusinessPartnerUpdatedEvent`
+
+### Changed
+
+- Update the internal core business service OpenAPI spec: adds `hardDeleteAllowed`, splits `PROFILE_CHANGE` into
+  `PROFILE_CHANGE_MANDATORY` and `PROFILE_CHANGE_VOLUNTARY`
+
 ## 4.2.6
 
 ### Fixed

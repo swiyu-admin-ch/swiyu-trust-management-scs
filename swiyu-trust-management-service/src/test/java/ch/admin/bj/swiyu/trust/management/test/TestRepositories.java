@@ -29,6 +29,7 @@ public class TestRepositories {
     public final NonComplianceListRepository nonComplianceList;
     public final TrustStatementPartnerLinkRepository trustStatementPartnerLink;
     public final BusinessPartnerIdentityRepository businessPartnerIdentity;
+    public final BusinessPartnerRepository businessPartner;
     public final ProtectedVerificationAuthorizationRepository protectedVerification;
     public final StatementRepository statement;
     public final TaskRepository task;

@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
         TiBusinessPartnerIdentityActivatedEvent.TypeRef.class,
         TiBusinessPartnerIdentityDeactivatedEvent.TypeRef.class,
         TiBusinessPartnerIdentityUpdatedEvent.TypeRef.class,
+        TiBusinessPartnerUpdatedEvent.TypeRef.class,
         TiProtectedVerificationSubmissionAcceptedEvent.TypeRef.class,
     }
 )

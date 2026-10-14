@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain.corebusiness;
 
 import ch.admin.bit.jeap.security.restclient.JeapOAuth2RestClientBuilderFactory;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.api.BusinessPartnerV2Api;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.ProtectedVerificationSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustAddDidsSubmissionInternalApi;
@@ -44,6 +45,11 @@ public class CoreBusinessServiceInternalConfig {
     @Bean
     public TrustOnboardingSubmissionApi trustOnboardingSubmissionApi(ApiClient coreBusinessServiceApiClient) {
         return new TrustOnboardingSubmissionApi(coreBusinessServiceApiClient);
+    }
+
+    @Bean
+    public BusinessPartnerV2Api businessPartnerApi(ApiClient coreBusinessServiceApiClient) {
+        return new BusinessPartnerV2Api(coreBusinessServiceApiClient);
     }
 
     @Bean
