@@ -43,6 +43,10 @@ public class BusinessPartnerIdentityEventProcessor {
     }
 
     @IdempotentMessageHandler
+    @Transactional(
+        transactionManager = MANAGEMENT_TRANSACTION_MANAGER,
+        noRollbackFor = BusinessPartnerIdentityNotActiveException.class
+    )
     public void processTiBusinessPartnerIdentityUpdatedEvent(TiBusinessPartnerIdentityUpdatedEvent event) {
         var businessPartnerId = event.getPayload().getBusinessPartnerIdentityId();
         log.info("Retrieve Business Partner Identity Updated Event with ID: {}", businessPartnerId);

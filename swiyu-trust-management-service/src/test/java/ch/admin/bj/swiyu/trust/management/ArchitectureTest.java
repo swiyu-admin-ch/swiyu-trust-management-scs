@@ -121,6 +121,21 @@ public class ArchitectureTest {
             GeneralCodingRules.NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING;
 
         @ArchTest
+        static final ArchRule idempotent_message_handlers_should_be_transactional = methods()
+            .that()
+            .areAnnotatedWith("ch.admin.bit.jeap.messaging.idempotence.messagehandler.IdempotentMessageHandler")
+            .should()
+            .beAnnotatedWith("org.springframework.transaction.annotation.Transactional")
+            .because(
+                """
+                IdempotentMessageHandlerAspect calls assertTransactionActive() before the handler body runs, \
+                so an @IdempotentMessageHandler without a transaction fails every single message with \
+                "Automatic idempotent message handling requires an active transaction!" - and whoever \
+                published the event sees nothing at all.\
+                """
+            );
+
+        @ArchTest
         static final ArchRule service_classes_should_not_have_state = classes()
             .that(annotatedWith(Service.class))
             .or(annotatedWith(Component.class))

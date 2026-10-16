@@ -118,7 +118,10 @@ public class BusinessPartnerIdentityService {
         }
     }
 
-    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    @Transactional(
+        transactionManager = MANAGEMENT_TRANSACTION_MANAGER,
+        noRollbackFor = BusinessPartnerIdentityNotActiveException.class
+    )
     public void issueTrustStatements(UUID businessPartnerId) {
         var bpi = businessPartnerIdentityRepository
             .findById(businessPartnerId)
