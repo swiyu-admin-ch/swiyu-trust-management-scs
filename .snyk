@@ -77,6 +77,11 @@ ignore:
         reason: No fixed version available yet; snappy compression not enabled in Kafka config, so Snappy.compress is not reachable at runtime. Tracked in EID-6915.
         expires: 2026-11-09T09:00:00.000Z
         created: 2026-09-21T09:16:57.000Z
+  SNYK-JAVA-ORGGLASSFISHJAXB-20883142:
+    - '*':
+        reason: No fixed version available; 4.0.9 is the latest release. Pulled in transitively via hibernate-core > jaxb-runtime, which only unmarshals Hibernate's own mapping files, not attacker-controlled XML.
+        expires: 2026-11-09T09:00:00.000Z
+        created: 2026-10-16T09:00:00.000Z
   SNYK-JS-BRACES-19963945:
     - '*':
         reason: No fixed version available; braces only used by dev/build tooling (not shipped to production bundle). Tracked in EID-6915.

@@ -1,6 +1,6 @@
 {
   "name": "swiyu-trust-management-ui",
-  "version": "4.3.0",
+  "version": "5.0.1",
   "private": true,
   "scripts": {
     "build": "ng build",
@@ -80,7 +80,8 @@
     "proxy-addr": "^2.0.8",
     "shell-quote": "^1.11.0",
     "piscina": "^5.3.2",
-    "basic-ftp": "^6.2.2"
+    "basic-ftp": "^6.2.2",
+    "qs": "^6.16.1"
   },
   "jestSonar": {
     "reportPath": "./coverage/sonarQube",

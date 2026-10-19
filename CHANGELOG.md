@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.0.1
+
+### Fixed
+
+- Override qs to 6.16.1 to fix Snyk high severity finding SNYK-JS-QS-20943482 (uncaught exception), pulled in transitively via `@angular-devkit/build-angular` > `webpack-dev-server` > `express`
+
+## 5.0.0
+
+### Removed
+
+- Remove manual creation endpoints for statements
+
+## 4.3.2
+
+### Fixed
+
+- Override PostgreSQL to 42.7.14 to fix Snyk high severity finding SNYK-JAVA-ORGPOSTGRESQL-20571163 (not failing securely / 'failing open')
+- Override Guava to 33.7.2-jre to fix Snyk high severity finding SNYK-JAVA-COMGOOGLEGUAVA-20825054 (allocation of resources without limits or throttling), pulled in transitively via `io.confluent:kafka-avro-serializer`
+- Override snappy-java to 1.1.10.9 to fix Snyk high severity finding SNYK-JAVA-ORGXERIALSNAPPY-20825055 (memory allocation with excessive size value), pulled in transitively via `org.apache.kafka:kafka-clients`
+- Ignore Snyk high severity finding SNYK-JAVA-ORGGLASSFISHJAXB-20883142 (XXE injection in `org.glassfish.jaxb:jaxb-core`): 4.0.9 is the latest release, so there is no upgrade path
+
 ## 4.3.1
 
 ### Fixed
