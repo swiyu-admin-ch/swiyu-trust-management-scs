@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.0.3
+
+### Fixed
+
+- Ignore Snyk high severity finding SNYK-JS-PICOMATCH-21248802 (CVE-2026-112366, regular expression denial of service) in `swiyu-trust-management-ui/.snyk` until 2026-11-09. There is no patched picomatch release (4.0.7 is the latest and is affected) and the `@angular-devkit/build-angular` 22.x upgrade Snyk suggests pins picomatch 4.0.7 as well. picomatch is a build-time-only transitive dependency and is not shipped to production
+
+## 5.0.2
+
+### Fixed
+
+- Override undici to 7.30.1 to fix Snyk high severity finding (cross-origin redirect cache poisoning / uncaught exception on malicious content encodings), pulled in transitively via `@angular/build` and `@angular-devkit/build-angular`
+
 ## 5.0.1
 
 ### Fixed

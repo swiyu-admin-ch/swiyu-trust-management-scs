@@ -17,4 +17,9 @@ ignore:
         reason: No fixed version available; braces only used by dev/build tooling (not shipped to production bundle). Tracked in EID-6915.
         expires: 2026-11-09T09:00:00.000Z
         created: 2026-09-21T12:10:03.000Z
+  SNYK-JS-PICOMATCH-21248802:
+    - '*':
+        reason: No fixed version available (CVE-2026-112366 affects picomatch up to and including the latest 4.0.7, and the @angular-devkit/build-angular 22.2.3 upgrade Snyk suggests pins 4.0.7 as well); picomatch only used by dev/build tooling (not shipped to production bundle). Tracked in EID-6992.
+        expires: 2026-11-09T09:00:00.000Z
+        created: 2026-10-20T00:00:00.000Z
 patch: { }
