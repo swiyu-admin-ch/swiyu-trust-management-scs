@@ -170,7 +170,7 @@ public class AuditPublisher {
             builder.addAuditObjectDataValue(NEW, useCase.getDataValueFieldName(), dataValue);
         }
 
-        sender.auditEvent(builder.build());
+        sender.auditEventScheduled(builder.build());
     }
 
     private CreateAuditRecordCommandBuilder withCommonFields(

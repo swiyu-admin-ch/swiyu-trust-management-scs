@@ -81,13 +81,15 @@ class BusinessPartnerSyncServiceIT {
         );
         service.syncPartner(PARTNER_ID);
         var firstSyncedAt = repos.businessPartner.findById(PARTNER_ID).orElseThrow().getSyncedAt();
+        var rowsAfterFirstSync = repos.businessPartner.count();
 
         when(businessPartnerApi.getBusinessPartner(PARTNER_ID)).thenReturn(
             dto().entityName(Map.of(DEFAULT_KEY, "After")).hardDeleteAllowed(true)
         );
         service.syncPartner(PARTNER_ID);
 
-        assertThat(repos.businessPartner.count()).isEqualTo(1);
+        // Compared against the count after the first sync, not against 1: the database container is shared.
+        assertThat(repos.businessPartner.count()).isEqualTo(rowsAfterFirstSync);
         var partner = repos.businessPartner.findById(PARTNER_ID).orElseThrow();
         assertThat(partner.getName()).isEqualTo("After");
         assertThat(partner.isHardDeleteAllowed()).isTrue();

@@ -44,6 +44,8 @@ app:
             zqlxcoKXFOLBcZMJxdl/qxZcDy1CZaBEEg==
             -----END EC PRIVATE KEY-----
 
+  functionality:
+    automatic-approval-enabled: true # required for local E2E tests to be true (or needs adaption in Config#expectAutoApprovalOfTrustOnboardingSubmissions)
 
 logging:
   level:

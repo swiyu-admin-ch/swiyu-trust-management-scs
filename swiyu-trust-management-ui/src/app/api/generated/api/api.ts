@@ -1,4 +1,5 @@
 export * from './business-partner-identity-api';
+export * from './business-partner-view-api';
 export * from './domain-event-log-api';
 export * from './frontend-configuration-api';
 export * from './non-compliant-actor-api';
@@ -8,6 +9,7 @@ export * from './task-api';
 export * from './trust-onboarding-document-api';
 export * from './trust-statement-issuance-api';
 import {BusinessPartnerIdentityApi} from './business-partner-identity-api';
+import {BusinessPartnerViewApi} from './business-partner-view-api';
 import {DomainEventLogApi} from './domain-event-log-api';
 import {FrontendConfigurationApi} from './frontend-configuration-api';
 import {NonCompliantActorApi} from './non-compliant-actor-api';
@@ -18,6 +20,7 @@ import {TrustOnboardingDocumentApi} from './trust-onboarding-document-api';
 import {TrustStatementIssuanceApi} from './trust-statement-issuance-api';
 export const APIS = [
   BusinessPartnerIdentityApi,
+  BusinessPartnerViewApi,
   DomainEventLogApi,
   FrontendConfigurationApi,
   NonCompliantActorApi,

@@ -1,4 +1,5 @@
 import {Routes} from '@angular/router';
+import {BusinessPartnerListComponent} from './pages/business-partner-list/business-partner-list.component';
 import {HomeComponent} from './pages/home/home.component';
 import {LogoutComponent} from './pages/logout/logout.component';
 import {NonComplianceActorCreateComponent} from './pages/non-compliance-actor-create/non-compliance-actor-create.component';
@@ -24,6 +25,7 @@ export const routes: Routes = [
       {path: ':taskId', component: TrustOnboardingTaskDetailComponent}
     ]
   },
+  {path: 'business-partners', component: BusinessPartnerListComponent},
   {path: 'non-compliance-actors', component: NonComplianceActorListComponent},
   {path: 'non-compliance-actors/create', component: NonComplianceActorCreateComponent},
   {path: 'non-compliance-actors/:actorId', component: NonComplianceDetailComponent},

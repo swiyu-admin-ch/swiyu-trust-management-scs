@@ -11,13 +11,13 @@
             from the dependencyManagement section
          -->
         <!-- see https://github.com/jeap-admin-ch/jeap-spring-boot-parent/blob/main/CHANGELOG.md -->
-        <version>41.14.0</version>
+        <version>41.22.0</version>
         <relativePath/>
     </parent>
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>5.0.3-SNAPSHOT</version>
+    <version>5.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -64,24 +64,29 @@
         <java.version>25</java.version>
         <maven.compiler.release>25</maven.compiler.release>
         <!-- CVE-OVERRIDE start -->
-        <!-- Override Tomcat to >= 11.0.26 to fix SNYK-JAVA-ORGAPACHETOMCATEMBED-20552494
-             (Authentication Bypass by Alternate Name). Spring Boot 4.1.1 manages 11.0.25.
+        <!-- Override Tomcat to >= 11.0.26 to fix SNYK-JAVA-ORGAPACHETOMCATEMBED-20552494 (Critical,
+             Authentication Bypass by Alternate Name) and SNYK-JAVA-ORGAPACHETOMCATEMBED-21246252 (High,
+             Missing Release of Resource after Effective Lifetime). Spring Boot 4.1.1 manages 11.0.25;
+             jEAP parent 41.22.0 (the latest) still manages Spring Boot 4.1.1.
              Remove when a jEAP parent manages Spring Boot with Tomcat >= 11.0.26. -->
         <tomcat.version>11.0.26</tomcat.version>
-        <!-- Override PostgreSQL to >= 42.7.14 to fix SNYK-JAVA-ORGPOSTGRESQL-20571163
-             (Not Failing Securely / 'Failing Open'). Spring Boot 4.1.1 manages 42.7.13.
+        <!-- Override PostgreSQL to >= 42.7.14 to fix SNYK-JAVA-ORGPOSTGRESQL-20571163 (High,
+             Not Failing Securely / 'Failing Open'). Spring Boot 4.1.1 manages 42.7.13.
              Remove when a jEAP parent manages PostgreSQL >= 42.7.14. -->
         <postgresql.version>42.7.14</postgresql.version>
-        <!-- Override Guava to >= 33.7.2-jre to fix SNYK-JAVA-COMGOOGLEGUAVA-20825054
-             (Allocation of Resources Without Limits or Throttling). Pulled in transitively as
-             32.0.1-jre via jeap-messaging-confluent-schema-registry > io.confluent:kafka-avro-serializer
-             and not managed by Spring Boot. Remove when kafka-avro-serializer ships Guava >= 33.7.2-jre. -->
+        <!-- Override Guava to >= 33.7.2-jre to fix SNYK-JAVA-COMGOOGLEGUAVA-20825054 (High,
+             Allocation of Resources Without Limits or Throttling). Pulled in transitively as
+             32.0.1-jre via jeap-messaging-confluent-schema-registry > io.confluent:kafka-avro-serializer;
+             8.3.2 is the latest kafka-avro-serializer release and still ships Guava 32.0.1-jre.
+             Remove when kafka-avro-serializer ships Guava >= 33.7.2-jre. -->
         <guava.version>33.7.2-jre</guava.version>
-        <!-- Override snappy-java to >= 1.1.10.9 to fix SNYK-JAVA-ORGXERIALSNAPPY-20825055
-             (Memory Allocation with Excessive Size Value). Pulled in transitively as 1.1.10.7 via
-             org.apache.kafka:kafka-clients and not managed by Spring Boot.
-             Remove when kafka-clients ships snappy-java >= 1.1.10.9. -->
-        <snappy-java.version>1.1.10.9</snappy-java.version>
+        <!-- Override snappy-java to >= 1.1.10.10 to fix SNYK-JAVA-ORGXERIALSNAPPY-20825055 (High,
+             Memory Allocation with Excessive Size Value, fixed in 1.1.10.9),
+             SNYK-JAVA-ORGXERIALSNAPPY-19964087 (High, Out-of-bounds Write, fixed in 1.1.10.9) and
+             SNYK-JAVA-ORGXERIALSNAPPY-19778376 (High, Out-of-bounds Write, fixed in 1.1.10.10).
+             Pulled in transitively as 1.1.10.7 via org.apache.kafka:kafka-clients 4.2.1 (current) and
+             not managed by Spring Boot. Remove when kafka-clients ships snappy-java >= 1.1.10.10. -->
+        <snappy-java.version>1.1.10.10</snappy-java.version>
         <!-- CVE-OVERRIDE end -->
     </properties>
 

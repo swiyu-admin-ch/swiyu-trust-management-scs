@@ -30,6 +30,7 @@ public class TestRepositories {
     public final TrustStatementPartnerLinkRepository trustStatementPartnerLink;
     public final BusinessPartnerIdentityRepository businessPartnerIdentity;
     public final BusinessPartnerRepository businessPartner;
+    public final BusinessPartnerViewRepository businessPartnerView;
     public final ProtectedVerificationAuthorizationRepository protectedVerification;
     public final StatementRepository statement;
     public final TaskRepository task;

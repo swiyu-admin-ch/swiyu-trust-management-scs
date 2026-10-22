@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.1.0
+
+### Added
+
+- Add the business partner view: a read-only join of the partner identity with the partner projection from the core business service, a paginated `/ui-api/v1/business-partner-view/` endpoint that searches by partner id and partner name, and the partner list page in the UI which keeps page, sorting and search in the browser url
+
+## 5.1.1
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent to 41.22.0
+- Update `@openapitools/openapi-generator-cli` to 2.42.0 and `concurrently` to 10.0.6: the newer `concurrently` manages `shell-quote` 1.12.0, which fixes Snyk critical severity finding SNYK-JS-SHELLQUOTE-20250993 (command injection), previously remediated by the removed `shell-quote` override
+- Remove the obsolete npm overrides for `undici`, `compression`, `proxy-addr`, `shell-quote`, `piscina` and `qs`: their Snyk findings are no longer reported after the dependency updates
+
+### Fixed
+
+- Override snappy-java to 1.1.10.10 to fix Snyk high severity finding SNYK-JAVA-ORGXERIALSNAPPY-19778376 (out-of-bounds write), pulled in transitively via `org.apache.kafka:kafka-clients`
+
+## 5.0.4
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent to 41.21.0
+- publish audit events via the scheduled sender of the new platform version
+- Enable the automatic-approval functionality in the shared configuration, required for local E2E tests
+
 ## 5.0.3
 
 ### Fixed
@@ -21,7 +47,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- Override qs to 6.16.1 to fix Snyk high severity finding SNYK-JS-QS-20943482 (uncaught exception), pulled in transitively via `@angular-devkit/build-angular` > `webpack-dev-server` > `express`
+- Override qs to 6.16.1 to fix Snyk high severity finding SNYK-JS-QS-20943482 (uncaught exception), pulled in
+  transitively via `@angular-devkit/build-angular` > `webpack-dev-server` > `express`
 
 ## 5.0.0
 
@@ -33,16 +60,22 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- Override PostgreSQL to 42.7.14 to fix Snyk high severity finding SNYK-JAVA-ORGPOSTGRESQL-20571163 (not failing securely / 'failing open')
-- Override Guava to 33.7.2-jre to fix Snyk high severity finding SNYK-JAVA-COMGOOGLEGUAVA-20825054 (allocation of resources without limits or throttling), pulled in transitively via `io.confluent:kafka-avro-serializer`
-- Override snappy-java to 1.1.10.9 to fix Snyk high severity finding SNYK-JAVA-ORGXERIALSNAPPY-20825055 (memory allocation with excessive size value), pulled in transitively via `org.apache.kafka:kafka-clients`
-- Ignore Snyk high severity finding SNYK-JAVA-ORGGLASSFISHJAXB-20883142 (XXE injection in `org.glassfish.jaxb:jaxb-core`): 4.0.9 is the latest release, so there is no upgrade path
+- Override PostgreSQL to 42.7.14 to fix Snyk high severity finding SNYK-JAVA-ORGPOSTGRESQL-20571163 (not failing
+  securely / 'failing open')
+- Override Guava to 33.7.2-jre to fix Snyk high severity finding SNYK-JAVA-COMGOOGLEGUAVA-20825054 (allocation of
+  resources without limits or throttling), pulled in transitively via `io.confluent:kafka-avro-serializer`
+- Override snappy-java to 1.1.10.9 to fix Snyk high severity finding SNYK-JAVA-ORGXERIALSNAPPY-20825055 (memory
+  allocation with excessive size value), pulled in transitively via `org.apache.kafka:kafka-clients`
+- Ignore Snyk high severity finding SNYK-JAVA-ORGGLASSFISHJAXB-20883142 (XXE injection in
+  `org.glassfish.jaxb:jaxb-core`): 4.0.9 is the latest release, so there is no upgrade path
 
 ## 4.3.1
 
 ### Fixed
 
-- Restore the transaction on the business partner identity updated event handler: without it the idempotence aspect rejected every such message before the handler ran, so no protected issuance, protected verification or additional-DID identity trust statement was issued at all
+- Restore the transaction on the business partner identity updated event handler: without it the idempotence aspect
+  rejected every such message before the handler ran, so no protected issuance, protected verification or additional-DID
+  identity trust statement was issued at all
 - Require every `@IdempotentMessageHandler` to be `@Transactional` via an architecture rule, so the same
   omission cannot return unnoticed
 

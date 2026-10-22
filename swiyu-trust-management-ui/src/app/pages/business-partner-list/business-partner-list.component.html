@@ -1,0 +1,82 @@
+<h1>{{ "app.menu.businessPartners" | translate }}</h1>
+<form [formGroup]="filterForm" class="ob-inline-form filter-form">
+  <mat-form-field>
+    <mat-label>{{ "businessPartner.list.filter.search" | translate }}</mat-label>
+    <input
+      matInput
+      [formControl]="filterForm.controls.search"
+      placeholder="{{ 'businessPartner.list.filter.searchPlaceholder' | translate }}"
+      data-cy="businessPartnerSearch"
+    />
+  </mat-form-field>
+  <button (click)="resetFilter()" mat-button obButton="secondary" type="button">
+    {{ "app.common.reset" | translate }}
+  </button>
+</form>
+
+<div class="table-container mat-elevation-z8" [class.is-loading]="loading()">
+  <table
+    [dataSource]="dataSource"
+    class="ob-table"
+    mat-table
+    matSort
+    [matSortActive]="sortActive"
+    [matSortDirection]="sortDirection"
+    (matSortChange)="onSortChange($event)"
+  >
+    <ng-container matColumnDef="businessPartnerId">
+      <th *matHeaderCellDef mat-header-cell mat-sort-header scope="col">
+        {{ "businessPartner.list.header.businessPartnerId" | translate }}
+      </th>
+      <td *matCellDef="let partner" mat-cell>{{ partner.businessPartnerId }}</td>
+    </ng-container>
+    <ng-container matColumnDef="name">
+      <th *matHeaderCellDef mat-header-cell mat-sort-header scope="col">
+        {{ "businessPartner.list.header.name" | translate }}
+      </th>
+      <td *matCellDef="let partner" mat-cell>{{ partner.name }}</td>
+    </ng-container>
+    <ng-container matColumnDef="status">
+      <th *matHeaderCellDef mat-header-cell mat-sort-header scope="col">
+        {{ "businessPartner.list.header.status" | translate }}
+      </th>
+      <td *matCellDef="let partner" mat-cell>{{ statusKey(partner) | translate }}</td>
+    </ng-container>
+    <ng-container matColumnDef="validUntil">
+      <th *matHeaderCellDef mat-header-cell mat-sort-header scope="col">
+        {{ "businessPartner.list.header.validUntil" | translate }}
+      </th>
+      <td *matCellDef="let partner" mat-cell>{{ partner.validUntil | date: "dd.MM.yyyy" }}</td>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <th *matHeaderCellDef mat-header-cell scope="col">{{ "businessPartner.list.header.actions" | translate }}</th>
+      <td *matCellDef="let partner" class="action-cell" mat-cell>
+        <div class="actions sw-flex-right">
+          <button [matMenuTriggerFor]="menu" mat-icon-button obButton="secondary" data-cy="businessPartnerActions">
+            <mat-icon svgIcon="show-more_vertical"></mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="copyPartnerId(partner)" data-cy="copyBusinessPartnerId">
+              <mat-icon svgIcon="copy"></mat-icon>
+              <span>{{ "businessPartner.list.actions.copyId" | translate }}</span>
+            </button>
+          </mat-menu>
+        </div>
+      </td>
+    </ng-container>
+    <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+    <tr *matRowDef="let row; columns: displayedColumns" mat-row [attr.data-cy]="row.businessPartnerId"></tr>
+    <tr *matNoDataRow>
+      <td class="mat-cell" colspan="5" data-cy="noDataRow">{{ "businessPartner.list.empty" | translate }}</td>
+    </tr>
+  </table>
+  <mat-paginator
+    [length]="totalItems"
+    [pageSizeOptions]="pageSizeOptions"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [disabled]="loading()"
+    (page)="onPage($event)"
+    showFirstLastButtons
+  ></mat-paginator>
+</div>
