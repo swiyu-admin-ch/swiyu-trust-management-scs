@@ -109,6 +109,13 @@ export class Configuration {
       };
     }
 
+    // init default prometheus credential
+    if (!this.credentials['prometheus']) {
+      this.credentials['prometheus'] = () => {
+        return this.username || this.password ? btoa(this.username + ':' + this.password) : undefined;
+      };
+    }
+
     // init default OIDC credential
     if (!this.credentials['OIDC']) {
     }

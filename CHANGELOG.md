@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.1.4
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent from 41.22.0 to 41.23.0
+
+## 5.1.3
+
+### Fixed
+
+- Restore the `undici` override to `^7.30.1` to close two critical and six high Snyk findings (SNYK-JS-UNDICI-21181005, -21181009, -21181011, -21181013, -21181015, -21181017, -21181019, -21185768). 5.1.1 dropped the override as "no longer reported", but `@angular/build` pins undici to exactly 7.29.1 and all eight findings need 7.30.1 on the 7.x line
+- Override `vite` to `^7.3.7` to fix Snyk high severity finding SNYK-JS-VITE-21282024 (arbitrary command injection), pulled in transitively via `@angular-devkit/build-angular` > `@angular/build`, which pins vite 7.3.6
+- Override `launch-editor` to `^2.14.2` to fix Snyk high severity finding SNYK-JS-LAUNCHEDITOR-21282025 (arbitrary command injection), pulled in transitively via `@angular-devkit/build-angular` > `webpack-dev-server`
+
+## 5.1.2
+
+### Changed
+
+- `submissionId` in task list is now used for data-cy so e2e run consistently
+
 ## 5.1.0
 
 ### Added

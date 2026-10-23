@@ -10,6 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ *
+ * @param submissionId The originating submission id the task was resolved from. E.g. the id of the
+ *                     TrustOnboardingSubmission if it is a TrustOnboardingTask
+ */
 @Schema(name = "TaskListItem", enumAsRef = true)
 public record TaskListItemDto(
     @NotNull UUID id,
@@ -19,5 +24,6 @@ public record TaskListItemDto(
     @NotNull TaskStatusDto state,
     String assignee,
     @NotNull String taskType,
-    @NotNull Set<TaskActionDto> allowedActions
+    @NotNull Set<TaskActionDto> allowedActions,
+    @NotNull UUID submissionId
 ) {}

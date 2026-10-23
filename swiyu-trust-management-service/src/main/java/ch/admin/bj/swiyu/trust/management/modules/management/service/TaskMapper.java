@@ -1,6 +1,5 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
-import static ch.admin.bj.swiyu.trust.client.core.business.internal.model.BusinessPartnerTypeDto.BUSINESS;
 import static java.util.Collections.emptyList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -17,6 +16,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Task;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,8 +34,18 @@ public class TaskMapper {
             toTaskStatusDto(task.getStatus()),
             task.getAssignee(),
             task.getTaskType().name(),
-            allowedActions
+            allowedActions,
+            toSubmissionId(task)
         );
+    }
+
+    private static UUID toSubmissionId(Task task) {
+        return switch (task) {
+            case TrustOnboardingTask onboardingTask -> onboardingTask.getTrustOnboardingSubmissionId();
+            case ProtectedVerificationRequestTask protectedVerificationTask -> protectedVerificationTask.getProtectedVerificationSubmissionId();
+            case TrustAddDidTask trustAddDidTask -> trustAddDidTask.getTrustAddDidSubmissionId();
+            default -> throw new IllegalArgumentException("Unsupported task type: " + task.getClass().getName());
+        };
     }
 
     public static TrustOnboardingTaskDto toTrustOnboardingTaskDto(

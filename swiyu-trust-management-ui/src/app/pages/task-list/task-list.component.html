@@ -128,42 +128,46 @@
       </th>
       <td *matCellDef="let task" class="action-cell" mat-cell>
         <div class="actions">
-          <button [matMenuTriggerFor]="menu" mat-icon-button obButton="secondary">
+          <button [matMenuTriggerFor]="menu" mat-icon-button obButton="secondary" data-cy="btn-context">
             <mat-icon svgIcon="show-more_vertical"></mat-icon>
           </button>
           <mat-menu #menu="matMenu">
             @if (isActionAllowed(TaskAction.Approve, task)) {
-              <button mat-menu-item (click)="sidepanelService.approve(task)">
+              <button mat-menu-item (click)="sidepanelService.approve(task)" data-cy="btn-approve">
                 <mat-icon svgIcon="checkmark"></mat-icon>
                 <span>{{ "app.trust-onboarding-task.actions.approve" | translate }}</span>
               </button>
             }
             @if (isActionAllowed(TaskAction.Reject, task)) {
-              <button mat-menu-item (click)="sidepanelService.reject(task)">
+              <button mat-menu-item (click)="sidepanelService.reject(task)" data-cy="btn-reject">
                 <mat-icon svgIcon="xmark"></mat-icon>
                 <span>{{ "app.trust-onboarding-task.actions.reject" | translate }}</span>
               </button>
             }
             @if (isActionAllowed(TaskAction.RequestMoreInformation, task)) {
-              <button mat-menu-item (click)="sidepanelService.requestMoreInformation(task)">
+              <button
+                mat-menu-item
+                (click)="sidepanelService.requestMoreInformation(task)"
+                data-cy="btn-request-more-info"
+              >
                 <mat-icon svgIcon="message"></mat-icon>
                 <span>{{ "app.trust-onboarding-task.actions.requestMoreInformation" | translate }}</span>
               </button>
             }
             @if (isActionAllowed(TaskAction.AddInternalNote, task)) {
-              <button mat-menu-item (click)="sidepanelService.addNote(task)">
+              <button mat-menu-item (click)="sidepanelService.addNote(task)" data-cy="btn-add-note">
                 <mat-icon svgIcon="file"></mat-icon>
                 <span>{{ "app.trust-onboarding-task.actions.add-internal-note" | translate }}</span>
               </button>
             }
             @if (isActionAllowed(TaskAction.AssignSelf, task)) {
-              <button mat-menu-item (click)="assignSelf(task)">
+              <button mat-menu-item (click)="assignSelf(task)" data-cy="btn-assign-self">
                 <mat-icon svgIcon="person"></mat-icon>
                 <span>{{ "app.trust-onboarding-task.actions.assign-self" | translate }}</span>
               </button>
             }
           </mat-menu>
-          <button [routerLink]="detailRoute(task)" mat-icon-button obButton="secondary">
+          <button [routerLink]="detailRoute(task)" mat-icon-button obButton="secondary" data-cy="btn-detail">
             <mat-icon svgIcon="chevron_right"></mat-icon>
           </button>
         </div>
@@ -171,7 +175,7 @@
     </ng-container>
 
     <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
-    <tr *matRowDef="let row; columns: displayedColumns" mat-row [attr.data-cy]="row.id"></tr>
+    <tr *matRowDef="let task; columns: displayedColumns" mat-row [attr.data-cy]="task.submissionId"></tr>
   </table>
 
   <mat-paginator [length]="totalItems" [pageSizeOptions]="[10, 25, 50]" [pageSize]="10" showFirstLastButtons>

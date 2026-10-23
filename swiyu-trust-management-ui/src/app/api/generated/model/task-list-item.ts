@@ -19,5 +19,6 @@ export interface TaskListItem {
   assignee?: string;
   taskType: string;
   allowedActions: Set<TaskAction>;
+  submissionId: string;
 }
 export namespace TaskListItem {}

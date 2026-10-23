@@ -12,28 +12,57 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartner
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustOnboardingTaskContactTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustOnboardingTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto;
-import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskType;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Task;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTask;
+import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaModifier;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.core.importer.ImportOption;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class TaskMapperTest {
 
-    @Test
-    void toTrustOnboardingTaskListItemDtoTest() {
-        // Given
+    @ParameterizedTest
+    @MethodSource("taskListItemTestCases")
+    void toTaskListItemDtoTest(TaskListItemTestCase testCase) {
         var allowedActions = Set.of(TaskActionDto.APPROVE);
-        var task = trustOnboardingTask();
+        var task = testCase.task();
 
-        // When
         var result = toTaskListItemDto(task, allowedActions);
 
-        // Then
         assertThat(result).isNotNull();
-        assertThat(result.taskType()).isEqualTo(TaskType.REGISTRATION.name());
+        assertThat(result.taskType()).isEqualTo(task.getTaskType().name());
+        assertThat(result.allowedActions()).isEqualTo(allowedActions);
+        assertThat(result.submissionId()).isEqualTo(testCase.submissionId());
+    }
+
+    @Test
+    void taskListItemTestCasesCoverAllTaskSubtypes() {
+        var taskSubtypes = new ClassFileImporter()
+            .withImportOption(new ImportOption.DoNotIncludeTests())
+            .importPackages("ch.admin.bj.swiyu.trust.management")
+            .stream()
+            .filter(type -> type.isAssignableTo(Task.class))
+            .filter(type -> !type.getModifiers().contains(JavaModifier.ABSTRACT))
+            .map(JavaClass::getName)
+            .toList();
+
+        assertThat(taskSubtypes).containsExactlyInAnyOrderElementsOf(
+            taskListItemTestCases()
+                .stream()
+                .map(testCase -> testCase.task().getClass().getName())
+                .toList()
+        );
     }
 
     @Test
@@ -216,4 +245,33 @@ class TaskMapperTest {
         assertThat(result.contacts().get(1).name()).isEqualTo("Bob Valid");
         assertThat(result.contacts().get(1).type()).isEqualTo(TrustOnboardingTaskContactTypeDto.AUTHORISED_SIGNATORY);
     }
+
+    private static List<TaskListItemTestCase> taskListItemTestCases() {
+        var submissionId = UUID.randomUUID();
+        var onboardingTask = trustOnboardingTask();
+        var protectedVerificationTask = new ProtectedVerificationRequestTask(
+            UUID.randomUUID(),
+            Map.of("de-CH", "Partner"),
+            submissionId,
+            Instant.now(),
+            Instant.now()
+        );
+
+        var addDidTask = new TrustAddDidTask(
+            UUID.randomUUID(),
+            Map.of("de-CH", "Partner"),
+            submissionId,
+            "did:example:permission",
+            Instant.now(),
+            Instant.now()
+        );
+
+        return List.of(
+            new TaskListItemTestCase(onboardingTask, onboardingTask.getTrustOnboardingSubmissionId()),
+            new TaskListItemTestCase(protectedVerificationTask, submissionId),
+            new TaskListItemTestCase(addDidTask, submissionId)
+        );
+    }
+
+    private record TaskListItemTestCase(Task task, UUID submissionId) {}
 }
