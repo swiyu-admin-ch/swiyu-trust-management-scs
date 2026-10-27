@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.2.0
+
+### Changed
+
+- Handle business partner identity state for `PROFILE_CHANGE_MANDATORY`, `PROFILE_CHANGE_VOLUNTARY` and `RENEWAL` trust onboarding submissions and approve renewals automatically
+
 ## 5.1.4
 
 ### Changed

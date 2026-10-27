@@ -10,6 +10,7 @@ import static org.mockito.Mockito.*;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
 import ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityNotActiveException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
@@ -27,6 +28,8 @@ import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -163,6 +166,51 @@ class BusinessPartnerIdentityServiceTest {
         businessPartnerIdentityService.activate(bpi.getId());
 
         assertThat(bpi.getLastActivated()).isCloseTo(Instant.now(), within(ofSeconds(1)));
+    }
+
+    @Test
+    void handleTrustOnboardingRejection_profileChangeMandatory_shouldDeactivate() {
+        var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        bpi.setVersion(0);
+        when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
+        when(businessPartnerIdentityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        businessPartnerIdentityService.handleTrustOnboardingRejection(
+            rejectedSubmission(bpi.getId(), TrustOnboardingSubmissionDto.TypeEnum.PROFILE_CHANGE_MANDATORY)
+        );
+
+        assertThat(bpi.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.DEACTIVATED);
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = TrustOnboardingSubmissionDto.TypeEnum.class,
+        names = { "REGISTRATION", "PROFILE_CHANGE_VOLUNTARY" }
+    )
+    void handleTrustOnboardingRejection_shouldLeaveBpiUnchanged(TrustOnboardingSubmissionDto.TypeEnum type) {
+        businessPartnerIdentityService.handleTrustOnboardingRejection(rejectedSubmission(UUID.randomUUID(), type));
+
+        verifyNoInteractions(businessPartnerIdentityRepository, outboxEventPublisher);
+    }
+
+    @Test
+    void handleTrustOnboardingRejection_renewal_shouldThrow() {
+        var submission = rejectedSubmission(UUID.randomUUID(), TrustOnboardingSubmissionDto.TypeEnum.RENEWAL);
+
+        assertThatThrownBy(() ->
+            businessPartnerIdentityService.handleTrustOnboardingRejection(submission)
+        ).isInstanceOf(IllegalStateException.class);
+        verifyNoInteractions(businessPartnerIdentityRepository, outboxEventPublisher);
+    }
+
+    private static TrustOnboardingSubmissionDto rejectedSubmission(
+        UUID partnerId,
+        TrustOnboardingSubmissionDto.TypeEnum type
+    ) {
+        return new TrustOnboardingSubmissionDto().id(UUID.randomUUID()).partnerId(partnerId).type(type);
     }
 
     @Test

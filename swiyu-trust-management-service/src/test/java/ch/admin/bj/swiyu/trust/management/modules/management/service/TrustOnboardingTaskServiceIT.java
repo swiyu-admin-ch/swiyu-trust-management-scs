@@ -14,6 +14,8 @@ import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
+import ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.TrustOnboardingRejectReasonDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskFilterDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveTaskActionDto;
@@ -41,6 +43,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -294,6 +298,7 @@ class TrustOnboardingTaskServiceIT {
     void reject() {
         // given
         var submission = trustOnboardingSubmissionDto();
+        when(trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submission.getId())).thenReturn(submission);
         this.trustOnboardingTaskService.createTask(submission, getCurrentUserName());
         commit();
 
@@ -310,6 +315,104 @@ class TrustOnboardingTaskServiceIT {
         task = repos.trustOnboardingTask.getTrustOnboardingTaskByTrustOnboardingSubmissionId(submission.getId());
         assertThat(task.getStatus()).isEqualTo(TaskStatus.REJECTED);
         assertThat(task.getDueAt()).isNull();
+    }
+
+    @Test
+    void reject_ProfileChangeMandatory_DeactivatesBusinessPartnerIdentity() {
+        // given
+        var bpi = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
+        );
+        var submission = trustOnboardingSubmissionDto()
+            .partnerId(bpi.getId())
+            .type(TrustOnboardingSubmissionDto.TypeEnum.PROFILE_CHANGE_MANDATORY);
+        when(trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submission.getId())).thenReturn(submission);
+        var taskId = trustOnboardingTaskService.createTask(submission, getCurrentUserName());
+        commit();
+
+        // when
+        trustOnboardingTaskService.reject(
+            taskId,
+            new RejectTaskActionDto(TrustOnboardingRejectReasonDto.OTHER, "partner note", "internal note"),
+            "Timo Truster"
+        );
+
+        // then
+        assertThat(repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow().getStatus()).isEqualTo(
+            BusinessPartnerIdentityStatus.DEACTIVATED
+        );
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(any());
+    }
+
+    @Test
+    void reject_ProfileChangeVoluntary_BusinessPartnerIdentityRemainsActive() {
+        // given
+        var bpi = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
+        );
+        var submission = trustOnboardingSubmissionDto()
+            .partnerId(bpi.getId())
+            .type(TrustOnboardingSubmissionDto.TypeEnum.PROFILE_CHANGE_VOLUNTARY);
+        when(trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submission.getId())).thenReturn(submission);
+        var taskId = trustOnboardingTaskService.createTask(submission, getCurrentUserName());
+        commit();
+
+        // when
+        trustOnboardingTaskService.reject(
+            taskId,
+            new RejectTaskActionDto(TrustOnboardingRejectReasonDto.OTHER, "partner note", "internal note"),
+            "Timo Truster"
+        );
+
+        // then
+        assertThat(repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow().getStatus()).isEqualTo(
+            BusinessPartnerIdentityStatus.ACTIVE
+        );
+        verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityDeactivatedEvent(any());
+    }
+
+    @Test
+    void reject_Renewal_Throws() {
+        // given
+        var submission = trustOnboardingSubmissionDto().type(TrustOnboardingSubmissionDto.TypeEnum.RENEWAL);
+        var taskId = trustOnboardingTaskService.createTask(submission, getCurrentUserName());
+        commit();
+        var request = new RejectTaskActionDto(TrustOnboardingRejectReasonDto.OTHER, "partner note", "internal note");
+
+        // when / then
+        assertThrows(IllegalArgumentException.class, () ->
+            trustOnboardingTaskService.reject(taskId, request, "Timo Truster")
+        );
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = TrustOnboardingSubmissionDto.TypeEnum.class,
+        names = { "PROFILE_CHANGE_MANDATORY", "PROFILE_CHANGE_VOLUNTARY", "RENEWAL" }
+    )
+    void approve_ExistingBusinessPartnerIdentity_RenewsValidUntil(TrustOnboardingSubmissionDto.TypeEnum type) {
+        // given
+        var bpi = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.businessPartnerIdentityValidUntilYesterday(
+                BusinessPartnerIdentityStatus.ACTIVE
+            )
+        );
+        var submission = trustOnboardingSubmissionDto().partnerId(bpi.getId()).type(type);
+        when(trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submission.getId())).thenReturn(submission);
+        var taskId = trustOnboardingTaskService.createTask(submission, getCurrentUserName());
+        commit();
+
+        // when
+        trustOnboardingTaskService.approve(
+            taskId,
+            new ApproveTaskActionDto("partner note", "internal note"),
+            "Timo Truster"
+        );
+
+        // then
+        var updatedBpi = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
+        assertThat(updatedBpi.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
+        assertThat(updatedBpi.getValidUntil()).isEqualTo(DateTimeHelper.today().plusYears(3).toInstant());
     }
 
     @Test
@@ -406,6 +509,9 @@ class TrustOnboardingTaskServiceIT {
 
         // given: a task overdue while INFORMATION_REQUESTED (past its rejection-enforcement deadline)
         var overdueInfoRequestedSubmission = trustOnboardingSubmissionDto();
+        when(
+            trustOnboardingSubmissionApi.getTrustOnboardingSubmission(overdueInfoRequestedSubmission.getId())
+        ).thenReturn(overdueInfoRequestedSubmission);
         trustOnboardingTaskService.createTask(overdueInfoRequestedSubmission, getCurrentUserName());
         var overdueInfoTaskId = repos.trustOnboardingTask
             .getTrustOnboardingTaskByTrustOnboardingSubmissionId(overdueInfoRequestedSubmission.getId())

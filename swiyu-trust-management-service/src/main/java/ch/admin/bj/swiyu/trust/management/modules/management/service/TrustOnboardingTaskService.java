@@ -176,6 +176,10 @@ public class TrustOnboardingTaskService {
         validateActionAllowed(task, triggeredBy, REJECT);
         task.reject();
         taskRepository.save(task);
+
+        var trustOnboardingSubmissionDto = trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submissionId);
+        businessPartnerIdentityService.handleTrustOnboardingRejection(trustOnboardingSubmissionDto);
+
         outboxEventPublisher.publishTrustOnboardingRejectedEvent(
             TiTrustOnboardingRejectedEventBuilder.create()
                 .trustOnboardingSubmissionId(submissionId)

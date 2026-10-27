@@ -61,25 +61,6 @@ public class TrustOnboardingTask extends Task {
         );
     }
 
-    public static TrustOnboardingTask createProfileChangeMandatoryTask(
-        UUID id,
-        UUID partnerId,
-        Map<String, String> partnerName,
-        UUID trustOnboardingSubmissionId,
-        Instant dueAt,
-        Instant submittedAt
-    ) {
-        return new TrustOnboardingTask(
-            id,
-            partnerId,
-            partnerName,
-            trustOnboardingSubmissionId,
-            TaskType.PROFILE_CHANGE,
-            dueAt,
-            submittedAt
-        );
-    }
-
     public static TrustOnboardingTask createProfileChangeTask(
         UUID id,
         UUID partnerId,
@@ -114,8 +95,13 @@ public class TrustOnboardingTask extends Task {
         this.timesResubmitted = 0;
     }
 
+    // Renewals are approved automatically, so neither rejecting nor asking for more information applies to them.
     public boolean canRequestMoreInformation() {
-        return timesResubmitted < MAX_RESUBMISSIONS;
+        return getTaskType() != TaskType.RENEWAL && timesResubmitted < MAX_RESUBMISSIONS;
+    }
+
+    public boolean canReject() {
+        return getTaskType() != TaskType.RENEWAL;
     }
 
     public void requestMoreInformation(Instant rejectionEnforcedAt) {

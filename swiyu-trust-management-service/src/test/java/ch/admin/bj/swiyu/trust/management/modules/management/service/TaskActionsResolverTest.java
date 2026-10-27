@@ -4,6 +4,7 @@ import static ch.admin.bj.swiyu.trust.management.modules.management.api.task.tas
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskActionsResolver.resolvePossibleActions;
 import static ch.admin.bj.swiyu.trust.management.test.TaskTestData.protectedVerificationRequestTask;
+import static ch.admin.bj.swiyu.trust.management.test.TaskTestData.renewalTask;
 import static ch.admin.bj.swiyu.trust.management.test.TaskTestData.trustOnboardingTask;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +29,15 @@ class TaskActionsResolverTest {
             TaskActionDto.ADD_INTERNAL_NOTE,
             TaskActionDto.ASSIGN_SELF
         );
+    }
+
+    @Test
+    void resolvePossibleActions_RenewalOpened_NoRejectNorRequestMoreInformation() {
+        // GIVEN / WHEN
+        var task = renewalTask();
+        var actions = resolvePossibleActions(task, CURRENT_USER_FULLNAME);
+        // THEN
+        assertThat(actions).containsExactlyInAnyOrder(APPROVE, ADD_INTERNAL_NOTE, ASSIGN_SELF);
     }
 
     @Test

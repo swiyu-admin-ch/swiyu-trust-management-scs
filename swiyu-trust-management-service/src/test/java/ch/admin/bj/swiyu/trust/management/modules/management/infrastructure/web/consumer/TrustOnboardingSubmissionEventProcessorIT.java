@@ -7,10 +7,12 @@ import static org.mockito.Mockito.*;
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingSubmissionEventProcessor;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingTaskService;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
 import ch.admin.bj.swiyu.trust.management.test.TrustOnboardingTestData;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,5 +65,34 @@ class TrustOnboardingSubmissionEventProcessorIT {
             .contains(event.getPayload().getTrustOnboardingSubmissionId().toString());
         verify(trustOnboardingTaskService).createOrResubmitTask(trustOnboardingSubmission, getCurrentUserName());
         verifyNoMoreInteractions(trustOnboardingTaskService);
+    }
+
+    @Test
+    @WithJeapAuthenticationToken(username = "test")
+    void processTiTrustOnboardingSubmissionAcceptedEvent_renewal_isApprovedAutomatically() {
+        // given
+        var event = TrustOnboardingTestData.tiTrustOnboardingSubmissionAcceptedEvent();
+        var trustOnboardingSubmission = new TrustOnboardingSubmissionDto().type(
+            TrustOnboardingSubmissionDto.TypeEnum.RENEWAL
+        );
+        when(
+            trustOnboardingSubmissionApi.getTrustOnboardingSubmission(
+                event.getPayload().getTrustOnboardingSubmissionId()
+            )
+        ).thenReturn(trustOnboardingSubmission);
+        var taskId = UUID.randomUUID();
+        when(
+            trustOnboardingTaskService.createOrResubmitTask(trustOnboardingSubmission, getCurrentUserName())
+        ).thenReturn(taskId);
+
+        // when
+        trustOnboardingSubmissionEventProcessor.processTiTrustOnboardingSubmissionAcceptedEvent(event);
+
+        // then
+        verify(trustOnboardingTaskService).approve(
+            eq(taskId),
+            any(ApproveTaskActionDto.class),
+            eq(getCurrentUserName())
+        );
     }
 }

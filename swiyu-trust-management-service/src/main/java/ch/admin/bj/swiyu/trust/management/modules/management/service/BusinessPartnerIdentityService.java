@@ -244,6 +244,36 @@ public class BusinessPartnerIdentityService {
         return bpi.getId();
     }
 
+    /**
+     * Applies the effect of a rejected trust onboarding submission on the business partner identity: a rejected
+     * mandatory profile change deactivates it, a rejected voluntary profile change or registration leaves it as is.
+     */
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public void handleTrustOnboardingRejection(TrustOnboardingSubmissionDto submission) {
+        switch (submission.getType()) {
+            case REGISTRATION, PROFILE_CHANGE_VOLUNTARY -> log.debug(
+                "Business partner identity {} remains unchanged on rejected {} submission",
+                submission.getPartnerId(),
+                submission.getType()
+            );
+            case PROFILE_CHANGE_MANDATORY -> {
+                log.info(
+                    "Deactivating business partner identity {} because trust onboarding submission {} of type {} was rejected",
+                    submission.getPartnerId(),
+                    submission.getId(),
+                    submission.getType()
+                );
+                deactivate(submission.getPartnerId());
+            }
+            case RENEWAL -> throw new IllegalStateException(
+                "Renewal submission '%s' is approved automatically and must not be rejected".formatted(
+                    submission.getId()
+                )
+            );
+            default -> throw new IllegalStateException("Unexpected value: " + submission.getType());
+        }
+    }
+
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public BusinessPartnerIdentityDto getBusinessPartnerIdentityDto(@Valid @NotNull UUID businessPartnerIdentityId) {
         var businessPartnerIdentity = businessPartnerIdentityRepository

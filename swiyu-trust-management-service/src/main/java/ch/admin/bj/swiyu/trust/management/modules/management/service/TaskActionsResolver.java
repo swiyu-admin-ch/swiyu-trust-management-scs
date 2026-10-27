@@ -39,8 +39,10 @@ public class TaskActionsResolver {
      */
     public static Set<TaskActionDto> resolvePossibleActions(Task task, String currentUserFullName) {
         var canRequestMoreInformation = false;
+        var canReject = true;
         if (task instanceof TrustOnboardingTask onboardingTask) {
             canRequestMoreInformation = onboardingTask.canRequestMoreInformation();
+            canReject = onboardingTask.canReject();
         }
         var reviewPreconditionsMet = true;
         if (task instanceof ProtectedVerificationRequestTask pvTask) {
@@ -51,6 +53,7 @@ public class TaskActionsResolver {
             task.getAssignee(),
             currentUserFullName,
             canRequestMoreInformation,
+            canReject,
             reviewPreconditionsMet
         );
     }
@@ -65,13 +68,14 @@ public class TaskActionsResolver {
         String currentAssignee,
         String currentUserFullName,
         boolean canRequestMoreInformation,
+        boolean canReject,
         boolean reviewPreconditionsMet
     ) {
         var actions = new HashSet<TaskActionDto>();
         for (var action : TaskActionDto.values()) {
             switch (action) {
                 case REJECT -> {
-                    if (isValidNewStatus(currentStatus, TaskStatus.REJECTED) && reviewPreconditionsMet) {
+                    if (isValidNewStatus(currentStatus, TaskStatus.REJECTED) && canReject && reviewPreconditionsMet) {
                         actions.add(action);
                     }
                 }
