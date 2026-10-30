@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.3.1
+
+### Changed
+
+- Move the reject validation of the task sidepanel into its own method, so `validate()` stays below the cognitive complexity Sonar allows
+- Build the request outside the `assertThatThrownBy` lambdas of `DeleteBusinessPartnerTaskServiceIT`, so only the call under test can throw
+- Use the unnamed pattern `_` for the delete-business-partner branch of `TaskMapper.toSubmissionId`, which never reads its binding
+
+## 5.3.0
+
+### Added
+
+- Add business partner deletion requests behind the feature toggle `FEATURES_EIDARTFE_1571_COMPLETE_BP_OFFBOARDING`, with a required reason, irreversibility confirmation and configurable waiting period. Creation checks the synced eligibility flag and rejects duplicate open requests.
+- Add a deletion-task detail page showing the persistent deletion deadline and history. Open requests can be rejected with an internal note from the detail page or task list; manual approval is unavailable.
+- Display the configured waiting period in the confirmation, translate the eligibility errors and support filtering the task list by deletion requests. Automatic execution is handled by the separate hard-delete job.
+- Guarantee a single pending deletion request per partner with a partial unique index, so two editors requesting a deletion at the same time cannot both pass the duplicate check.
+- Add `FeaturesProperties` for the Jira numbered feature toggles, separate from the `app.functionality` flags that are part of the product, and expose them to the frontend as `AppConfig.featureToggles` - the same split as in swiyu-core-business-service and swiyu-ecosystem-portal-scs.
+
+### Changed
+
+- Log every domain event written by `DomainEventService` as `log.info`, so the event history is visible without querying `domain_event_log`.
+- Take the partner name of a deletion task from the core business service projection as a single string instead of looking up the localized name of the partner identity; `DeleteBusinessPartnerTask.partnerName` is a plain string now.
+
+## 5.2.4
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent from 41.23.0 to 41.28.0 and remove the obsolete Tomcat, PostgreSQL, Guava and snappy-java overrides: the parent now manages Tomcat 11.0.27, PostgreSQL 42.7.14, Guava 33.7.2-jre and snappy-java 1.1.10.12
+
+### Fixed
+
+- Override Jackson to 2.22.4 / 3.2.4 to fix the critical deserialization findings SNYK-JAVA-COMFASTERXMLJACKSONCORE-21761837 and SNYK-JAVA-TOOLSJACKSONCORE-21761838
+- Override follow-redirects to 1.16.2 in the UI to fix Snyk high severity finding SNYK-JS-FOLLOWREDIRECTS-21762031
+- Ignore Snyk high severity finding SNYK-JS-PICOMATCH-21248802 (ReDoS, CVE-2026-112366) for 14 days; no fixed picomatch release exists yet, the vulnerable code is still present in the latest 4.0.7
+
 ## 5.2.3
 
 ### Fixed

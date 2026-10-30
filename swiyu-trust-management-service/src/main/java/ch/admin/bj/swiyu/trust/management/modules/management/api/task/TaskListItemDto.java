@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  *
  * @param submissionId The originating submission id the task was resolved from. E.g. the id of the
- *                     TrustOnboardingSubmission if it is a TrustOnboardingTask
+ *                     TrustOnboardingSubmission if it is a TrustOnboardingTask. Null for deletion requests, which originate in the TMS.
  */
 @Schema(name = "TaskListItem", enumAsRef = true)
 public record TaskListItemDto(
@@ -25,5 +25,5 @@ public record TaskListItemDto(
     String assignee,
     @NotNull String taskType,
     @NotNull Set<TaskActionDto> allowedActions,
-    @NotNull UUID submissionId
+    UUID submissionId
 ) {}

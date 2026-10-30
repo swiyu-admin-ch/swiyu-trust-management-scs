@@ -72,7 +72,9 @@ export class SidepanelComponent {
       this.declarationError.set(false);
       if (this.panelData()) {
         this.declarationCheckVisible.set(
-          this.panelData()?.action !== TaskAction.AddInternalNote && !this.isProtectedVerificationTask()
+          this.panelData()?.action !== TaskAction.AddInternalNote &&
+            !this.isProtectedVerificationTask() &&
+            !this.isDeletionTask()
         );
       }
     });
@@ -82,6 +84,11 @@ export class SidepanelComponent {
   isProtectedVerificationTask(): boolean {
     const task = this.panelData()?.task;
     return !!task && 'taskType' in task && task.taskType === PROTECTED_VERIFICATION_REQUEST_TASK_TYPE;
+  }
+
+  isDeletionTask(): boolean {
+    const task = this.panelData()?.task;
+    return !!task && 'taskType' in task && task.taskType === 'DELETE_BUSINESS_PARTNER';
   }
 
   submit(form: NgForm) {
@@ -110,18 +117,7 @@ export class SidepanelComponent {
 
     // Rule 2: Reject-specific validation
     if (this.panelData()?.action === TaskAction.Reject) {
-      if (this.isProtectedVerificationTask()) {
-        if (!this.formData().protectedVerificationRejectReason.trim()) {
-          errors.push('Reject reason is required.');
-        }
-      } else {
-        const reason = this.formData().rejectReason;
-        if (!reason) {
-          errors.push('Reject reason is required.');
-        } else if (!this.rejectReasons.includes(reason)) {
-          errors.push('Reject reason must be one of the predefined values.');
-        }
-      }
+      errors.push(...this.rejectErrors());
     }
 
     if (errors.length > 0) {
@@ -132,12 +128,33 @@ export class SidepanelComponent {
     return true;
   }
 
+  /** Every task type has its own mandatory field when rejecting, so the branches are kept out of validate(). */
+  private rejectErrors(): string[] {
+    if (this.isDeletionTask()) {
+      return this.formData().internalMessageBody.trim() ? [] : ['Internal note is required.'];
+    }
+    if (this.isProtectedVerificationTask()) {
+      return this.formData().protectedVerificationRejectReason.trim() ? [] : ['Reject reason is required.'];
+    }
+    const reason = this.formData().rejectReason;
+    if (!reason) {
+      return ['Reject reason is required.'];
+    }
+    return this.rejectReasons.includes(reason) ? [] : ['Reject reason must be one of the predefined values.'];
+  }
+
   private buildRequest(): Observable<unknown> | undefined {
     const taskId = this.panelData()?.task?.id as string;
     const isProtectedVerificationTask = this.isProtectedVerificationTask();
 
     switch (this.panelData()?.action) {
       case TaskAction.Reject:
+        if (this.isDeletionTask()) {
+          return this.api.rejectDeleteBusinessPartner({
+            taskId,
+            rejectDeleteBusinessPartnerTaskAction: {internalNote: this.formData().internalMessageBody.trim()}
+          });
+        }
         return isProtectedVerificationTask
           ? this.api.rejectProtectedVerificationRequest({
               taskId,

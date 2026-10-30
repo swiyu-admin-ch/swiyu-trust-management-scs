@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.infrastructure.web.controller;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityNotActiveException;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerNotDeletableException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemProxyException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.TrustStatementValidationFailedException;
@@ -57,6 +58,17 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     ) {
         log.debug(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatusCode.valueOf(400));
+    }
+
+    /**
+     * Returns the error code rather than the message: the message is English only and names technical ids, while the
+     * UI translates the code. The message stays in the log for support.
+     */
+    @ExceptionHandler(BusinessPartnerNotDeletableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleBusinessPartnerNotDeletableException(BusinessPartnerNotDeletableException e) {
+        log.debug(e.getMessage());
+        return new ResponseEntity<>(e.getError().name(), HttpStatusCode.valueOf(400));
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)

@@ -175,7 +175,7 @@
     </ng-container>
 
     <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
-    <tr *matRowDef="let task; columns: displayedColumns" mat-row [attr.data-cy]="task.submissionId"></tr>
+    <tr *matRowDef="let task; columns: displayedColumns" mat-row [attr.data-cy]="task.submissionId ?? task.id"></tr>
   </table>
 
   <mat-paginator [length]="totalItems" [pageSizeOptions]="[10, 25, 50]" [pageSize]="10" showFirstLastButtons>

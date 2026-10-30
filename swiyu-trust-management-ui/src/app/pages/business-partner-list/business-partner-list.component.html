@@ -60,6 +60,12 @@
               <mat-icon svgIcon="copy"></mat-icon>
               <span>{{ "businessPartner.list.actions.copyId" | translate }}</span>
             </button>
+            @if (deletionAvailable) {
+              <button mat-menu-item (click)="requestDeletion(partner)" data-cy="deleteBusinessPartner">
+                <mat-icon svgIcon="trash"></mat-icon>
+                <span>{{ "businessPartner.list.actions.delete" | translate }}</span>
+              </button>
+            }
           </mat-menu>
         </div>
       </td>

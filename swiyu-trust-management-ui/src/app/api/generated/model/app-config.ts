@@ -8,6 +8,7 @@
  * Do not edit the class manually.
  */
 import {AuthConfig} from './auth-config';
+import {FeatureToggles} from './feature-toggles';
 
 /**
  * Comprehensive application configuration for frontend client
@@ -16,4 +17,9 @@ export interface AppConfig {
   environment: string;
   authConfig: AuthConfig;
   version: string;
+  featureToggles: FeatureToggles;
+  /**
+   * Waiting period between requesting and scheduling irreversible deletion, in seconds.
+   */
+  hardDeleteDelaySeconds: number;
 }

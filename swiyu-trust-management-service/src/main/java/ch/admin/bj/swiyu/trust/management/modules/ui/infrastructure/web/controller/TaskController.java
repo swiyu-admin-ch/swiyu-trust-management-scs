@@ -9,15 +9,18 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.task.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.AddInternalNoteTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveProtectedVerificationRequestTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.ApproveTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RejectDeleteBusinessPartnerTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RejectProtectedVerificationRequestTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RejectTaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.RequestMoreInformationTaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.service.DeleteBusinessPartnerTaskService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationRequestTaskService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TaskService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustAddDidTaskService;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.TrustOnboardingTaskService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -28,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
 import org.springframework.data.web.SortDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +47,7 @@ public class TaskController {
     private final TrustOnboardingTaskService trustOnboardingTaskService;
     private final TrustAddDidTaskService trustAddDidTaskService;
     private final ProtectedVerificationRequestTaskService protectedVerificationRequestTaskService;
+    private final DeleteBusinessPartnerTaskService deleteBusinessPartnerTaskService;
 
     @GetMapping("/")
     @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
@@ -66,6 +71,30 @@ public class TaskController {
     @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
     public TrustAddDidTaskDto getAddDidTask(@PathVariable UUID taskId) {
         return this.trustAddDidTaskService.getTask(taskId);
+    }
+
+    @GetMapping("/{taskId}/delete-business-partner")
+    @PreAuthorize(HAS_ROLE_EDITOR_OR_READER)
+    public DeleteBusinessPartnerTaskDto getDeleteBusinessPartnerTask(@PathVariable UUID taskId) {
+        return this.deleteBusinessPartnerTaskService.getTask(taskId, getCurrentUserFullName());
+    }
+
+    @PostMapping("/delete-business-partner")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize(HAS_ROLE_EDITOR)
+    public UUID createDeleteBusinessPartnerTask(
+        @NotNull @Valid @RequestBody CreateDeleteBusinessPartnerTaskRequestDto request
+    ) {
+        return this.deleteBusinessPartnerTaskService.createTask(request, getCurrentUserFullName());
+    }
+
+    @PostMapping("/{taskId}/delete-business-partner/reject")
+    @PreAuthorize(HAS_ROLE_EDITOR)
+    public void rejectDeleteBusinessPartner(
+        @PathVariable UUID taskId,
+        @NotNull @Valid @RequestBody RejectDeleteBusinessPartnerTaskActionDto request
+    ) {
+        this.deleteBusinessPartnerTaskService.reject(taskId, request, getCurrentUserFullName());
     }
 
     @GetMapping("/{taskId}/protected-verification-request")

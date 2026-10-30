@@ -53,6 +53,14 @@ public enum AuditUseCase {
         AuditEventType.CREATED,
         true
     ),
+    TASK_CREATED(
+        Category.TASK,
+        null, // not hardcoded, this is the dynamic task type
+        DataJsonFieldName.TASK_DATA,
+        null, // no non-json value sent
+        AuditEventType.CREATED,
+        true
+    ),
     TASK_APPROVED(
         Category.TASK,
         null, // not hardcoded, this is the dynamic task type

@@ -64,7 +64,30 @@ The following environment variables must be set
 | `TRUST_REGISTRY_VC_SCHEMA_ENDPOINT`               | The path to the VC schema endpoint on the trust registry.                                 | `/api/v1/vc-schema` |
 | `CORE_BUSINESS_SERVICE_BASE_URL`                  | The base URL of the core business service REST API.                                       |                     |
 | `ENVIRONMENT`                                     | The environment name exposed to the frontend (e.g. `dev`, `ref`, `prod`).                 |                     |
-| `FUNCTIONALITY_AUTOMATIC_APPROVAL_ENABLED`        | Feature flag to enable or disable automatic approval of onboarding submissions.           |                     |
+| `FUNCTIONALITY_AUTOMATIC_APPROVAL_ENABLED`        | Functionality flag to enable or disable automatic approval of onboarding submissions.     |                     |
+| `OFFBOARDING_HARD_DELETE_DELAY`                   | Waiting period between requesting and scheduling an irreversible deletion.                | `2d`                |
+
+`OFFBOARDING_HARD_DELETE_DELAY` accepts any duration unit; a value without one
+is read as days, so `2` means two days and `5m` five minutes. The same duration
+is displayed in the confirmation dialog and used to calculate the task's
+persistent deletion deadline. Automatic execution is provided by the separate
+hard-delete job.
+
+### Functionality flags and feature toggles
+
+The service separates the two the same way swiyu-core-business-service and
+swiyu-ecosystem-portal-scs do:
+
+- **Functionality flags** (`app.functionality.*`, env `FUNCTIONALITY_*`) are part
+  of the product. They are named after what they do and stay.
+- **Feature toggles** (`features.*`, env `FEATURES_*`) are named after their Jira
+  issue, gate work in progress, and are removed again once the story is rolled
+  out. Every toggle must be listed on
+  [Feature Flags](https://confluence.bit.admin.ch/spaces/EIDTGM/pages/982856284/Feature+Flags).
+
+| Variable                                           | Description                                                                     | Default |
+|----------------------------------------------------|---------------------------------------------------------------------------------|---------|
+| `FEATURES_EIDARTFE_1571_COMPLETE_BP_OFFBOARDING`   | Gates the complete business partner offboarding, i.e. the deletion requests.     | `false` |
 
 ### Secrets config
 

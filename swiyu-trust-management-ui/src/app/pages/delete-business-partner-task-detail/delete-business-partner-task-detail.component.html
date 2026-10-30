@@ -1,0 +1,28 @@
+<a routerLink="/tasks" mat-button obButton="secondary">{{ "deleteTask.back" | translate }}</a>
+@if (loadError()) {
+  <ob-alert type="error">{{ (notFound() ? "deleteTask.notFound" : "deleteTask.loadError") | translate }}</ob-alert>
+} @else if (task(); as currentTask) {
+  <h1>{{ "task.table.taskType.DELETE_BUSINESS_PARTNER" | translate }}</h1>
+  <h2>{{ currentTask.partnerName }}</h2>
+  <app-task-status-chip [status]="currentTask.state" />
+  <dl>
+    <dt>{{ "businessPartner.list.header.businessPartnerId" | translate }}</dt>
+    <dd>{{ currentTask.businessPartnerId }}</dd>
+    <dt>{{ "task.table.header.submittedAt" | translate }}</dt>
+    <dd>{{ currentTask.submittedAt | date: "dd.MM.yyyy HH:mm:ss" }}</dd>
+    <dt>{{ "deleteTask.hardDeleteDueAt" | translate }}</dt>
+    <dd data-cy="hardDeleteDueAt">{{ currentTask.hardDeleteDueAt | date: "dd.MM.yyyy HH:mm:ss" }}</dd>
+  </dl>
+  <button
+    mat-button
+    obButton="secondary"
+    type="button"
+    (click)="reject()"
+    [disabled]="!canReject"
+    data-cy="btnTaskReject"
+  >
+    {{ "deleteTask.reject" | translate }}
+  </button>
+  <h2>{{ "deleteTask.history" | translate }}</h2>
+  <app-domain-event-list [trustOnboardingTaskId]="taskId()" />
+}

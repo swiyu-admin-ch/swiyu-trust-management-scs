@@ -1,10 +1,12 @@
 import {Injectable, inject} from '@angular/core';
 import {ObOffCanvasService} from '@oblique/oblique';
 import {BehaviorSubject, Subject} from 'rxjs';
-import {TaskAction, TaskListItem, TrustOnboardingTask} from '../../../api/generated';
+import {DeleteBusinessPartnerTask, TaskAction, TaskListItem, TrustOnboardingTask} from '../../../api/generated';
+
+type PanelTask = TrustOnboardingTask | TaskListItem | DeleteBusinessPartnerTask;
 
 export interface PanelData {
-  task: TrustOnboardingTask | TaskListItem;
+  task: PanelTask;
   action: TaskAction;
 }
 
@@ -27,15 +29,15 @@ export class SidepanelService {
     this.triggerReload();
   }
 
-  addNote(task: TrustOnboardingTask | TaskListItem) {
+  addNote(task: PanelTask) {
     this.openPanel({action: TaskAction.AddInternalNote, task});
   }
 
-  approve(task: TrustOnboardingTask | TaskListItem) {
+  approve(task: PanelTask) {
     this.openPanel({action: TaskAction.Approve, task});
   }
 
-  reject(task: TrustOnboardingTask | TaskListItem) {
+  reject(task: PanelTask) {
     this.openPanel({action: TaskAction.Reject, task});
   }
 

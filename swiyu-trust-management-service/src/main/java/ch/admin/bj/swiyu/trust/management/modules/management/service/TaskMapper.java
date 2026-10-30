@@ -13,6 +13,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.DeleteBusinessPartnerTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Task;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
@@ -41,6 +42,7 @@ public class TaskMapper {
 
     private static UUID toSubmissionId(Task task) {
         return switch (task) {
+            case DeleteBusinessPartnerTask _ -> null;
             case TrustOnboardingTask onboardingTask -> onboardingTask.getTrustOnboardingSubmissionId();
             case ProtectedVerificationRequestTask protectedVerificationTask -> protectedVerificationTask.getProtectedVerificationSubmissionId();
             case TrustAddDidTask trustAddDidTask -> trustAddDidTask.getTrustAddDidSubmissionId();
@@ -97,6 +99,25 @@ public class TaskMapper {
             submission.getSbnId(),
             toAuthorizableField(submission.getCategory()),
             task.hasOpenedZasData(),
+            allowedActions
+        );
+    }
+
+    public static DeleteBusinessPartnerTaskDto toDeleteBusinessPartnerTaskDto(
+        DeleteBusinessPartnerTask task,
+        Set<TaskActionDto> allowedActions
+    ) {
+        return new DeleteBusinessPartnerTaskDto(
+            task.getId(),
+            task.getAssignee(),
+            task.getSubmittedAt(),
+            task.getDueAt(),
+            toTaskStatusDto(task.getStatus()),
+            // Stored under the default key only, see DeleteBusinessPartnerTask.
+            task.getPartnerName().get(LocalizedMapConstants.DEFAULT_VALUE_KEY),
+            task.getPartnerId(),
+            task.getHardDeleteDueAt(),
+            task.getTaskType().name(),
             allowedActions
         );
     }

@@ -15,6 +15,8 @@ import {_, TranslateModule, TranslateService} from '@ngx-translate/core';
 import {ObButtonDirective, ObDocumentMetaService, ObENotificationType, ObNotificationService} from '@oblique/oblique';
 import {catchError, debounceTime, EMPTY, finalize, Observable, switchMap, take, tap} from 'rxjs';
 import {BusinessPartnerViewApi, BusinessPartnerViewListItem} from '../../api/generated';
+import {AppConfigService} from '../../core/appconfig/app-config.service';
+import {BusinessPartnerDeletePanelService} from './delete-panel/business-partner-delete-panel.service';
 
 interface FilterFormModel {
   search: FormControl<string>;
@@ -67,6 +69,8 @@ export class BusinessPartnerListComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly meta = inject(ObDocumentMetaService);
+  private readonly appConfigService = inject(AppConfigService);
+  private readonly deletePanelService = inject(BusinessPartnerDeletePanelService);
   private readonly translateService = inject(TranslateService);
   private readonly notificationService = inject(ObNotificationService);
 
@@ -97,6 +101,14 @@ export class BusinessPartnerListComponent {
     this.filterForm.controls.search.valueChanges
       .pipe(debounceTime(300), takeUntilDestroyed())
       .subscribe(search => this.writeStateToUrl({search: search.trim() || null, page: null}, true));
+
+    // A created deletion request changes nothing in the url, so the list has to be told to reload.
+    this.deletePanelService.created$
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap(() => this.loadPartners(this.filterForm.controls.search.value.trim()))
+      )
+      .subscribe();
   }
 
   onPage(event: PageEvent): void {
@@ -120,6 +132,15 @@ export class BusinessPartnerListComponent {
 
   statusKey(partner: BusinessPartnerViewListItem): string {
     return STATUS_TRANSLATION_KEY[partner.status ?? 'NOT_ONBOARDED'];
+  }
+
+  /** Feature toggle EIDARTFE_1571: without it the delete entry must not appear at all. */
+  get deletionAvailable(): boolean {
+    return this.appConfigService.featureToggles.EIDARTFE_1571_COMPLETE_BP_OFFBOARDING;
+  }
+
+  requestDeletion(partner: BusinessPartnerViewListItem): void {
+    this.deletePanelService.open(partner);
   }
 
   copyPartnerId(partner: BusinessPartnerViewListItem): void {

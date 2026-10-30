@@ -30,6 +30,7 @@ describe('SidepanelComponent', () => {
   beforeEach(async () => {
     mockApi = {
       approveTrustOnboarding: jest.fn().mockReturnValue(of(undefined)),
+      rejectDeleteBusinessPartner: jest.fn().mockReturnValue(of(undefined)),
       rejectTrustOnboarding: jest.fn().mockReturnValue(of(undefined)),
       approveProtectedVerificationRequest: jest.fn().mockReturnValue(of(undefined)),
       rejectProtectedVerificationRequest: jest.fn().mockReturnValue(of(undefined))
@@ -132,5 +133,27 @@ describe('SidepanelComponent', () => {
     fixture.detectChanges();
 
     expect(component.declarationCheckVisible()).toBe(false);
+  });
+  it('rejects a deletion task using only the required internal note', () => {
+    sidepanelService.reject(getTaskListItem('DELETE_BUSINESS_PARTNER'));
+    fixture.detectChanges();
+    expect(component.declarationCheckVisible()).toBe(false);
+    expect(fixture.nativeElement.querySelector('[data-cy="selectRejectReason"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-cy="rejectMsgBody"]')).toBeNull();
+    component.formData().internalMessageBody = '  Keep the partner  ';
+    component.submit({invalid: false} as never);
+    expect(mockApi.rejectDeleteBusinessPartner).toHaveBeenCalledWith({
+      taskId,
+      rejectDeleteBusinessPartnerTaskAction: {internalNote: 'Keep the partner'}
+    });
+    expect(mockApi.rejectTrustOnboarding).not.toHaveBeenCalled();
+  });
+
+  it('does not reject a deletion task with a blank internal note', () => {
+    sidepanelService.reject(getTaskListItem('DELETE_BUSINESS_PARTNER'));
+    fixture.detectChanges();
+    component.formData().internalMessageBody = '   ';
+    component.submit({invalid: false} as never);
+    expect(mockApi.rejectDeleteBusinessPartner).not.toHaveBeenCalled();
   });
 });

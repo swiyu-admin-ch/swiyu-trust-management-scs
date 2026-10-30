@@ -1,5 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.controller;
 
+import ch.admin.bj.swiyu.trust.management.modules.common.config.OffboardingProperties;
+import ch.admin.bj.swiyu.trust.management.modules.common.features.FeaturesProperties;
 import ch.admin.bj.swiyu.trust.management.modules.ui.api.*;
 import ch.admin.bj.swiyu.trust.management.modules.ui.infrastructure.web.config.*;
 import io.swagger.v3.oas.annotations.*;
@@ -26,6 +28,10 @@ public class FrontendConfigurationController {
 
     private final FrontendProperties frontendProperties;
 
+    private final FeaturesProperties featuresProperties;
+
+    private final OffboardingProperties offboardingProperties;
+
     @GetMapping("/")
     public @NonNull AppConfigDto getConfiguration() {
         var authProperties = frontendProperties.auth();
@@ -40,7 +46,9 @@ public class FrontendConfigurationController {
                 authProperties.responseType(),
                 authProperties.requireHttps()
             ),
-            buildProperties.getVersion()
+            buildProperties.getVersion(),
+            new FeatureTogglesDto(featuresProperties.getEidartfe1571CompleteBpOffboarding()),
+            offboardingProperties.hardDeleteDelay().toSeconds()
         );
     }
 }

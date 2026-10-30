@@ -164,6 +164,9 @@ app:
       use-silent-refresh: false # not supported by the jeap mock service
   functionality:
     automatic-approval-enabled: false
+  offboarding:
+    # Short on purpose so local e2e tests do not have to wait days for the deletion deadline.
+    hard-delete-delay: 5m
   issuer:
     jwt:
       trust-issuer:
@@ -183,3 +186,6 @@ core-business:
 
 status-registry:
   write-base-url: ${core-business.core-business-service-internal-base-url}
+
+features:
+  EIDARTFE_1571_COMPLETE_BP_OFFBOARDING: true

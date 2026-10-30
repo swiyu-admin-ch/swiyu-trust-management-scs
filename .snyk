@@ -87,4 +87,13 @@ ignore:
         reason: No fixed version available; braces only used by dev/build tooling (not shipped to production bundle). Tracked in EID-6915.
         expires: 2026-11-09T09:00:00.000Z
         created: 2026-09-21T12:10:03.000Z
+  SNYK-JS-PICOMATCH-21248802:
+    - '*':
+        reason: >-
+          No fixed version exists yet (CVE-2026-112366); the advisory states no fixed release and the
+          vulnerable code is still present in the latest picomatch 4.0.7. Reached through Angular
+          schematics/build tooling (@angular-devkit/core), which matches glob patterns from project
+          configuration rather than untrusted runtime input. Track the upstream fix.
+        expires: 2026-11-11T09:00:00.000Z
+        created: 2026-10-28T09:00:00.000Z
 patch: { }

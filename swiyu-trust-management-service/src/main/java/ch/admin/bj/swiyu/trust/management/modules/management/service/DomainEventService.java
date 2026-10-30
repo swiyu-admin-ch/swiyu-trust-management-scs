@@ -9,6 +9,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.
 import com.querydsl.core.BooleanBuilder;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Service for event internal to the TMS.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DomainEventService {
@@ -25,9 +27,7 @@ public class DomainEventService {
 
     @Transactional
     public void trustOnboardingSubmissionReceived(UUID taskId, String triggeredBy) {
-        domainEventLogRepository.save(
-            DomainEventLog.createTaskDomainEventLog(TRUST_ONBOARDING_SUBMISSION_RECEIVED, triggeredBy, taskId)
-        );
+        saveAndLog(DomainEventLog.createTaskDomainEventLog(TRUST_ONBOARDING_SUBMISSION_RECEIVED, triggeredBy, taskId));
     }
 
     @Transactional
@@ -37,7 +37,7 @@ public class DomainEventService {
         String partnerNote,
         String internalNote
     ) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createTaskDomainEventLog(
                 TRUST_ONBOARDING_SUCCEEDED,
                 triggeredBy,
@@ -55,7 +55,7 @@ public class DomainEventService {
         String partnerNote,
         String internalNote
     ) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createTaskDomainEventLog(
                 TRUST_ONBOARDING_REJECTED,
                 triggeredBy,
@@ -73,7 +73,7 @@ public class DomainEventService {
         String partnerNote,
         String internalNote
     ) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createTaskDomainEventLog(
                 TRUST_ONBOARDING_MORE_INFORMATION_REQUESTED,
                 triggeredBy,
@@ -86,14 +86,12 @@ public class DomainEventService {
 
     @Transactional
     public void trustOnboardingSubmissionResubmitted(UUID taskId, String triggeredBy) {
-        domainEventLogRepository.save(
-            DomainEventLog.createTaskDomainEventLog(TRUST_ONBOARDING_RESUBMITTED, triggeredBy, taskId)
-        );
+        saveAndLog(DomainEventLog.createTaskDomainEventLog(TRUST_ONBOARDING_RESUBMITTED, triggeredBy, taskId));
     }
 
     @Transactional
     public void taskNoteAdded(UUID taskId, String triggeredBy, String internalNote) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createTaskDomainEventLog(
                 TASK_NOTE_ADDED,
                 triggeredBy,
@@ -106,40 +104,36 @@ public class DomainEventService {
 
     @Transactional
     public void taskAssigned(UUID taskId, String triggeredBy) {
-        domainEventLogRepository.save(DomainEventLog.createTaskDomainEventLog(TASK_ASSIGNED, triggeredBy, taskId));
+        saveAndLog(DomainEventLog.createTaskDomainEventLog(TASK_ASSIGNED, triggeredBy, taskId));
     }
 
     @Transactional
     public void trustAddDidSubmissionReceived(UUID taskId, String triggeredBy) {
-        domainEventLogRepository.save(
-            DomainEventLog.createTaskDomainEventLog(TRUST_ADD_DID_SUBMISSION_RECEIVED, triggeredBy, taskId)
-        );
+        saveAndLog(DomainEventLog.createTaskDomainEventLog(TRUST_ADD_DID_SUBMISSION_RECEIVED, triggeredBy, taskId));
     }
 
     @Transactional
     public void trustAddDidSubmissionSucceeded(UUID taskId, String triggeredBy) {
-        domainEventLogRepository.save(
-            DomainEventLog.createTaskDomainEventLog(TRUST_ADD_DID_SUCCEEDED, triggeredBy, taskId)
-        );
+        saveAndLog(DomainEventLog.createTaskDomainEventLog(TRUST_ADD_DID_SUCCEEDED, triggeredBy, taskId));
     }
 
     @Transactional
     public void trustAddDidSubmissionRejected(UUID taskId, String triggeredBy, String internalNote) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createTaskDomainEventLog(TRUST_ADD_DID_REJECTED, triggeredBy, taskId, null, internalNote)
         );
     }
 
     @Transactional
     public void protectedVerificationRequestReceived(UUID taskId, String triggeredBy) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createTaskDomainEventLog(PROTECTED_VERIFICATION_REQUEST_RECEIVED, triggeredBy, taskId)
         );
     }
 
     @Transactional
     public void protectedVerificationRequestApproved(UUID taskId, String triggeredBy, String internalNote) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createTaskDomainEventLog(
                 PROTECTED_VERIFICATION_REQUEST_APPROVED,
                 triggeredBy,
@@ -157,7 +151,7 @@ public class DomainEventService {
         String rejectReason,
         String internalNote
     ) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createTaskDomainEventLog(
                 PROTECTED_VERIFICATION_REQUEST_REJECTED,
                 triggeredBy,
@@ -170,7 +164,7 @@ public class DomainEventService {
 
     @Transactional
     public void nonCompliantActorAdded(UUID nonCompliantActorId, String triggeredBy) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createNonCompliantActorDomainEventLog(
                 NON_COMPLIANT_ACTOR_ADDED,
                 triggeredBy,
@@ -181,7 +175,7 @@ public class DomainEventService {
 
     @Transactional
     public void nonCompliantActorRemoved(UUID nonCompliantActorId, String triggeredBy) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createNonCompliantActorDomainEventLog(
                 NON_COMPLIANT_ACTOR_REMOVED,
                 triggeredBy,
@@ -191,7 +185,7 @@ public class DomainEventService {
     }
 
     public void protectedVerificationAuthorizationAdded(UUID pvaId, String triggeredBy) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createProtectedVerificationAuthorizationDomainEventLog(
                 PROTECTED_VERIFICATION_AUTHORIZATION_ADDED,
                 triggeredBy,
@@ -202,7 +196,7 @@ public class DomainEventService {
 
     @Transactional
     public void protectedIssuanceEntryAdded(UUID protectedIssuanceEntryId, String triggeredBy) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createProtectedIssuanceEntryDomainEventLog(
                 PROTECTED_ISSUANCE_ENTRY_ADDED,
                 triggeredBy,
@@ -213,7 +207,7 @@ public class DomainEventService {
 
     @Transactional
     public void protectedIssuanceEntryRemoved(UUID protectedIssuanceEntryId, String triggeredBy) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createProtectedIssuanceEntryDomainEventLog(
                 PROTECTED_ISSUANCE_ENTRY_REMOVED,
                 triggeredBy,
@@ -228,7 +222,7 @@ public class DomainEventService {
         UUID businessPartnerId,
         String triggeredBy
     ) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createProtectedIssuanceAuthorizationDomainEventLog(
                 PROTECTED_ISSUANCE_AUTHORIZATION_ADDED,
                 triggeredBy,
@@ -244,7 +238,7 @@ public class DomainEventService {
         UUID businessPartnerId,
         String triggeredBy
     ) {
-        domainEventLogRepository.save(
+        saveAndLog(
             DomainEventLog.createProtectedIssuanceAuthorizationDomainEventLog(
                 PROTECTED_ISSUANCE_AUTHORIZATION_REMOVED,
                 triggeredBy,
@@ -252,6 +246,75 @@ public class DomainEventService {
                 businessPartnerId
             )
         );
+    }
+
+    @Transactional
+    public void businessPartnerDeleteRequested(UUID taskId, String triggeredBy, String internalNote) {
+        saveAndLog(
+            DomainEventLog.createTaskDomainEventLog(
+                BUSINESS_PARTNER_DELETE_REQUESTED,
+                triggeredBy,
+                taskId,
+                null /* no partner note */,
+                internalNote
+            )
+        );
+    }
+
+    @Transactional
+    public void businessPartnerDeleteRejected(UUID taskId, String triggeredBy, String internalNote) {
+        saveAndLog(
+            DomainEventLog.createTaskDomainEventLog(
+                BUSINESS_PARTNER_DELETE_REJECTED,
+                triggeredBy,
+                taskId,
+                null /* no partner note */,
+                internalNote
+            )
+        );
+    }
+
+    /**
+     * Every domain event is also written to the application log: the {@code domain_event_log} table is only visible to
+     * whoever can query the database, while support and the alerting pipeline work off the logs. The notes are left out
+     * on purpose - they are free text written by an editor and have no place in a log line.
+     */
+    private void saveAndLog(DomainEventLog domainEventLog) {
+        var saved = domainEventLogRepository.save(domainEventLog);
+        log.info(
+            "Domain event {} on {} triggered by {}, logged as {}",
+            saved.getEventType(),
+            subjectOf(saved),
+            saved.getTriggeredBy(),
+            saved.getId()
+        );
+    }
+
+    /**
+     * Only one of the reference columns is set per event type, so the log line names the one that is.
+     */
+    private static String subjectOf(DomainEventLog event) {
+        if (event.getTaskId() != null) {
+            return "taskId=" + event.getTaskId();
+        }
+        if (event.getNonCompliantActorId() != null) {
+            return "nonCompliantActorId=" + event.getNonCompliantActorId();
+        }
+        if (event.getProtectedIssuanceEntryId() != null) {
+            return "protectedIssuanceEntryId=" + event.getProtectedIssuanceEntryId();
+        }
+        if (event.getProtectedIssuanceAuthorizationId() != null) {
+            return (
+                "protectedIssuanceAuthorizationId=" +
+                event.getProtectedIssuanceAuthorizationId() +
+                ", businessPartnerId=" +
+                event.getBusinessPartnerId()
+            );
+        }
+        if (event.getProtectedVerificationAuthorizationId() != null) {
+            return "protectedVerificationAuthorizationId=" + event.getProtectedVerificationAuthorizationId();
+        }
+        return "no reference";
     }
 
     @Transactional(readOnly = true)

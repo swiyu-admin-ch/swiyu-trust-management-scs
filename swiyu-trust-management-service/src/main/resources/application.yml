@@ -191,6 +191,10 @@ app:
     environment: ${ENVIRONMENT:}
   functionality:
     automatic-approval-enabled: ${FUNCTIONALITY_AUTOMATIC_APPROVAL_ENABLED:}
+  offboarding:
+    # Delay between creating a delete-business-partner task and it becoming due for auto-approval.
+    # Any unit is allowed; a bare number is read as days. Lower stages may shorten it, e.g. 5m.
+    hard-delete-delay: ${OFFBOARDING_HARD_DELETE_DELAY:2d}
   trust-onboarding-task:
     due-date-period: 5 # 5 Days
     rejection-enforcement-period: 30 # 30 Days
@@ -257,3 +261,8 @@ app:
           user-pin: ${PUBLIC_TRANSPARENCY_ISSUER_HSM_USER_PIN:""}
           user: ${PUBLIC_TRANSPARENCY_ISSUER_HSM_USER:${HSM_USER:}}
           password: ${PUBLIC_TRANSPARENCY_ISSUER_HSM_PASSWORD:${HSM_PASSWORD:}}
+
+# Jira numbered feature toggles, removed again once the story is rolled out.
+# Must be listed on https://confluence.bit.admin.ch/spaces/EIDTGM/pages/982856284/Feature+Flags
+features:
+  EIDARTFE_1571_COMPLETE_BP_OFFBOARDING: ${FEATURES_EIDARTFE_1571_COMPLETE_BP_OFFBOARDING:false}

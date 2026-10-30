@@ -84,7 +84,14 @@ export class TaskListComponent implements AfterViewInit {
   pageIndex = 0;
   totalItems = 0;
   statuses = Object.values(TaskStatus);
-  taskTypes = ['REGISTRATION', 'PROFILE_CHANGE', 'RENEWAL', 'ADD_DID', 'PROTECTED_VERIFICATION_REQUEST'];
+  taskTypes = [
+    'REGISTRATION',
+    'PROFILE_CHANGE',
+    'RENEWAL',
+    'ADD_DID',
+    'PROTECTED_VERIFICATION_REQUEST',
+    'DELETE_BUSINESS_PARTNER'
+  ];
 
   constructor() {
     this.translateSetup();
@@ -121,6 +128,8 @@ export class TaskListComponent implements AfterViewInit {
 
   detailRoute(task: TaskListItem): string[] {
     switch (task.taskType) {
+      case 'DELETE_BUSINESS_PARTNER':
+        return ['/tasks', task.id, 'delete-business-partner'];
       case 'ADD_DID':
         return ['/tasks', task.id, 'add-did'];
       case 'PROTECTED_VERIFICATION_REQUEST':
@@ -142,6 +151,7 @@ export class TaskListComponent implements AfterViewInit {
   }
 
   private translateSetup() {
+    this.translateService.get('task.table.taskType.DELETE_BUSINESS_PARTNER');
     // Required for translate service auto collection of i18n keys
     this.translateService.get('task.table.taskType.REGISTRATION');
     this.translateService.get('task.table.taskType.ADD_DID');

@@ -12,6 +12,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartner
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustOnboardingTaskContactTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustOnboardingTaskDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.DeleteBusinessPartnerTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Task;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTask;
@@ -269,7 +270,16 @@ class TaskMapperTest {
         return List.of(
             new TaskListItemTestCase(onboardingTask, onboardingTask.getTrustOnboardingSubmissionId()),
             new TaskListItemTestCase(protectedVerificationTask, submissionId),
-            new TaskListItemTestCase(addDidTask, submissionId)
+            new TaskListItemTestCase(addDidTask, submissionId),
+            new TaskListItemTestCase(
+                new DeleteBusinessPartnerTask(
+                    UUID.randomUUID(),
+                    "Partner",
+                    Instant.now(),
+                    Instant.now().plusSeconds(300)
+                ),
+                null
+            )
         );
     }
 

@@ -3,6 +3,7 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatusValidator.isValidNewStatus;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.DeleteBusinessPartnerTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Task;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
@@ -48,7 +49,7 @@ public class TaskActionsResolver {
         if (task instanceof ProtectedVerificationRequestTask pvTask) {
             reviewPreconditionsMet = pvTask.hasOpenedZasData();
         }
-        return resolvePossibleActions(
+        var actions = resolvePossibleActions(
             task.getStatus(),
             task.getAssignee(),
             currentUserFullName,
@@ -56,6 +57,11 @@ public class TaskActionsResolver {
             canReject,
             reviewPreconditionsMet
         );
+        // A deletion request is never approved by hand; a job approves it once hardDeleteDueAt is reached (EID-6994).
+        if (task instanceof DeleteBusinessPartnerTask) {
+            actions.remove(TaskActionDto.APPROVE);
+        }
+        return actions;
     }
 
     /**

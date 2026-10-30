@@ -90,6 +90,9 @@ app:
     external-url: "http://test.trust.management.scs"
   functionality:
     automatic-approval-enabled: false
+  offboarding:
+    # Shorter than PRD on purpose, so a test can assert the computed due date without waiting days.
+    hard-delete-delay: 2d
   jobs:
     trust-statistics-metrics-exporter-cron: "-"
   issuer:
@@ -113,3 +116,6 @@ status-registry:
 
 zas-sbn:
   base-url: https://usntools.zas.admin.ch/usntools-svc
+
+features:
+  EIDARTFE_1571_COMPLETE_BP_OFFBOARDING: true

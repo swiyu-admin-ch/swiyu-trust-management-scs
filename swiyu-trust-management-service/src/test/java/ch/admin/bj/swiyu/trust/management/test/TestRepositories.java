@@ -2,6 +2,7 @@ package ch.admin.bj.swiyu.trust.management.test;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.DeleteBusinessPartnerTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTaskRepository;
@@ -39,6 +40,7 @@ public class TestRepositories {
     public final TrustOnboardingTaskRepository trustOnboardingTask;
     public final StatusListMetadataRepository statusListMetadata;
     public final TrustAddDidTaskRepository trustAddDidTask;
+    public final DeleteBusinessPartnerTaskRepository deleteBusinessPartnerTask;
 
     /**
      * Opens a new Transaction. Might be useful if there are multiple transactions are needed within a test.

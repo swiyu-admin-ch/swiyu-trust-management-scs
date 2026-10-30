@@ -21,10 +21,16 @@ import {ApproveProtectedVerificationRequestTaskAction} from '../model/approve-pr
 // @ts-ignore
 import {ApproveTaskAction} from '../model/approve-task-action';
 // @ts-ignore
+import {CreateDeleteBusinessPartnerTaskRequest} from '../model/create-delete-business-partner-task-request';
+// @ts-ignore
+import {DeleteBusinessPartnerTask} from '../model/delete-business-partner-task';
+// @ts-ignore
 // @ts-ignore
 import {PagedModelTaskListItem} from '../model/paged-model-task-list-item';
 // @ts-ignore
 import {ProtectedVerificationRequestTask} from '../model/protected-verification-request-task';
+// @ts-ignore
+import {RejectDeleteBusinessPartnerTaskAction} from '../model/reject-delete-business-partner-task-action';
 // @ts-ignore
 import {RejectProtectedVerificationRequestTaskAction} from '../model/reject-protected-verification-request-task-action';
 // @ts-ignore
@@ -62,7 +68,15 @@ export interface AssignSelfRequestParams {
   taskId: string;
 }
 
+export interface CreateDeleteBusinessPartnerTaskRequestParams {
+  createDeleteBusinessPartnerTaskRequest: CreateDeleteBusinessPartnerTaskRequest;
+}
+
 export interface GetAddDidTaskRequestParams {
+  taskId: string;
+}
+
+export interface GetDeleteBusinessPartnerTaskRequestParams {
   taskId: string;
 }
 
@@ -96,6 +110,11 @@ export interface GetTrustOnboardingTaskRequestParams {
 
 export interface MarkProtectedVerificationRequestTaskZasDataReviewedRequestParams {
   taskId: string;
+}
+
+export interface RejectDeleteBusinessPartnerRequestParams {
+  taskId: string;
+  rejectDeleteBusinessPartnerTaskAction: RejectDeleteBusinessPartnerTaskAction;
 }
 
 export interface RejectProtectedVerificationRequestRequestParams {
@@ -507,6 +526,99 @@ export class TaskApi extends BaseService {
   }
 
   /**
+   * @endpoint post /ui-api/tasks/delete-business-partner
+   * @param requestParameters
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public createDeleteBusinessPartnerTask(
+    requestParameters: CreateDeleteBusinessPartnerTaskRequestParams,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<string>;
+  public createDeleteBusinessPartnerTask(
+    requestParameters: CreateDeleteBusinessPartnerTaskRequestParams,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpResponse<string>>;
+  public createDeleteBusinessPartnerTask(
+    requestParameters: CreateDeleteBusinessPartnerTaskRequestParams,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpEvent<string>>;
+  public createDeleteBusinessPartnerTask(
+    requestParameters: CreateDeleteBusinessPartnerTaskRequestParams,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any> {
+    const createDeleteBusinessPartnerTaskRequest = requestParameters?.createDeleteBusinessPartnerTaskRequest;
+    if (createDeleteBusinessPartnerTaskRequest === null || createDeleteBusinessPartnerTaskRequest === undefined) {
+      throw new Error(
+        'Required parameter createDeleteBusinessPartnerTaskRequest was null or undefined when calling createDeleteBusinessPartnerTask.'
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (OIDC) required
+    localVarHeaders = this.configuration.addCredentialToHeaders('OIDC', 'Authorization', localVarHeaders, 'Bearer ');
+
+    // authentication (bearer-jwt) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'bearer-jwt',
+      'Authorization',
+      localVarHeaders,
+      'Bearer '
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    // to determine the Content-Type header
+    const consumes: string[] = ['application/json'];
+    const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+    }
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/ui-api/tasks/delete-business-partner`;
+    const {basePath, withCredentials} = this.configuration;
+    return this.httpClient.request<string>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      body: createDeleteBusinessPartnerTaskRequest,
+      responseType: <any>responseType_,
+      ...(withCredentials ? {withCredentials} : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? {transferCache: localVarTransferCache} : {}),
+      reportProgress: reportProgress
+    });
+  }
+
+  /**
    * @endpoint get /ui-api/tasks/{taskId}/add-did
    * @param requestParameters
    * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -579,6 +691,89 @@ export class TaskApi extends BaseService {
     let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/add-did`;
     const {basePath, withCredentials} = this.configuration;
     return this.httpClient.request<TrustAddDidTask>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? {withCredentials} : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? {transferCache: localVarTransferCache} : {}),
+      reportProgress: reportProgress
+    });
+  }
+
+  /**
+   * @endpoint get /ui-api/tasks/{taskId}/delete-business-partner
+   * @param requestParameters
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public getDeleteBusinessPartnerTask(
+    requestParameters: GetDeleteBusinessPartnerTaskRequestParams,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<DeleteBusinessPartnerTask>;
+  public getDeleteBusinessPartnerTask(
+    requestParameters: GetDeleteBusinessPartnerTaskRequestParams,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpResponse<DeleteBusinessPartnerTask>>;
+  public getDeleteBusinessPartnerTask(
+    requestParameters: GetDeleteBusinessPartnerTaskRequestParams,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpEvent<DeleteBusinessPartnerTask>>;
+  public getDeleteBusinessPartnerTask(
+    requestParameters: GetDeleteBusinessPartnerTaskRequestParams,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any> {
+    const taskId = requestParameters?.taskId;
+    if (taskId === null || taskId === undefined) {
+      throw new Error('Required parameter taskId was null or undefined when calling getDeleteBusinessPartnerTask.');
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (OIDC) required
+    localVarHeaders = this.configuration.addCredentialToHeaders('OIDC', 'Authorization', localVarHeaders, 'Bearer ');
+
+    // authentication (bearer-jwt) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'bearer-jwt',
+      'Authorization',
+      localVarHeaders,
+      'Bearer '
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/delete-business-partner`;
+    const {basePath, withCredentials} = this.configuration;
+    return this.httpClient.request<DeleteBusinessPartnerTask>('get', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,
       responseType: <any>responseType_,
       ...(withCredentials ? {withCredentials} : {}),
@@ -1090,6 +1285,103 @@ export class TaskApi extends BaseService {
     const {basePath, withCredentials} = this.configuration;
     return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? {withCredentials} : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? {transferCache: localVarTransferCache} : {}),
+      reportProgress: reportProgress
+    });
+  }
+
+  /**
+   * @endpoint post /ui-api/tasks/{taskId}/delete-business-partner/reject
+   * @param requestParameters
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public rejectDeleteBusinessPartner(
+    requestParameters: RejectDeleteBusinessPartnerRequestParams,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any>;
+  public rejectDeleteBusinessPartner(
+    requestParameters: RejectDeleteBusinessPartnerRequestParams,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpResponse<any>>;
+  public rejectDeleteBusinessPartner(
+    requestParameters: RejectDeleteBusinessPartnerRequestParams,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<HttpEvent<any>>;
+  public rejectDeleteBusinessPartner(
+    requestParameters: RejectDeleteBusinessPartnerRequestParams,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {httpHeaderAccept?: 'application/json'; context?: HttpContext; transferCache?: boolean}
+  ): Observable<any> {
+    const taskId = requestParameters?.taskId;
+    if (taskId === null || taskId === undefined) {
+      throw new Error('Required parameter taskId was null or undefined when calling rejectDeleteBusinessPartner.');
+    }
+    const rejectDeleteBusinessPartnerTaskAction = requestParameters?.rejectDeleteBusinessPartnerTaskAction;
+    if (rejectDeleteBusinessPartnerTaskAction === null || rejectDeleteBusinessPartnerTaskAction === undefined) {
+      throw new Error(
+        'Required parameter rejectDeleteBusinessPartnerTaskAction was null or undefined when calling rejectDeleteBusinessPartner.'
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (OIDC) required
+    localVarHeaders = this.configuration.addCredentialToHeaders('OIDC', 'Authorization', localVarHeaders, 'Bearer ');
+
+    // authentication (bearer-jwt) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'bearer-jwt',
+      'Authorization',
+      localVarHeaders,
+      'Bearer '
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    // to determine the Content-Type header
+    const consumes: string[] = ['application/json'];
+    const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+    }
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/ui-api/tasks/${this.configuration.encodeParam({name: 'taskId', value: taskId, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid'})}/delete-business-partner/reject`;
+    const {basePath, withCredentials} = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      body: rejectDeleteBusinessPartnerTaskAction,
       responseType: <any>responseType_,
       ...(withCredentials ? {withCredentials} : {}),
       headers: localVarHeaders,

@@ -19,7 +19,7 @@
               </mat-form-field>
             </div>
           }
-          @if (panelData()?.action === TaskAction.Reject) {
+          @if (panelData()?.action === TaskAction.Reject && !isDeletionTask()) {
             <div>
               <h6>{{ "app.trust-onboarding-task.sidepanel.message" | translate }}</h6>
               @if (isProtectedVerificationTask()) {
@@ -92,6 +92,7 @@
               <textarea
                 matInput
                 name="internalMsgBody"
+                [required]="isDeletionTask() && panelData()?.action === TaskAction.Reject"
                 [(ngModel)]="formData().internalMessageBody"
                 placeholder="{{ 'app.trust-onboarding-task.sidepanel.internal.body' | translate }}"
                 data-cy="internalMsgBody"

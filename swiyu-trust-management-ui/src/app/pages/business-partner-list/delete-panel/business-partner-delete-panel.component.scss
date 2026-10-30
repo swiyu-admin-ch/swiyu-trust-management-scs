@@ -1,0 +1,19 @@
+.delete-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.delete-panel-warning {
+  font-weight: bold;
+}
+
+.delete-panel-error {
+  color: var(--ob-error, #d8232a);
+}
+
+.delete-panel-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}

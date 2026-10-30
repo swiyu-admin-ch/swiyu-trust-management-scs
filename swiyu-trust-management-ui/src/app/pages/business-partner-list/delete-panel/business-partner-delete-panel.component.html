@@ -1,0 +1,48 @@
+@if (partner(); as selectedPartner) {
+  <form #form="ngForm" (ngSubmit)="submit(form)" class="delete-panel">
+    <h6>{{ "businessPartner.delete.title" | translate }}</h6>
+    <p data-cy="deletePartnerName">{{ selectedPartner.name }}</p>
+    <p class="delete-panel-warning">{{ "businessPartner.delete.warning" | translate: { delay: waitingPeriod } }}</p>
+
+    <mat-form-field>
+      <mat-label>{{ "businessPartner.delete.reason" | translate }}</mat-label>
+      <textarea
+        matInput
+        required
+        name="reason"
+        [ngModel]="reason()"
+        (ngModelChange)="reason.set($event)"
+        data-cy="deletePartnerReason"
+      ></textarea>
+    </mat-form-field>
+
+    <mat-checkbox
+      name="confirmed"
+      [ngModel]="confirmed()"
+      (ngModelChange)="confirmed.set($event); confirmationError.set(false)"
+      data-cy="deletePartnerConfirm"
+    >
+      {{ "businessPartner.delete.confirm" | translate: { delay: waitingPeriod } }}
+    </mat-checkbox>
+    @if (confirmationError()) {
+      <p class="delete-panel-error" data-cy="deletePartnerConfirmError">
+        {{ "businessPartner.delete.confirm.required" | translate }}
+      </p>
+    }
+
+    <div class="delete-panel-actions">
+      <button type="button" mat-button obButton="secondary" (click)="cancel()" data-cy="deletePartnerCancel">
+        {{ "businessPartner.delete.cancel" | translate }}
+      </button>
+      <button
+        type="submit"
+        mat-button
+        obButton="primary"
+        [disabled]="submitting() || waitingPeriod === undefined"
+        data-cy="deletePartnerSubmit"
+      >
+        {{ "businessPartner.delete.submit" | translate }}
+      </button>
+    </div>
+  </form>
+}

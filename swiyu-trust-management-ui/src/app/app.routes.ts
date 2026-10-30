@@ -1,5 +1,6 @@
 import {Routes} from '@angular/router';
 import {BusinessPartnerListComponent} from './pages/business-partner-list/business-partner-list.component';
+import {DeleteBusinessPartnerTaskDetailComponent} from './pages/delete-business-partner-task-detail/delete-business-partner-task-detail.component';
 import {HomeComponent} from './pages/home/home.component';
 import {LogoutComponent} from './pages/logout/logout.component';
 import {NonComplianceActorCreateComponent} from './pages/non-compliance-actor-create/non-compliance-actor-create.component';
@@ -17,6 +18,7 @@ export const routes: Routes = [
     path: 'tasks',
     children: [
       {path: '', component: TaskListComponent},
+      {path: ':taskId/delete-business-partner', component: DeleteBusinessPartnerTaskDetailComponent},
       {path: ':taskId/add-did', component: TrustAddDidTaskDetailComponent},
       {
         path: ':taskId/protected-verification-request',

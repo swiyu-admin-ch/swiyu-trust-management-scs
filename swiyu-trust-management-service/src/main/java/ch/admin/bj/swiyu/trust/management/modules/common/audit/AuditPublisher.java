@@ -88,6 +88,19 @@ public class AuditPublisher {
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
+    public void taskCreated(UUID partnerId, UUID taskId, Long version, String taskType, String taskJson) {
+        publishAuditEvent(
+            TASK_CREATED,
+            taskId.toString(),
+            version,
+            taskType,
+            partnerId.toString(),
+            taskJson,
+            null // no non-json data part of auditing
+        );
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
     public void taskApproved(UUID partnerId, UUID taskId, Long version, String taskType, String taskJson) {
         publishAuditEvent(
             TASK_APPROVED,

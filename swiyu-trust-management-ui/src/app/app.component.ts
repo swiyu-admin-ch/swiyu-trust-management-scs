@@ -14,6 +14,7 @@ import {
 } from '@oblique/oblique';
 import {AppConfigService} from './core/appconfig/app-config.service';
 import {AuthService} from './core/security/auth.service';
+import {BusinessPartnerDeletePanelComponent} from './pages/business-partner-list/delete-panel/business-partner-delete-panel.component';
 import {SidepanelHeaderComponent} from './pages/trust-onboarding-task-detail/sidepanel/header/header.component';
 import {SidepanelComponent} from './pages/trust-onboarding-task-detail/sidepanel/sidepanel.component';
 
@@ -25,6 +26,7 @@ import {SidepanelComponent} from './pages/trust-onboarding-task-detail/sidepanel
     TranslateModule,
     ObOffCanvasModule,
     SidepanelComponent,
+    BusinessPartnerDeletePanelComponent,
     SidepanelHeaderComponent,
     ObDocumentMetaModule,
     MatButtonModule,
