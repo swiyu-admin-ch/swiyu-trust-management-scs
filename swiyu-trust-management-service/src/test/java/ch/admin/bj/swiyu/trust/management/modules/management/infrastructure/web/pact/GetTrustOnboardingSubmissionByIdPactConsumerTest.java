@@ -19,6 +19,7 @@ import ch.admin.bit.jeap.security.test.client.configuration.JeapOAuth2Integratio
 import ch.admin.bit.jeap.security.test.jws.JwsBuilderFactory;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.invoker.ApiClient;
+import ch.admin.bj.swiyu.trust.client.core.business.internal.model.LanguageDto;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.ProofOfPossessionStatusDto;
 import ch.admin.bj.swiyu.trust.management.test.pact.PactConsumerTestConfig;
 import java.time.Instant;
@@ -111,7 +112,8 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
                                         c.stringType("lastName", "Mustermann");
                                         c.stringType("email", "m.m@test.ch");
                                         c.stringType("phone", "+78 1234 56 78");
-                                        o.object("address", a -> {
+                                        c.stringMatcher("correspondingLanguage", "^(EN|DE|FR|IT|RM)$", "DE");
+                                        c.object("address", a -> {
                                             a.stringType("street", "Musterstrasse 1");
                                             a.stringType("city", "8000 Zürich");
                                             a.stringType("postalCode", "8000");
@@ -130,7 +132,6 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
                                         );
                                     });
                                     o.stringValue("businessPartnerType", "BUSINESS");
-                                    o.stringMatcher("correspondingLanguage", "^(EN|DE|FR|IT|RM)$", "DE");
                                     o.datetime(
                                         "submittedAt",
                                         ISO_DATE_TIME_FORMAT_NANOSECONDS,
@@ -179,6 +180,8 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
         assertThat(submission.getId()).isEqualTo(TRUST_ONBOARDING_SUBMISSION_ID);
         assertThat(submission.getPartnerId()).isEqualTo(BUSINESS_PARTNER_ID);
         assertThat(submission.getStatus()).isEqualTo(SUBMITTED);
+        // The correspondence language is consumed from contactPerson, not from the deprecated top-level field that EID-6624 removes
+        assertThat(submission.getContactPerson().getCorrespondingLanguage()).isEqualTo(LanguageDto.DE);
         assertThat(submission.getProofOfPossessions()).isNotEmpty();
         assertThat(submission.getProofOfPossessions()).allMatch(p ->
             ProofOfPossessionStatusDto.VALID.equals(p.getStatus())

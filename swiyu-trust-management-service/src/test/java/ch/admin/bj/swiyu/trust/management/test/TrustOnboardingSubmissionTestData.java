@@ -17,6 +17,15 @@ public class TrustOnboardingSubmissionTestData {
         return trustOnboardingSubmission(entityName(), LanguageDto.DE);
     }
 
+    /**
+     * A submission without a contact person: the CBS contract declares {@code contactPerson} as optional.
+     */
+    public static TrustOnboardingSubmissionDto trustOnboardingSubmissionWithoutContactPerson() {
+        var submission = trustOnboardingSubmission();
+        submission.setContactPerson(null);
+        return submission;
+    }
+
     public static TrustOnboardingSubmissionDto trustOnboardingSubmission(
         Map<String, String> entityName,
         LanguageDto correspondingLanguage
@@ -28,7 +37,6 @@ public class TrustOnboardingSubmissionTestData {
         submission.setName(entityName);
         submission.setBusinessPartnerType(BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION);
         submission.setRegistryIds(Map.of("uid", "123456"));
-        submission.setCorrespondingLanguage(correspondingLanguage);
         submission.setContactPerson(contact(correspondingLanguage));
         submission.setProofOfPossessions(proofOfPossessions());
         submission.setPartnerId(UUID.randomUUID());

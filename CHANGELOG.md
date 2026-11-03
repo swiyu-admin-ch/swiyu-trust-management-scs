@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.3.5
+
+### Changed
+
+- Read the trust onboarding correspondence language from `contactPerson.correspondingLanguage` instead of the deprecated top-level field of the core business service submission; remove that field from the client API spec and no longer expect it in the consumer contract (prerequisite for its removal in EID-6624); tolerate a submission without a contact person
+
+## 5.3.4
+
+### Fixed
+
+- Pin `@angular-devkit/build-angular` 21.2.29 with an npm override: it is only installed as a peer dependency of `@angular-builders/jest` and stayed on 21.2.25, which carried its own `@angular/build` 21.2.25 with `undici` 7.29.1 and `vite` 7.3.6 (SNYK-JS-UNDICI-21181005/-21181009/-21181011/-21181013/-21181015/-21181017/-21181019/-21185768, SNYK-JS-VITE-21282024)
+- Override `open` 11 and `body-parser` 1.20.9 inside `webpack-dev-server`, which still resolved the vulnerable `open` 10.2.0 and `express` 4 > `body-parser` 1.20.8 (SNYK-JS-OPEN-22112123, SNYK-JS-BODYPARSER-21431495)
+
+## 5.3.2
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent from 41.28.0 to 41.29.1 and remove the obsolete Jackson overrides: the parent now manages Jackson 2.22.4 / 3.2.4
+- Remove the obsolete npm override for follow-redirects from the UI and keep the basic-ftp override, which is still required (SNYK-JS-BASICFTP-20419408)
+
+### Fixed
+
+- Fix the open high and critical findings in the UI development dependencies: upgrade the Angular build tooling to `@angular/build` / `@angular/cli` / `@angular-devkit/core` 21.2.29 and `prettier-eslint` 17, and pin `handlebars` 4.7.10 and `webpack-dev-server` 5.2.7 (SNYK-JS-HANDLEBARS-20557395, SNYK-JS-HANDLEBARS-20574183, SNYK-JS-WEBPACKDEVSERVER-21431002, SNYK-JS-MINIMATCH-15309438/-15353387/-15353389)
+- Ignore SNYK-JS-URIJS-19963963 and SNYK-JS-HTTPCACHESEMANTICS-19964064/-19964068 for 14 days: no fixed release exists (uri-js 4.4.1 is the latest; http-cache-semantics is only replaced by the Angular CLI 22 major upgrade)
+
 ## 5.3.1
 
 ### Changed

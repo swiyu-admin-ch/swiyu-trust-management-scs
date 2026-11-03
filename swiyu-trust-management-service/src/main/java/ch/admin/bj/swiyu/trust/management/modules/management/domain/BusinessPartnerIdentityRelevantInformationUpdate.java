@@ -23,9 +23,17 @@ public record BusinessPartnerIdentityRelevantInformationUpdate(
             submission.getRegistryIds().get("UID") == null ? null : submission.getRegistryIds().get("UID"),
             submission.getIsRegisteredInCommercialRegister() != null &&
                 submission.getIsRegisteredInCommercialRegister(),
-            submission.getCorrespondingLanguage() == null ? null : submission.getCorrespondingLanguage().toString(),
+            toCorrespondingLanguage(submission),
             submission.getBusinessPartnerType() == BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION,
             submission.getProofOfPossessions().stream().map(ProofOfPossessionDto::getDid).collect(Collectors.toSet())
         );
+    }
+
+    private static String toCorrespondingLanguage(TrustOnboardingSubmissionDto submission) {
+        var contactPerson = submission.getContactPerson();
+        if (contactPerson == null || contactPerson.getCorrespondingLanguage() == null) {
+            return null;
+        }
+        return contactPerson.getCorrespondingLanguage().toString();
     }
 }

@@ -4,6 +4,7 @@ import static ch.admin.bj.swiyu.trust.management.modules.management.service.Task
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.TaskMapper.toTrustOnboardingTaskDto;
 import static ch.admin.bj.swiyu.trust.management.test.TaskTestData.trustOnboardingTask;
 import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingSubmissionTestData.trustOnboardingSubmission;
+import static ch.admin.bj.swiyu.trust.management.test.TrustOnboardingSubmissionTestData.trustOnboardingSubmissionWithoutContactPerson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.LanguageDto;
@@ -88,11 +89,9 @@ class TaskMapperTest {
 
     @Test
     void toTrustOnboardingTaskDtoTest_correspondingLanguageTakenFromContactPerson() {
-        // Given - EID-6618: the correspondence language must be read from contactPerson,
-        // not the deprecated top-level field. Set them to different values to prove the source.
+        // Given - EID-6618: the correspondence language is read from contactPerson
         var allowedActions = Set.of(TaskActionDto.APPROVE);
         var submission = trustOnboardingSubmission();
-        submission.setCorrespondingLanguage(LanguageDto.DE);
         submission.getContactPerson().setCorrespondingLanguage(LanguageDto.FR);
         var task = trustOnboardingTask();
 
@@ -187,6 +186,32 @@ class TaskMapperTest {
                 assertThat(contact.phone()).isEqualTo("12345");
                 assertThat(contact.email()).isEqualTo("test@test.ch");
             });
+    }
+
+    @Test
+    void toTrustOnboardingTaskDto_contactPersonNull_mapsSignatoriesOnly() {
+        // Given - the CBS contract declares contactPerson as optional
+        var allowedActions = Set.of(TaskActionDto.APPROVE);
+        var submission = trustOnboardingSubmissionWithoutContactPerson();
+        var signatory = new SignatoryDto();
+        signatory.setFirstName("Carla");
+        signatory.setLastName("Soleset");
+        signatory.setPhone("+41 33 333 33 33");
+        signatory.setEmail("carla.soleset@example.com");
+        submission.setSignatories(List.of(signatory));
+        var task = trustOnboardingTask();
+
+        // When
+        var result = toTrustOnboardingTaskDto(allowedActions, task, submission);
+
+        // Then - must not throw NullPointerException; the signatories are still mapped
+        assertThat(result.contacts())
+            .singleElement()
+            .satisfies(contact -> {
+                assertThat(contact.name()).isEqualTo("Carla Soleset");
+                assertThat(contact.type()).isEqualTo(TrustOnboardingTaskContactTypeDto.AUTHORISED_SIGNATORY);
+            });
+        assertThat(result.correspondenceLanguage()).isEqualTo(TrustOnboardingTaskDto.CorrespondenceLanguageDto.EN_CH);
     }
 
     @Test

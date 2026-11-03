@@ -96,4 +96,28 @@ ignore:
           configuration rather than untrusted runtime input. Track the upstream fix.
         expires: 2026-11-11T09:00:00.000Z
         created: 2026-10-28T09:00:00.000Z
+  SNYK-JS-URIJS-19963963:
+    - '*':
+        reason: >-
+          No fixed uri-js release exists (4.4.1 is the latest). Pulled in transitively
+          via eslint > ajv 6; lint/build tooling only, never shipped in the bundle.
+          Track the upstream fix.
+        expires: 2026-11-13T09:00:00.000Z
+        created: 2026-10-30T00:00:00.000Z
+  SNYK-JS-HTTPCACHESEMANTICS-19964064:
+    - '*':
+        reason: >-
+          No fixed http-cache-semantics release exists; the vulnerable copy is pulled in
+          by the @angular/cli tooling and is only replaced by the Angular CLI 22 major
+          upgrade (EID-6533). Build-time only.
+        expires: 2026-11-13T09:00:00.000Z
+        created: 2026-10-30T00:00:00.000Z
+  SNYK-JS-HTTPCACHESEMANTICS-19964068:
+    - '*':
+        reason: >-
+          No fixed http-cache-semantics release exists; the vulnerable copy is pulled in
+          by the @angular/cli tooling and is only replaced by the Angular CLI 22 major
+          upgrade (EID-6533). Build-time only.
+        expires: 2026-11-13T09:00:00.000Z
+        created: 2026-10-30T00:00:00.000Z
 patch: { }

@@ -11,13 +11,13 @@
             from the dependencyManagement section
          -->
         <!-- see https://github.com/jeap-admin-ch/jeap-spring-boot-parent/blob/main/CHANGELOG.md -->
-        <version>41.28.0</version>
+        <version>41.29.1</version>
         <relativePath/>
     </parent>
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>5.3.1-SNAPSHOT</version>
+    <version>5.3.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -70,39 +70,6 @@
         <module>swiyu-trust-management-service</module>
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- CVE-OVERRIDE start -->
-            <!-- Override Jackson to >= 2.22.4 (com.fasterxml.jackson) and >= 3.2.4 (tools.jackson) to fix the
-                 critical deserialization findings SNYK-JAVA-COMFASTERXMLJACKSONCORE-21761837 and
-                 SNYK-JAVA-TOOLSJACKSONCORE-21761838. jEAP parent 41.28.0 manages 2.22.3 / 3.2.3 via
-                 jeap-internal-spring-boot-parent 11.9.0 and Spring Boot 4.1.2 is the newest release, so no
-                 upgrade path exists yet; 2.22.4 / 3.2.4 are the first releases fixing both findings. Core and
-                 databind are pinned together to keep each Jackson family consistent.
-                 Remove when the parent manages Jackson >= 2.22.4 / 3.2.4. -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>2.22.4</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>2.22.4</version>
-            </dependency>
-            <dependency>
-                <groupId>tools.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>3.2.4</version>
-            </dependency>
-            <dependency>
-                <groupId>tools.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>3.2.4</version>
-            </dependency>
-            <!-- CVE-OVERRIDE end -->
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <pluginManagement>

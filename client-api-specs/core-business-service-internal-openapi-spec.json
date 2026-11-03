@@ -2399,9 +2399,6 @@
           "partnerNote": {
             "type": "string"
           },
-          "correspondingLanguage": {
-            "$ref": "#/components/schemas/Language"
-          },
           "submittedAt": {
             "type": "string",
             "format": "date-time",

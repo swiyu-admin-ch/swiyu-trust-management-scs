@@ -270,14 +270,17 @@ public class TaskMapper {
             return emptyList();
         }
 
-        contacts.add(
-            new TrustOnboardingTaskDto.ContactDto(
-                "%s %s".formatted(source.getContactPerson().getFirstName(), source.getContactPerson().getLastName()),
-                TrustOnboardingTaskContactTypeDto.CONTACT_PERSON,
-                source.getContactPerson().getPhone(),
-                source.getContactPerson().getEmail()
-            )
-        );
+        var contactPerson = source.getContactPerson();
+        if (contactPerson != null) {
+            contacts.add(
+                new TrustOnboardingTaskDto.ContactDto(
+                    "%s %s".formatted(contactPerson.getFirstName(), contactPerson.getLastName()),
+                    TrustOnboardingTaskContactTypeDto.CONTACT_PERSON,
+                    contactPerson.getPhone(),
+                    contactPerson.getEmail()
+                )
+            );
+        }
 
         if (source.getSignatories() != null) {
             source
