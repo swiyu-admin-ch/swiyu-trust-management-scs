@@ -120,4 +120,14 @@ ignore:
           upgrade (EID-6533). Build-time only.
         expires: 2026-11-13T09:00:00.000Z
         created: 2026-10-30T00:00:00.000Z
+  SNYK-JS-FLAT-22148819:
+    - '*':
+        reason: >-
+          No fixed flat release exists for this range: webpack-merge 6.0.1 (latest) requires
+          flat ^5.0.2, and flat 6.0.1 is an ESM-only rewrite that cannot be required by
+          webpack-merge. Reached only through the Angular build tooling
+          (@angular-devkit/build-angular > webpack-merge), never shipped in the bundle.
+          Track the upstream fix.
+        expires: 2026-11-17T09:00:00.000Z
+        created: 2026-11-03T09:00:00.000Z
 patch: { }

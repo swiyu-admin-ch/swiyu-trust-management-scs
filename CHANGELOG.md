@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.3.7
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent from 41.29.1 to 41.30.0
+
+### Fixed
+
+- Ignore SNYK-JS-FLAT-22148819 for 14 days: no fixed `flat` release exists for the `flat ^5.0.2` range required by `webpack-merge` 6.0.1
+
+## 5.3.6
+
+### Fixed
+
+- Show the correct off-canvas panel title: it was resolved once during bootstrap with `instant()`, before the translations were loaded, and only followed the task sidepanel service, so the delete business partner panel displayed the raw key `app.trust-onboarding-task.sidepanel.submit`; it is now resolved reactively from both panel services and follows a language switch
+- Translate the ten German reject reasons, which still carried their enum names, and replace the French and Italian sidepanel strings that described their field instead of labelling it
+
 ## 5.3.5
 
 ### Changed

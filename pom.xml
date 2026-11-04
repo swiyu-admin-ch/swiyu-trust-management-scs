@@ -11,13 +11,13 @@
             from the dependencyManagement section
          -->
         <!-- see https://github.com/jeap-admin-ch/jeap-spring-boot-parent/blob/main/CHANGELOG.md -->
-        <version>41.29.1</version>
+        <version>41.30.0</version>
         <relativePath/>
     </parent>
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>5.3.5-SNAPSHOT</version>
+    <version>5.3.7-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
