@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.3.9
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent from 41.31.0 to 41.33.0
+
+## 5.3.8
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent from 41.30.0 to 41.31.0
+
+### Fixed
+
+- Remove the obsolete npm overrides for `@angular-devkit/build-angular`, `handlebars` and `express`/`body-parser`: the current dependency graph resolves `@angular-devkit/build-angular` 21.2.29, `handlebars` 4.7.10 and `body-parser` 1.20.9 on its own. The `basic-ftp` and `webpack-dev-server`/`open` overrides remain, because their transitive versions are still vulnerable (SNYK-JS-BASICFTP-20419408, SNYK-JS-WEBPACKDEVSERVER-21431002, SNYK-JS-OPEN-22112123)
+
 ## 5.3.7
 
 ### Changed
