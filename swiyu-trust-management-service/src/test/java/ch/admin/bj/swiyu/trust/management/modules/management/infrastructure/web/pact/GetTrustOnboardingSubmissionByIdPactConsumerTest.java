@@ -113,12 +113,7 @@ class GetTrustOnboardingSubmissionByIdPactConsumerTest {
                                         c.stringType("email", "m.m@test.ch");
                                         c.stringType("phone", "+78 1234 56 78");
                                         c.stringMatcher("correspondingLanguage", "^(EN|DE|FR|IT|RM)$", "DE");
-                                        c.object("address", a -> {
-                                            a.stringType("street", "Musterstrasse 1");
-                                            a.stringType("city", "8000 Zürich");
-                                            a.stringType("postalCode", "8000");
-                                            a.stringType("country", "CH");
-                                        });
+                                        // No address here: contactPerson.address is deprecated and the entity address is the top-level one
                                     });
                                     o.numberType("version", 1);
                                     o.minArrayLike("proofOfPossessions", 1, p -> {
