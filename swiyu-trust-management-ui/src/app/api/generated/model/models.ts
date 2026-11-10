@@ -50,6 +50,7 @@ export * from './trust-add-did-task';
 export * from './trust-onboarding-reject-reason';
 export * from './trust-onboarding-submission-document-list-item-dto';
 export * from './trust-onboarding-task';
+export * from './trust-onboarding-task-type';
 export * from './trust-onboarding-task-contact-type';
 export * from './zas-data';
 export * from './zas-data-organisation';

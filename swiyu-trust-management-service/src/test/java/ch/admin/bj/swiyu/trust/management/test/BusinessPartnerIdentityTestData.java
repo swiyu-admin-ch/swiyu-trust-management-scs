@@ -51,6 +51,26 @@ public class BusinessPartnerIdentityTestData {
         );
     }
 
+    /**
+     * An active identity that expires in 30 days - the state in which the core-business-service offers a
+     * mandatory profile change or a renewal, mirroring the demo partners on DEV.
+     */
+    public static BusinessPartnerIdentity businessPartnerIdentityExpiringIn30Days() {
+        return new BusinessPartnerIdentity(
+            UUID.randomUUID(),
+            BUSINESS_PARTNER_NAME,
+            today().minusYears(3).toInstant(),
+            "CHE-123-456-789",
+            true,
+            "de-CH",
+            BusinessPartnerIdentityStatus.ACTIVE,
+            false,
+            today().plusDays(30).toInstant(),
+            null,
+            Set.of("did1", "did2")
+        );
+    }
+
     public static BusinessPartnerIdentity businessPartnerIdentityLastIssuance7MonthsAgo() {
         return businessPartnerIdentityLastIssuance7MonthsAgo(BusinessPartnerIdentityStatus.ACTIVE);
     }
@@ -69,6 +89,26 @@ public class BusinessPartnerIdentityTestData {
             false,
             today().plusYears(3).toInstant(),
             today().minusMonths(7).toInstant(),
+            Set.of("Some-did")
+        );
+    }
+
+    /**
+     * An active identity whose validity runs out <b>today</b> - the boundary case, because an identity is activated
+     * with a midnight-aligned {@code validUntil} and therefore lands exactly on it.
+     */
+    public static BusinessPartnerIdentity businessPartnerIdentityValidUntilToday() {
+        return new BusinessPartnerIdentity(
+            UUID.randomUUID(),
+            BUSINESS_PARTNER_NAME,
+            today().minusYears(3).toInstant(),
+            "CHE-123-456-789",
+            false,
+            "de-CH",
+            BusinessPartnerIdentityStatus.ACTIVE,
+            false,
+            today().toInstant(),
+            null,
             Set.of("Some-did")
         );
     }
@@ -93,6 +133,28 @@ public class BusinessPartnerIdentityTestData {
             null,
             Set.of("Some-did")
         );
+    }
+
+    /**
+     * An ACTIVE identity statement belonging to the given partner - needed wherever a test has to observe whether the
+     * statements of an identity survive something or get revoked.
+     */
+    public static TrustStatementPartnerLink activePartnerLinkIdentityV1(UUID partnerId, String subject) {
+        var partnerLink = TrustStatementPartnerLink.createIdentityV1(
+            partnerId,
+            subject,
+            Instant.now(),
+            today().plusYears(3).toInstant(),
+            BUSINESS_PARTNER_NAME,
+            Collections.emptyList(),
+            false
+        );
+        partnerLink.persistReferencesAfterPublicationSucceeded(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            TrustStatementPartnerLinkStatus.ACTIVE
+        );
+        return partnerLink;
     }
 
     public static TrustStatementPartnerLink partnerLinkIdentityV1(String subject) {

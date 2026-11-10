@@ -13,6 +13,11 @@ import lombok.*;
 
 /**
  * @param uid Unternehmens-Identifikationsnummer (UID)
+ * @param taskType which of the re-verification flows the task belongs to - REGISTRATION for a first-time
+ *     onboarding, PROFILE_CHANGE for an update of an already onboarded partner, RENEWAL for an extension
+ *     that is approved automatically. The three behave differently on rejection, so the reviewer has to
+ *     see which one is in front of them (EIDARTFE-1301, story S7). Same representation as
+ *     {@link TaskListItemDto#taskType()}.
  */
 @Schema(name = "TrustOnboardingTask", enumAsRef = true)
 public record TrustOnboardingTaskDto(
@@ -21,6 +26,7 @@ public record TrustOnboardingTaskDto(
     @NotNull Instant submittedAt,
     @NotNull Instant dueAt,
     @NotNull TaskStatusDto state,
+    @NotNull TrustOnboardingTaskTypeDto taskType,
     @NotNull BusinessPartnerTypeDto partnerType,
     String uid,
     Boolean isRegisteredInCommercialRegister,

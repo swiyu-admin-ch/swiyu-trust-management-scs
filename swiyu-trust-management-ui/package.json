@@ -1,6 +1,6 @@
 {
   "name": "swiyu-trust-management-ui",
-  "version": "5.3.10",
+  "version": "5.4.2",
   "private": true,
   "scripts": {
     "build": "ng build",
@@ -81,7 +81,16 @@
     "sonar56x": true
   },
   "overrides": {
+    "@angular/build": {
+      "undici": "^7.30.2"
+    },
     "basic-ftp": "^6.2.2",
+    "jsdom": {
+      "undici": "^8.12.4"
+    },
+    "node-gyp": {
+      "undici": "^7.30.2"
+    },
     "webpack-dev-server": {
       ".": "^5.2.7",
       "open": "^11.0.0"

@@ -11,6 +11,6 @@ import {PageMetadata} from './page-metadata';
 import {ProtectedIssuanceAuthorization} from './protected-issuance-authorization';
 
 export interface PagedModelProtectedIssuanceAuthorization {
-  content?: Array<ProtectedIssuanceAuthorization>;
-  page?: PageMetadata;
+  content: Array<ProtectedIssuanceAuthorization>;
+  page: PageMetadata;
 }

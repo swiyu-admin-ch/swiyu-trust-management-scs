@@ -11,6 +11,6 @@ import {BusinessPartnerViewListItem} from './business-partner-view-list-item';
 import {PageMetadata} from './page-metadata';
 
 export interface PagedModelBusinessPartnerViewListItem {
-  content?: Array<BusinessPartnerViewListItem>;
-  page?: PageMetadata;
+  content: Array<BusinessPartnerViewListItem>;
+  page: PageMetadata;
 }

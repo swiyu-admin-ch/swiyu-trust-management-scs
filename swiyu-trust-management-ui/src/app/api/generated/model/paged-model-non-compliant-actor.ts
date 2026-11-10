@@ -11,6 +11,6 @@ import {NonCompliantActor} from './non-compliant-actor';
 import {PageMetadata} from './page-metadata';
 
 export interface PagedModelNonCompliantActor {
-  content?: Array<NonCompliantActor>;
-  page?: PageMetadata;
+  content: Array<NonCompliantActor>;
+  page: PageMetadata;
 }

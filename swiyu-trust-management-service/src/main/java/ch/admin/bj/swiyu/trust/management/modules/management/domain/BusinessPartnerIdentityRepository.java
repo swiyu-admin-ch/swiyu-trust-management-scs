@@ -23,9 +23,9 @@ public interface BusinessPartnerIdentityRepository
 
     long countByStatus(BusinessPartnerIdentityStatus status);
 
-    List<BusinessPartnerIdentity> findAllByStatusAndValidUntilBefore(
+    List<BusinessPartnerIdentity> findAllByStatusAndValidUntilLessThanEqual(
         BusinessPartnerIdentityStatus status,
-        Instant validUntilBefore
+        Instant validUntilLimit
     );
 
     List<BusinessPartnerIdentity> findAllByStatusAndLastIssuanceAtLessThanEqual(

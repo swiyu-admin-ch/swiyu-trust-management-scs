@@ -12,11 +12,14 @@ import ch.admin.bj.swiyu.trust.client.core.business.internal.model.SignatoryDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.BusinessPartnerTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustOnboardingTaskContactTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustOnboardingTaskDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TrustOnboardingTaskTypeDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.taskaction.TaskActionDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.DeleteBusinessPartnerTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Task;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
+import ch.admin.bj.swiyu.trust.management.test.TaskTestData;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
@@ -28,8 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class TaskMapperTest {
@@ -85,6 +90,32 @@ class TaskMapperTest {
         assertThat(result.partnerType()).isEqualTo(BusinessPartnerTypeDto.GOVERNMENTAL_INSTITUTION);
         assertThat(result.dids().getFirst().did()).isEqualTo("did:123");
         assertThat(result.submittedAt()).isEqualTo(task.getSubmittedAt());
+        assertThat(result.taskType()).hasToString(task.getTaskType().name());
+    }
+
+    /**
+     * The reviewer has to see which of the three flows a task belongs to, because a rejection has a different effect
+     * per type.
+     */
+    @ParameterizedTest
+    @MethodSource("onboardingTasksOfEveryType")
+    void toTrustOnboardingTaskDtoTest_exposesTaskType(
+        TrustOnboardingTask task,
+        TrustOnboardingTaskTypeDto expectedTaskType
+    ) {
+        // When
+        var result = toTrustOnboardingTaskDto(Set.of(TaskActionDto.APPROVE), task, trustOnboardingSubmission());
+
+        // Then - typed, so the UI switches over the three flows instead of comparing strings
+        assertThat(result.taskType()).isEqualTo(expectedTaskType);
+    }
+
+    private static Stream<Arguments> onboardingTasksOfEveryType() {
+        return Stream.of(
+            Arguments.of(TaskTestData.trustOnboardingTask(), TrustOnboardingTaskTypeDto.REGISTRATION),
+            Arguments.of(TaskTestData.profileChangeTask(), TrustOnboardingTaskTypeDto.PROFILE_CHANGE),
+            Arguments.of(TaskTestData.renewalTask(), TrustOnboardingTaskTypeDto.RENEWAL)
+        );
     }
 
     @Test

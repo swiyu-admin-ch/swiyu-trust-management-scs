@@ -5,7 +5,6 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
@@ -59,14 +58,10 @@ public class DemoDataMapper {
         );
     }
 
-    private static TaskType toTaskType(DemoData.DemoBusinessPartner.DemoTrustOnboarding onboarding) {
-        return switch (onboarding.submissionType()) {
-            case REGISTRATION -> TaskType.REGISTRATION;
-            case PROFILE_CHANGE_MANDATORY, PROFILE_CHANGE_VOLUNTARY -> TaskType.PROFILE_CHANGE;
-            case RENEWAL -> TaskType.RENEWAL;
-        };
-    }
-
+    /**
+     * Takes the expiry date from the demo data: computing it as lastActivated plus three years silently overrode the
+     * 30-day expiry the re-verification demo partners ask for. lastActivated still feeds lastIssuanceAt.
+     */
     public static BusinessPartnerIdentity toBusinessPartnerIdentity(DemoData.DemoBusinessPartner bp) {
         var lastActivated = Instant.now().minus(10, ChronoUnit.DAYS);
         return new BusinessPartnerIdentity(
@@ -78,7 +73,7 @@ public class DemoDataMapper {
             bp.contact() == null ? "de" : bp.contact().correspondingLanguage().toString(),
             DemoDataMapper.toBusinessPartnerIdentityStatus(bp.bpi().status()),
             bp.type() == DemoData.DemoBusinessPartner.DemoBusinessPartnerType.GOVERNMENTAL_INSTITUTION,
-            lastActivated.atZone(ZoneId.of("Europe/Zurich")).plusYears(3).toInstant(),
+            bp.bpi().validUntil(),
             lastActivated,
             bp.identifiers().stream().map(DemoData.DemoBusinessPartner.DemoIdentifier::did).collect(Collectors.toSet())
         );

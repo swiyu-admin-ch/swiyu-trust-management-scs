@@ -109,6 +109,13 @@
           task().partnerType | concatI18nKey: "app.trust-onboarding-task.fields.partnerType.value" | translate
         }}</span>
       </div>
+      <div>
+        <small>{{ "app.trust-onboarding-task.fields.taskType.label" | translate }}</small
+        ><br />
+        <span data-cy="taskType">{{
+          task().taskType | concatI18nKey: "app.trust-onboarding-task.fields.taskType.value" | translate
+        }}</span>
+      </div>
     </div>
     @if (task().partnerType === "BUSINESS") {
       <div class="ob-flex" data-cy="inCommercialRegisterBlock">

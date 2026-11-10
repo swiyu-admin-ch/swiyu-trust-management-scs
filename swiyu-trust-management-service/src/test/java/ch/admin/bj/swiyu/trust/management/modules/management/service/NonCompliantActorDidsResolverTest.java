@@ -130,6 +130,7 @@ class NonCompliantActorDidsResolverTest {
         );
         when(identifierApi.getAllIdentifierEntries(eq(businessPartnerId), eq(0), any(), any())).thenThrow(error);
 
-        Assertions.assertDoesNotThrow(() -> resolver.resolve(List.of(actor)));
+        var actors = List.of(actor);
+        Assertions.assertDoesNotThrow(() -> resolver.resolve(actors));
     }
 }

@@ -11,6 +11,6 @@ import {PageMetadata} from './page-metadata';
 import {ProtectedIssuanceEntry} from './protected-issuance-entry';
 
 export interface PagedModelProtectedIssuanceEntry {
-  content?: Array<ProtectedIssuanceEntry>;
-  page?: PageMetadata;
+  content: Array<ProtectedIssuanceEntry>;
+  page: PageMetadata;
 }

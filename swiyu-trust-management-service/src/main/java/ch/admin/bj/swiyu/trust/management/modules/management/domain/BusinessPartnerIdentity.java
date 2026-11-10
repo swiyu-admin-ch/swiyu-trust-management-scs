@@ -131,10 +131,16 @@ public class BusinessPartnerIdentity {
         this.lastIssuanceAt = source.lastIssuanceAt;
     }
 
+    public boolean isActive() {
+        return status == BusinessPartnerIdentityStatus.ACTIVE;
+    }
+
     public void applyRelevantInformationUpdate(BusinessPartnerIdentityRelevantInformationUpdate source) {
         this.entityName = source.entityName();
         this.uid = source.uid();
-        this.isRegisteredInCommercialRegister = source.isRegisteredInCommercialRegister();
+        this.isRegisteredInCommercialRegister = source.isRegisteredInCommercialRegisterOr(
+            this.isRegisteredInCommercialRegister
+        );
         this.correspondingLanguage = source.correspondingLanguage();
         this.isStateActor = source.isStateActor();
         this.trustedIdentifier.clear();

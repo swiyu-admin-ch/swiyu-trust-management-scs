@@ -83,10 +83,15 @@ public class BusinessPartnerIdentityService {
         outboxEventPublisher.publishBusinessPartnerIdentityDeactivatedEvent(event);
     }
 
+    /**
+     * All active identities whose validity has run out. Keeps the midnight-aligned {@code today()} that
+     * {@code activate} sets validUntil from, and only loosens the comparison to LessThanEqual - with the previous
+     * Before an identity expiring today was skipped until the next run.
+     */
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public List<UUID> findAllBusinessPartnerIdentityIdsToDeactivate() {
         return businessPartnerIdentityRepository
-            .findAllByStatusAndValidUntilBefore(BusinessPartnerIdentityStatus.ACTIVE, today().toInstant())
+            .findAllByStatusAndValidUntilLessThanEqual(BusinessPartnerIdentityStatus.ACTIVE, today().toInstant())
             .stream()
             .map(BusinessPartnerIdentity::getId)
             .toList();
@@ -127,7 +132,7 @@ public class BusinessPartnerIdentityService {
             .findById(businessPartnerId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
 
-        if (bpi.getStatus() != BusinessPartnerIdentityStatus.ACTIVE) {
+        if (!bpi.isActive()) {
             throw new BusinessPartnerIdentityNotActiveException(
                 "Business partner identity for id '%s' is not active".formatted(businessPartnerId)
             );
@@ -153,7 +158,7 @@ public class BusinessPartnerIdentityService {
             .findById(businessPartnerId)
             .orElseThrow(businessPartnerIdentityNotFound(businessPartnerId));
 
-        if (bpi.getStatus() != BusinessPartnerIdentityStatus.ACTIVE) {
+        if (!bpi.isActive()) {
             throw new BusinessPartnerIdentityNotActiveException(
                 "Business partner identity for id '%s' is not active".formatted(businessPartnerId)
             );
@@ -213,7 +218,7 @@ public class BusinessPartnerIdentityService {
                         relevantInformationUpdate.entityName(),
                         null,
                         relevantInformationUpdate.uid(),
-                        relevantInformationUpdate.isRegisteredInCommercialRegister(),
+                        Boolean.TRUE.equals(relevantInformationUpdate.isRegisteredInCommercialRegister()),
                         relevantInformationUpdate.correspondingLanguage(),
                         BusinessPartnerIdentityStatus.DEACTIVATED,
                         relevantInformationUpdate.isStateActor(),
@@ -245,8 +250,8 @@ public class BusinessPartnerIdentityService {
     }
 
     /**
-     * Applies the effect of a rejected trust onboarding submission on the business partner identity: a rejected
-     * mandatory profile change deactivates it, a rejected voluntary profile change or registration leaves it as is.
+     * A rejected renewal or voluntary profile change changes nothing. A rejected mandatory one costs the trust status
+     * only at the original expiry date, which the expiry job handles - not here.
      */
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void handleTrustOnboardingRejection(TrustOnboardingSubmissionDto submission) {
@@ -256,15 +261,16 @@ public class BusinessPartnerIdentityService {
                 submission.getPartnerId(),
                 submission.getType()
             );
-            case PROFILE_CHANGE_MANDATORY -> {
-                log.info(
-                    "Deactivating business partner identity {} because trust onboarding submission {} of type {} was rejected",
-                    submission.getPartnerId(),
-                    submission.getId(),
-                    submission.getType()
-                );
-                deactivate(submission.getPartnerId());
-            }
+            case PROFILE_CHANGE_MANDATORY -> log.info(
+                "Business partner identity {} keeps its validity until {} although trust onboarding submission {} of type {} was rejected - it loses the trust status at its original expiry date, not on rejection",
+                submission.getPartnerId(),
+                businessPartnerIdentityRepository
+                    .findById(submission.getPartnerId())
+                    .map(BusinessPartnerIdentity::getValidUntil)
+                    .orElse(null),
+                submission.getId(),
+                submission.getType()
+            );
             case RENEWAL -> throw new IllegalStateException(
                 "Renewal submission '%s' is approved automatically and must not be rejected".formatted(
                     submission.getId()

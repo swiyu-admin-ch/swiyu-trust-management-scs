@@ -17,6 +17,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.DeleteB
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.ProtectedVerificationRequestTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Task;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskType;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTask;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
 import java.util.*;
@@ -61,6 +62,7 @@ public class TaskMapper {
             task.getSubmittedAt(),
             task.getDueAt(),
             toTaskStatusDto(task.getStatus()),
+            toTrustOnboardingTaskTypeDto(task.getTaskType()),
             toBusinessPartnerTypeDto(submission),
             toUid(submission.getRegistryIds()),
             submission.getIsRegisteredInCommercialRegister(),
@@ -120,6 +122,21 @@ public class TaskMapper {
             task.getTaskType().name(),
             allowedActions
         );
+    }
+
+    /**
+     * The three task types a trust onboarding task can have. {@code TrustOnboardingTask.validateTaskType} rejects any
+     * other, so the default branch is a guard against a future enum value, not a reachable case.
+     */
+    private static TrustOnboardingTaskTypeDto toTrustOnboardingTaskTypeDto(TaskType taskType) {
+        return switch (taskType) {
+            case REGISTRATION -> TrustOnboardingTaskTypeDto.REGISTRATION;
+            case PROFILE_CHANGE -> TrustOnboardingTaskTypeDto.PROFILE_CHANGE;
+            case RENEWAL -> TrustOnboardingTaskTypeDto.RENEWAL;
+            default -> throw new IllegalArgumentException(
+                "A trust onboarding task cannot have task type %s".formatted(taskType)
+            );
+        };
     }
 
     public static AuthorizableFieldDto toAuthorizableField(ProtectedVerificationCategoryDto category) {

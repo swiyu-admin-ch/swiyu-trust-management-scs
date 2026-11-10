@@ -13,6 +13,7 @@ import {Did} from './did';
 import {PartnerType} from './partner-type';
 import {TaskAction} from './task-action';
 import {TaskStatus} from './task-status';
+import {TrustOnboardingTaskType} from './trust-onboarding-task-type';
 
 export interface TrustOnboardingTask {
   id: string;
@@ -20,6 +21,7 @@ export interface TrustOnboardingTask {
   submittedAt: string;
   dueAt: string;
   state: TaskStatus;
+  taskType: TrustOnboardingTaskType;
   partnerType: PartnerType;
   uid?: string;
   isRegisteredInCommercialRegister?: boolean;

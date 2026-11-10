@@ -168,21 +168,26 @@ class BusinessPartnerIdentityServiceTest {
         assertThat(bpi.getLastActivated()).isCloseTo(Instant.now(), within(ofSeconds(1)));
     }
 
+    /**
+     * A rejected mandatory profile change keeps the trust status until the original expiry date (OB_FR_12.8, MUT_23),
+     * so the rejection itself must not deactivate the identity.
+     */
     @Test
-    void handleTrustOnboardingRejection_profileChangeMandatory_shouldDeactivate() {
+    void handleTrustOnboardingRejection_profileChangeMandatory_keepsIdentityActiveUntilOriginalExpiry() {
         var bpi = BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(
             BusinessPartnerIdentityStatus.ACTIVE
         );
         bpi.setVersion(0);
+        var validUntilBefore = bpi.getValidUntil();
         when(businessPartnerIdentityRepository.findById(bpi.getId())).thenReturn(Optional.of(bpi));
-        when(businessPartnerIdentityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         businessPartnerIdentityService.handleTrustOnboardingRejection(
             rejectedSubmission(bpi.getId(), TrustOnboardingSubmissionDto.TypeEnum.PROFILE_CHANGE_MANDATORY)
         );
 
-        assertThat(bpi.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.DEACTIVATED);
-        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(any());
+        assertThat(bpi.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
+        assertThat(bpi.getValidUntil()).isEqualTo(validUntilBefore);
+        verifyNoInteractions(outboxEventPublisher);
     }
 
     @ParameterizedTest

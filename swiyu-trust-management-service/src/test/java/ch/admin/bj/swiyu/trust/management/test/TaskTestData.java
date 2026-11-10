@@ -40,6 +40,18 @@ public class TaskTestData {
         );
     }
 
+    public static TrustOnboardingTask profileChangeTask() {
+        var submittedAt = LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant();
+        return TrustOnboardingTask.createProfileChangeTask(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            BUSINESS_PARTNER_NAME,
+            UUID.randomUUID(),
+            submittedAt.plus(12, ChronoUnit.DAYS),
+            submittedAt
+        );
+    }
+
     public static TrustOnboardingTask renewalTask() {
         var submittedAt = LocalDate.of(2025, 8, 9).atStartOfDay(ZONE_ID_ZURICH).toInstant();
         return TrustOnboardingTask.createRenewalTask(

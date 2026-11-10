@@ -15,10 +15,10 @@ export interface SimpleErrors {
   globalErrors?: Array<ObjectError>;
   fieldErrors?: Array<FieldError>;
   nestedPath?: string;
-  fieldError?: FieldError;
+  allErrors?: Array<ObjectError>;
   errorCount?: number;
   globalErrorCount?: number;
   globalError?: ObjectError;
   fieldErrorCount?: number;
-  allErrors?: Array<ObjectError>;
+  fieldError?: FieldError;
 }

@@ -11,6 +11,6 @@ import {PageMetadata} from './page-metadata';
 import {TrustOnboardingSubmissionDocumentListItemDto} from './trust-onboarding-submission-document-list-item-dto';
 
 export interface PagedModelTrustOnboardingSubmissionDocumentListItemDto {
-  content?: Array<TrustOnboardingSubmissionDocumentListItemDto>;
-  page?: PageMetadata;
+  content: Array<TrustOnboardingSubmissionDocumentListItemDto>;
+  page: PageMetadata;
 }

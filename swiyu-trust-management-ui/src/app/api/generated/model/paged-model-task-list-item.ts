@@ -11,6 +11,6 @@ import {PageMetadata} from './page-metadata';
 import {TaskListItem} from './task-list-item';
 
 export interface PagedModelTaskListItem {
-  content?: Array<TaskListItem>;
-  page?: PageMetadata;
+  content: Array<TaskListItem>;
+  page: PageMetadata;
 }

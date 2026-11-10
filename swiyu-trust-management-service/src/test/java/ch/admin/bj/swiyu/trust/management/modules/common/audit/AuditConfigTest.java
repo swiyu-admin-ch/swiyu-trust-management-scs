@@ -44,8 +44,7 @@ class AuditConfigTest {
         SecurityContextHolder.setContext(new SecurityContextImpl(token));
 
         // Act / Assert
-        assertThrows(AuditorProvider.UserNotAuthenticatedException.class, () ->
-            auditConfig.auditorProvider().getCurrentAuditor()
-        );
+        var auditorProvider = auditConfig.auditorProvider();
+        assertThrows(AuditorProvider.UserNotAuthenticatedException.class, auditorProvider::getCurrentAuditor);
     }
 }

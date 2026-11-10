@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.4.2
+
+### Fixed
+
+- Documented why `toIsRegisteredInCommercialRegister` returns `null` and suppressed the Sonar finding on it: `null`
+  carries "not communicated by this submission type" and must stay distinguishable from `false`, which is the bug
+  `5.4.1` fixed. No caller unboxes the value
+
+## 5.4.1
+
+### Fixed
+
+- Keep the business partner identity data that a re-verification does not carry: a renewal no longer clears `isRegisteredInCommercialRegister`, and only proof-of-possessions in state `VALID` become trusted identifiers
+- A rejected mandatory profile change no longer deactivates the identity on the day of the decision - the organization keeps its trust status until the original expiry date
+- An identity that expires today is deactivated today instead of on the following day: the expiry query compared a midnight-aligned `validUntil` against midnight of the current day, so it skipped exactly the boundary case
+- The demo identities take their expiry date from the demo data instead of computing it as "activated ten days ago plus three years", which silently overrode it. The two partners that exist to demo a re-verification asked for an identity expiring in 30 days and got one with almost three years left, so the state those flows are demoed in never existed on any stage
+- Resolved the Sonar findings: dropped the unused `toTaskType` in `DemoDataMapper`, whose last caller went away in `EID-6891`, and reduced two assertion lambdas to a single possibly throwing invocation
+
+### Added
+
+- Cover the automatic approval of a renewal while `automaticApprovalEnabled` is off - the configuration every stage except the integration stages runs with
+- Show the submission type in the trust onboarding task details as the typed `TrustOnboardingTaskType` (`REGISTRATION`, `PROFILE_CHANGE`, `RENEWAL`), so a reviewer sees which flow they are deciding on - a rejection has a different effect per type
+- Cover that a rejected voluntary profile change leaves organisation name and UID untouched (`OB_FR_12.9`), and that an expired identity has its trust statements revoked once the original expiry date has passed
+- Cover the deactivation of an identity whose validity runs out today, and the still-working manual deactivation, on persisted identities with really issued trust statements instead of on a mocked service call
+- Cover that a deactivation revokes the trust statements of its own identity only - a second trusted partner keeps its statements, which no previous test could show because only one partner existed in each of them
+- Cover the consequence of a rejected mandatory profile change as one chain instead of as separate steps: reject, identity stays active with an unchanged `validUntil`, the original expiry date passes, the expiry mechanism deactivates it, its trust statements are revoked
+
+## 5.3.11
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent from 41.33.0 to 41.34.0
+
+### Fixed
+
+- Override `undici` to 7.30.2 (build tooling) and 8.12.4 (jsdom) to fix the new undici findings
+  SNYK-JS-UNDICI-22290988, SNYK-JS-UNDICI-22291066, SNYK-JS-UNDICI-22291127, SNYK-JS-UNDICI-22291102
+  (critical) and SNYK-JS-UNDICI-22370261
+
 ## 5.3.10
 
 ### Fixed

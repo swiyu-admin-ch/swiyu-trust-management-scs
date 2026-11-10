@@ -11,6 +11,6 @@ import {DomainEventLog} from './domain-event-log';
 import {PageMetadata} from './page-metadata';
 
 export interface PagedModelDomainEventLog {
-  content?: Array<DomainEventLog>;
-  page?: PageMetadata;
+  content: Array<DomainEventLog>;
+  page: PageMetadata;
 }

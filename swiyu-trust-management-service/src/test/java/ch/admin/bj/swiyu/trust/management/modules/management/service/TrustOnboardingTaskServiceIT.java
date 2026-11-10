@@ -12,6 +12,7 @@ import static org.mockito.Mockito.*;
 import ch.admin.bit.jeap.messaging.avro.security.AvroClassSecurity;
 import ch.admin.bit.jeap.security.test.WithJeapAuthenticationToken;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
+import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.IdentifierApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.api.TrustOnboardingSubmissionApi;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
@@ -38,6 +39,7 @@ import ch.admin.bj.swiyu.trust.management.modules.registry.service.JsonJwtDeseri
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.TrustRegistryService;
 import ch.admin.bj.swiyu.trust.management.test.*;
 import java.time.Instant;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -131,6 +133,9 @@ class TrustOnboardingTaskServiceIT {
 
     @Autowired
     private BusinessPartnerIdentityEventProcessor businessPartnerIdentityEventProcessor;
+
+    @Autowired
+    private BusinessPartnerIdentityService businessPartnerIdentityService;
 
     @BeforeAll
     static void installAvroClassWhitelist() {
@@ -317,12 +322,17 @@ class TrustOnboardingTaskServiceIT {
         assertThat(task.getDueAt()).isNull();
     }
 
+    /**
+     * A rejected mandatory profile change costs the trust status only at the original expiry date (OB_FR_12.8,
+     * MUT_23), so the rejection itself leaves the identity active.
+     */
     @Test
-    void reject_ProfileChangeMandatory_DeactivatesBusinessPartnerIdentity() {
+    void reject_ProfileChangeMandatory_BusinessPartnerIdentityKeepsValidityUntilOriginalExpiry() {
         // given
         var bpi = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
+        var validUntilBefore = bpi.getValidUntil();
         var submission = trustOnboardingSubmissionDto()
             .partnerId(bpi.getId())
             .type(TrustOnboardingSubmissionDto.TypeEnum.PROFILE_CHANGE_MANDATORY);
@@ -338,18 +348,86 @@ class TrustOnboardingTaskServiceIT {
         );
 
         // then
+        var afterRejection = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
+        assertThat(afterRejection.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
+        assertThat(afterRejection.getValidUntil()).isEqualTo(validUntilBefore);
+        verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityDeactivatedEvent(any());
+    }
+
+    /**
+     * OB_FR_12.9: a rejected voluntary update leaves the organization its trust status "incl. organisation name, UID".
+     * The identity must therefore come out of the rejection completely unchanged - not only still ACTIVE, but with the
+     * name and the UID it had before, because those are exactly what the partner tried to change.
+     */
+    /**
+     * The whole chain in one run: reject, identity stays active with an unchanged validUntil, the original expiry date
+     * passes, the expiry mechanism deactivates it, its statements are revoked. Separate tests of the steps would each
+     * pass while the chain is broken in between.
+     */
+    @Test
+    void reject_ProfileChangeMandatory_identityKeepsValidityUntilExpiryThenLosesStatements() {
+        // given a trusted identity with issued trust statements and a mandatory profile change awaiting review
+        var bpi = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
+        );
+        var validUntilBefore = bpi.getValidUntil();
+        var submission = trustOnboardingSubmissionDto()
+            .partnerId(bpi.getId())
+            .type(TrustOnboardingSubmissionDto.TypeEnum.PROFILE_CHANGE_MANDATORY);
+        when(trustOnboardingSubmissionApi.getTrustOnboardingSubmission(submission.getId())).thenReturn(submission);
+        var taskId = trustOnboardingTaskService.createTask(submission, getCurrentUserName());
+        commit();
+        businessPartnerIdentityService.issueTrustStatements(bpi.getId());
+        assertThat(repos.trustStatementPartnerLink.findAll())
+            .isNotEmpty()
+            .allMatch(link -> link.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE);
+
+        // 1 - the reviewer rejects it
+        trustOnboardingTaskService.reject(
+            taskId,
+            new RejectTaskActionDto(TrustOnboardingRejectReasonDto.OTHER, "partner note", "internal note"),
+            "Timo Truster"
+        );
+
+        // 2 - the identity keeps the validity it already had
+        var afterRejection = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
+        assertThat(afterRejection.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
+        assertThat(afterRejection.getValidUntil()).isEqualTo(validUntilBefore);
+        assertThat(repos.trustStatementPartnerLink.findAll())
+            .as("the rejection itself revokes nothing")
+            .allMatch(link -> link.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE);
+
+        // 3 - the original expiry date passes
+        afterRejection.activate(Period.ofDays(0)); // validUntil = start of today
+        repos.businessPartnerIdentity.saveAndFlush(afterRejection);
+
+        // 4 - the expiry mechanism deactivates it
+        var expired = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsToDeactivate();
+        assertThat(expired).contains(bpi.getId());
+        businessPartnerIdentityService.deactivate(bpi.getId());
         assertThat(repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow().getStatus()).isEqualTo(
             BusinessPartnerIdentityStatus.DEACTIVATED
         );
-        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(any());
+
+        // 5 - and the resulting event revokes its statements
+        var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityDeactivatedEvent.class);
+        verify(outboxEventPublisher, atLeastOnce()).publishBusinessPartnerIdentityDeactivatedEvent(captor.capture());
+        businessPartnerIdentityEventProcessor.processTiBusinessPartnerIdentityDeactivatedEvent(captor.getValue());
+        assertThat(repos.trustStatementPartnerLink.findAll())
+            .as("the trust statements are revoked once the original expiry date has passed")
+            .isNotEmpty()
+            .noneMatch(link -> link.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE);
     }
 
     @Test
-    void reject_ProfileChangeVoluntary_BusinessPartnerIdentityRemainsActive() {
+    void reject_ProfileChangeVoluntary_BusinessPartnerIdentityRemainsActiveWithNameAndUid() {
         // given
         var bpi = repos.businessPartnerIdentity.save(
             BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
         );
+        var entityNameBefore = bpi.getEntityName();
+        var uidBefore = bpi.getUid();
+        var validUntilBefore = bpi.getValidUntil();
         var submission = trustOnboardingSubmissionDto()
             .partnerId(bpi.getId())
             .type(TrustOnboardingSubmissionDto.TypeEnum.PROFILE_CHANGE_VOLUNTARY);
@@ -365,9 +443,11 @@ class TrustOnboardingTaskServiceIT {
         );
 
         // then
-        assertThat(repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow().getStatus()).isEqualTo(
-            BusinessPartnerIdentityStatus.ACTIVE
-        );
+        var afterRejection = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
+        assertThat(afterRejection.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.ACTIVE);
+        assertThat(afterRejection.getEntityName()).isEqualTo(entityNameBefore);
+        assertThat(afterRejection.getUid()).isEqualTo(uidBefore);
+        assertThat(afterRejection.getValidUntil()).isEqualTo(validUntilBefore);
         verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityDeactivatedEvent(any());
     }
 

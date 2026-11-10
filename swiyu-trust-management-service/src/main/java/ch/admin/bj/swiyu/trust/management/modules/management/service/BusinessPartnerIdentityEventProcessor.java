@@ -29,6 +29,10 @@ public class BusinessPartnerIdentityEventProcessor {
         businessPartnerIdentityService.issueTrustStatements(businessPartnerId);
     }
 
+    /**
+     * Revokes the trust statements of a deactivated identity, unless it is active again: activation and deactivation
+     * travel on separate topics without an ordering guarantee, so a stale event must not undo a reactivation.
+     */
     @IdempotentMessageHandler
     @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public void processTiBusinessPartnerIdentityDeactivatedEvent(TiBusinessPartnerIdentityDeactivatedEvent event) {

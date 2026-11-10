@@ -33,6 +33,8 @@ import ch.admin.bj.swiyu.trust.management.modules.registry.service.JsonJwtDeseri
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.TrustRegistryService;
 import ch.admin.bj.swiyu.trust.management.test.*;
 import java.time.Instant;
+import java.time.Period;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,6 +72,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         DataJpaTestKafkaConfiguration.class,
         DataJpaTestConfiguration.class,
         BusinessPartnerIdentityService.class,
+        BusinessPartnerIdentityEventProcessor.class,
         AsyncTestConfig.class,
         MockIssuerClient.class,
     }
@@ -102,6 +105,9 @@ class BusinessPartnerIdentityServiceIT {
 
     @Autowired
     private BusinessPartnerIdentityService businessPartnerIdentityService;
+
+    @Autowired
+    private BusinessPartnerIdentityEventProcessor businessPartnerIdentityEventProcessor;
 
     @Autowired
     private TestRepositories repos;
@@ -198,6 +204,149 @@ class BusinessPartnerIdentityServiceIT {
             );
         var refreshed = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
         assertThat(refreshed.getLastIssuanceAt()).isCloseTo(Instant.now(), within(ofSeconds(2)));
+    }
+
+    /**
+     * The job picks up an identity whose validity runs out today and deactivates it. Guards the boundary: with the
+     * previous strict comparison it was only caught on the following run.
+     */
+    @Test
+    void expiryJob_identityExpiringToday_isDeactivated() {
+        var bpi = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.businessPartnerIdentityValidUntilToday()
+        );
+        repos.commit();
+
+        var selected = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsToDeactivate();
+        assertThat(selected).contains(bpi.getId());
+        businessPartnerIdentityService.deactivate(bpi.getId());
+
+        assertThat(repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow().getStatus()).isEqualTo(
+            BusinessPartnerIdentityStatus.DEACTIVATED
+        );
+    }
+
+    /**
+     * A deliberate deactivation by an operator works on an identity that is neither expired nor inactive - the expiry
+     * date is not a precondition for it.
+     */
+    @Test
+    void manualDeactivation_ofAValidIdentity_stillWorks() {
+        var bpi = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
+        );
+        repos.commit();
+        assertThat(bpi.getValidUntil()).isAfter(Instant.now());
+
+        businessPartnerIdentityService.deactivate(bpi.getId());
+
+        assertThat(repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow().getStatus()).isEqualTo(
+            BusinessPartnerIdentityStatus.DEACTIVATED
+        );
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(any());
+    }
+
+    /**
+     * A deactivation concerns exactly one identity: a second trusted partner keeps its statements.
+     */
+    @Test
+    void deactivationEvent_revokesOnlyTheStatementsOfTheDeactivatedIdentity() {
+        // given two trusted identities, each with really issued statements
+        var toDeactivate = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
+        );
+        var untouched = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
+        );
+        repos.commit();
+        businessPartnerIdentityService.issueTrustStatements(toDeactivate.getId());
+        businessPartnerIdentityService.issueTrustStatements(untouched.getId());
+        assertThat(linksOf(untouched.getId())).isNotEmpty();
+        assertThat(linksOf(toDeactivate.getId())).isNotEmpty();
+
+        // when one of them is deactivated and the event is processed
+        businessPartnerIdentityService.deactivate(toDeactivate.getId());
+        var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityDeactivatedEvent.class);
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(captor.capture());
+        businessPartnerIdentityEventProcessor.processTiBusinessPartnerIdentityDeactivatedEvent(captor.getValue());
+
+        // then only its own statements are revoked
+        assertThat(linksOf(toDeactivate.getId()))
+            .as("the statements of the deactivated identity are revoked")
+            .noneMatch(link -> link.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE);
+        assertThat(linksOf(untouched.getId()))
+            .as("the statements of an unrelated partner are untouched")
+            .isNotEmpty()
+            .allMatch(link -> link.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE);
+    }
+
+    private List<TrustStatementPartnerLink> linksOf(UUID partnerId) {
+        return repos.trustStatementPartnerLink
+            .findAll()
+            .stream()
+            .filter(link -> partnerId.equals(link.getPartnerId()))
+            .toList();
+    }
+
+    /**
+     * A deactivated identity has its statements revoked.
+     */
+    @Test
+    void deactivationEvent_identityStillDeactivated_revokesTheStatements() {
+        var bpi = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
+        );
+        repos.commit();
+        businessPartnerIdentityService.issueTrustStatements(bpi.getId());
+
+        businessPartnerIdentityService.deactivate(bpi.getId());
+        var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityDeactivatedEvent.class);
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(captor.capture());
+
+        businessPartnerIdentityEventProcessor.processTiBusinessPartnerIdentityDeactivatedEvent(captor.getValue());
+
+        assertThat(repos.trustStatementPartnerLink.findAll())
+            .as("a deactivated identity has its statements revoked")
+            .isNotEmpty()
+            .noneMatch(link -> link.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE);
+    }
+
+    @Test
+    void expiredIdentityAfterRejection_isDeactivatedAndItsTrustStatementsAreRevoked() {
+        // given an identity that still has its original validity and real trust statements. Issued first and expired
+        // afterwards, because a statement cannot be issued with a validity that has already run out.
+        var bpi = repos.businessPartnerIdentity.save(
+            BusinessPartnerIdentityTestData.newDefaultBusinessPartnerIdentity(BusinessPartnerIdentityStatus.ACTIVE)
+        );
+        repos.commit();
+        businessPartnerIdentityService.issueTrustStatements(bpi.getId());
+        assertThat(repos.trustStatementPartnerLink.findAll())
+            .isNotEmpty()
+            .allMatch(link -> link.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE);
+
+        // and the original expiry date has passed - the point a rejected mandatory profile change leaves it at
+        var toExpire = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
+        toExpire.activate(Period.ofDays(0)); // validUntil = start of today
+        repos.businessPartnerIdentity.saveAndFlush(toExpire);
+
+        // when the expiry job runs
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsToDeactivate();
+        assertThat(identityIdsToDeactivate).contains(bpi.getId());
+        identityIdsToDeactivate.forEach(businessPartnerIdentityService::deactivate);
+
+        // and the resulting event is consumed
+        var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityDeactivatedEvent.class);
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(captor.capture());
+        businessPartnerIdentityEventProcessor.processTiBusinessPartnerIdentityDeactivatedEvent(captor.getValue());
+
+        // then the identity is deactivated and none of its statements is active any more
+        assertThat(repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow().getStatus()).isEqualTo(
+            BusinessPartnerIdentityStatus.DEACTIVATED
+        );
+        assertThat(repos.trustStatementPartnerLink.findAll())
+            .as("the trust statements are revoked once the original expiry date has passed")
+            .isNotEmpty()
+            .noneMatch(link -> link.getStatus() == TrustStatementPartnerLinkStatus.ACTIVE);
     }
 
     @Test
@@ -304,6 +453,25 @@ class BusinessPartnerIdentityServiceIT {
         assertThat(updatedBpi.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.DEACTIVATED);
         var captor = ArgumentCaptor.forClass(TiBusinessPartnerIdentityDeactivatedEvent.class);
         verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(captor.capture());
+    }
+
+    /**
+     * An identity is activated with a midnight-aligned validUntil, so one that expires today sits exactly on the
+     * boundary. Comparing against the start of the current day skipped it until the job ran again the next day,
+     * leaving the organization trusted for a day it no longer paid for.
+     */
+    @Test
+    void deactivateExpiredBusinessPartnerIdentities_deactivateValidUntilToday() {
+        var bpi = BusinessPartnerIdentityTestData.businessPartnerIdentityValidUntilToday();
+        repos.businessPartnerIdentity.save(bpi);
+        repos.commit();
+
+        var identityIdsToDeactivate = businessPartnerIdentityService.findAllBusinessPartnerIdentityIdsToDeactivate();
+        identityIdsToDeactivate.forEach(identityId -> businessPartnerIdentityService.deactivate(identityId));
+
+        var updatedBpi = repos.businessPartnerIdentity.findById(bpi.getId()).orElseThrow();
+        assertThat(updatedBpi.getStatus()).isEqualTo(BusinessPartnerIdentityStatus.DEACTIVATED);
+        verify(outboxEventPublisher).publishBusinessPartnerIdentityDeactivatedEvent(any());
     }
 
     @Test

@@ -11,6 +11,6 @@ import {BusinessPartnerIdentity} from './business-partner-identity';
 import {PageMetadata} from './page-metadata';
 
 export interface PagedModelBusinessPartnerIdentity {
-  content?: Array<BusinessPartnerIdentity>;
-  page?: PageMetadata;
+  content: Array<BusinessPartnerIdentity>;
+  page: PageMetadata;
 }

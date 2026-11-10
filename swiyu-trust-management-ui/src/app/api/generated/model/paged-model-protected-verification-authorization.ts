@@ -11,6 +11,6 @@ import {PageMetadata} from './page-metadata';
 import {ProtectedVerificationAuthorization} from './protected-verification-authorization';
 
 export interface PagedModelProtectedVerificationAuthorization {
-  content?: Array<ProtectedVerificationAuthorization>;
-  page?: PageMetadata;
+  content: Array<ProtectedVerificationAuthorization>;
+  page: PageMetadata;
 }
