@@ -1,6 +1,9 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 version: v1.25.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
+# Keep the npm (SNYK-JS-*) entries identical to the ones in swiyu-trust-management-ui/.snyk: the
+# pipeline scans the UI with --file=swiyu-trust-management-ui/package.json and then reads that copy,
+# not this one. An entry renewed only here leaves the UI scan on the expired date and breaks the build.
 ignore:
   SNYK-RHEL9-LIBCURLMINIMAL-17878844:
     - '*':
@@ -57,16 +60,6 @@ ignore:
         reason: No fix available in ubi9 JRE base image yet
         expires: 2026-11-09T09:00:00.000Z
         created: 2026-07-01T12:25:16.970Z
-  SNYK-JS-IMAGESIZE-17295816:
-    - '*':
-        reason: 'No update path as of now'
-        expires: 2026-11-09T09:00:00.000Z
-        created: 2026-06-23T14:51:45.487Z
-  SNYK-JS-IMAGESIZE-17295814:
-    - '*':
-        reason: 'No update path as of now'
-        expires: 2026-11-09T09:00:00.000Z
-        created: 2026-06-23T14:52:11.176Z
   SNYK-JAVA-ORGXERIALSNAPPY-19778376:
     - '*':
         reason: No fix available yet
@@ -79,23 +72,34 @@ ignore:
         created: 2026-09-21T09:16:57.000Z
   SNYK-JAVA-ORGGLASSFISHJAXB-20883142:
     - '*':
-        reason: No fixed version available; 4.0.9 is the latest release. Pulled in transitively via hibernate-core > jaxb-runtime, which only unmarshals Hibernate's own mapping files, not attacker-controlled XML.
-        expires: 2026-11-09T09:00:00.000Z
+        reason: >-
+          Still no fixed version: re-checked Maven Central on 2026-11-09, 4.0.9 is the latest
+          jaxb-core and jaxb-runtime release. Pulled in transitively via
+          spring-boot-starter-data-jpa > hibernate-core 7.4.13 > jaxb-runtime, which only unmarshals
+          Hibernate's own mapping files, not attacker-controlled XML. Track the upstream fix.
+        expires: 2026-11-23T09:00:00.000Z
         created: 2026-10-16T09:00:00.000Z
   SNYK-JS-BRACES-19963945:
     - '*':
-        reason: No fixed version available; braces only used by dev/build tooling (not shipped to production bundle). Tracked in EID-6915.
-        expires: 2026-11-09T09:00:00.000Z
+        reason: >-
+          Still no fixed version: re-checked npm on 2026-11-10, 3.0.3 is the latest braces release and
+          micromatch 4.0.8 requires ^3.0.3. Reached only through the Angular build tooling
+          (@angular-devkit/build-angular > http-proxy-middleware > micromatch), never shipped in the
+          bundle. Snyk proposes webpack-dev-server 6.0.0, which does not fix braces but replaces the
+          path: that is a major upgrade of a transitive dev dependency we already pin to ^5.2.7 in
+          package.json overrides, so it is deferred to the Angular CLI upgrade (EID-6533).
+          Tracked in EID-6915.
+        expires: 2026-11-23T09:00:00.000Z
         created: 2026-09-21T12:10:03.000Z
   SNYK-JS-PICOMATCH-21248802:
     - '*':
         reason: >-
-          No fixed version exists yet (CVE-2026-112366); the advisory states no fixed release and the
-          vulnerable code is still present in the latest picomatch 4.0.7. Reached through Angular
+          No fixed version exists yet (CVE-2026-112366); re-checked npm on 2026-11-10, 4.0.7 is still
+          the latest picomatch release and the advisory names no fixed release. Reached through Angular
           schematics/build tooling (@angular-devkit/core), which matches glob patterns from project
-          configuration rather than untrusted runtime input. Track the upstream fix.
-        expires: 2026-11-11T09:00:00.000Z
-        created: 2026-10-28T09:00:00.000Z
+          configuration rather than untrusted runtime input. Track the upstream fix. Tracked in EID-6992.
+        expires: 2026-11-23T09:00:00.000Z
+        created: 2026-10-20T00:00:00.000Z
   SNYK-JS-URIJS-19963963:
     - '*':
         reason: >-

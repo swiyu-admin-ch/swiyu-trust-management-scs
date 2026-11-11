@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.4.4
+
+### Fixed
+
+- The `braces` Snyk ignore renewed on 2026-11-09 only reached the root `.snyk`, but the pipeline scans the UI with
+  `--file=swiyu-trust-management-ui/package.json` and then reads `swiyu-trust-management-ui/.snyk`, where the ignore was
+  still on the expired date - so the uncontrolled recursion finding turned the build red again. Both policy files now
+  carry identical npm entries plus a comment that says they must stay in sync, braces 3.0.3 and picomatch 4.0.7 are
+  re-verified as the latest releases on npm, and the two `image-size` ignores are dropped along with the dependency they
+  covered
+
+## 5.4.3
+
+### Changed
+
+- Renewed the two Snyk ignores that expired on 2026-11-09 and turned the pipeline red: the XXE finding in
+  `jaxb-core` and the uncontrolled recursion in `braces`. Both reasons were re-verified - 4.0.9 and 3.0.3 are still
+  the latest releases, so no upgrade exists - and now say so with the date they were checked
+
 ## 5.4.2
 
 ### Fixed

@@ -1,26 +1,29 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 version: v1.25.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
+# Keep the npm (SNYK-JS-*) entries identical to the ones in ../.snyk: the pipeline scans the UI with
+# --file=swiyu-trust-management-ui/package.json, and Snyk then reads this copy instead of the root one.
 ignore:
-  SNYK-JS-IMAGESIZE-17295816:
-    - '*':
-        reason: 'No update path as of now'
-        expires: 2026-11-09T09:00:00.000Z
-        created: 2026-06-23T14:51:45.487Z
-  SNYK-JS-IMAGESIZE-17295814:
-    - '*':
-        reason: 'No update path as of now'
-        expires: 2026-11-09T09:00:00.000Z
-        created: 2026-06-23T14:52:11.176Z
   SNYK-JS-BRACES-19963945:
     - '*':
-        reason: No fixed version available; braces only used by dev/build tooling (not shipped to production bundle). Tracked in EID-6915.
-        expires: 2026-11-09T09:00:00.000Z
+        reason: >-
+          Still no fixed version: re-checked npm on 2026-11-10, 3.0.3 is the latest braces release and
+          micromatch 4.0.8 requires ^3.0.3. Reached only through the Angular build tooling
+          (@angular-devkit/build-angular > http-proxy-middleware > micromatch), never shipped in the
+          bundle. Snyk proposes webpack-dev-server 6.0.0, which does not fix braces but replaces the
+          path: that is a major upgrade of a transitive dev dependency we already pin to ^5.2.7 in
+          package.json overrides, so it is deferred to the Angular CLI upgrade (EID-6533).
+          Tracked in EID-6915.
+        expires: 2026-11-23T09:00:00.000Z
         created: 2026-09-21T12:10:03.000Z
   SNYK-JS-PICOMATCH-21248802:
     - '*':
-        reason: No fixed version available (CVE-2026-112366 affects picomatch up to and including the latest 4.0.7, and the @angular-devkit/build-angular 22.2.3 upgrade Snyk suggests pins 4.0.7 as well); picomatch only used by dev/build tooling (not shipped to production bundle). Tracked in EID-6992.
-        expires: 2026-11-09T09:00:00.000Z
+        reason: >-
+          No fixed version exists yet (CVE-2026-112366); re-checked npm on 2026-11-10, 4.0.7 is still
+          the latest picomatch release and the advisory names no fixed release. Reached through Angular
+          schematics/build tooling (@angular-devkit/core), which matches glob patterns from project
+          configuration rather than untrusted runtime input. Track the upstream fix. Tracked in EID-6992.
+        expires: 2026-11-23T09:00:00.000Z
         created: 2026-10-20T00:00:00.000Z
   SNYK-JS-URIJS-19963963:
     - '*':
