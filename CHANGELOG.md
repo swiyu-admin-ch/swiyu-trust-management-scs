@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.4.5
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent from 41.34.0 to 41.36.0
+- Drop the Snyk ignores that no longer match any finding: snappy-java, picomatch, uri-js and
+  http-cache-semantics
+- Renew the ubi9 base-image curl/libacl ignores and the flat ignore in both policy files for 14 days: no fixed
+  base image and no fixed flat release are available yet
+
 ## 5.4.4
 
 ### Fixed

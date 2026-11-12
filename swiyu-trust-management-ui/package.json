@@ -1,6 +1,6 @@
 {
   "name": "swiyu-trust-management-ui",
-  "version": "5.4.4",
+  "version": "5.4.5",
   "private": true,
   "scripts": {
     "build": "ng build",

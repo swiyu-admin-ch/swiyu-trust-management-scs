@@ -1,8 +1,8 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 version: v1.25.1
-# ignores vulnerabilities until expiry date; change duration by modifying expiry date
 # Keep the npm (SNYK-JS-*) entries identical to the ones in ../.snyk: the pipeline scans the UI with
 # --file=swiyu-trust-management-ui/package.json, and Snyk then reads this copy instead of the root one.
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-JS-BRACES-19963945:
     - '*':
@@ -16,39 +16,6 @@ ignore:
           Tracked in EID-6915.
         expires: 2026-11-23T09:00:00.000Z
         created: 2026-09-21T12:10:03.000Z
-  SNYK-JS-PICOMATCH-21248802:
-    - '*':
-        reason: >-
-          No fixed version exists yet (CVE-2026-112366); re-checked npm on 2026-11-10, 4.0.7 is still
-          the latest picomatch release and the advisory names no fixed release. Reached through Angular
-          schematics/build tooling (@angular-devkit/core), which matches glob patterns from project
-          configuration rather than untrusted runtime input. Track the upstream fix. Tracked in EID-6992.
-        expires: 2026-11-23T09:00:00.000Z
-        created: 2026-10-20T00:00:00.000Z
-  SNYK-JS-URIJS-19963963:
-    - '*':
-        reason: >-
-          No fixed uri-js release exists (4.4.1 is the latest). Pulled in transitively
-          via eslint > ajv 6; lint/build tooling only, never shipped in the bundle.
-          Track the upstream fix.
-        expires: 2026-11-13T09:00:00.000Z
-        created: 2026-10-30T00:00:00.000Z
-  SNYK-JS-HTTPCACHESEMANTICS-19964064:
-    - '*':
-        reason: >-
-          No fixed http-cache-semantics release exists; the vulnerable copy is pulled in
-          by the @angular/cli tooling and is only replaced by the Angular CLI 22 major
-          upgrade (EID-6533). Build-time only.
-        expires: 2026-11-13T09:00:00.000Z
-        created: 2026-10-30T00:00:00.000Z
-  SNYK-JS-HTTPCACHESEMANTICS-19964068:
-    - '*':
-        reason: >-
-          No fixed http-cache-semantics release exists; the vulnerable copy is pulled in
-          by the @angular/cli tooling and is only replaced by the Angular CLI 22 major
-          upgrade (EID-6533). Build-time only.
-        expires: 2026-11-13T09:00:00.000Z
-        created: 2026-10-30T00:00:00.000Z
   SNYK-JS-FLAT-22148819:
     - '*':
         reason: >-
@@ -57,6 +24,6 @@ ignore:
           webpack-merge. Reached only through the Angular build tooling
           (@angular-devkit/build-angular > webpack-merge), never shipped in the bundle.
           Track the upstream fix.
-        expires: 2026-11-17T09:00:00.000Z
+        expires: 2026-11-25T09:00:00.000Z
         created: 2026-11-03T09:00:00.000Z
 patch: { }
