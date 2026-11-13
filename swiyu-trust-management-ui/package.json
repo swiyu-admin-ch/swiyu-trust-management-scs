@@ -1,6 +1,6 @@
 {
   "name": "swiyu-trust-management-ui",
-  "version": "5.4.5",
+  "version": "5.4.6",
   "private": true,
   "scripts": {
     "build": "ng build",
@@ -85,9 +85,6 @@
       "undici": "^7.30.2"
     },
     "basic-ftp": "^6.2.2",
-    "jsdom": {
-      "undici": "^8.12.4"
-    },
     "node-gyp": {
       "undici": "^7.30.2"
     },
