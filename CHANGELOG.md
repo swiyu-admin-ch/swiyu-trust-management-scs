@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.5.0
+
+### Added
+
+- Identify trust statements which exist in the registry database but not in the management database on startup.
+  Such statements are soft deleted (protocol V2) respectively deactivated (protocol V1) in the registry
+
+## 5.4.8
+
+### Changed
+
+- Upgrade the jEAP Spring Boot parent from 41.36.0 to 41.37.0
+- Re-run the Snyk Maven, Node and container scans: no open high or critical findings. The jaxb-core, braces
+  and flat ignores stay in place, all still match a finding and remain unfixed upstream
+
+## 5.4.7
+
+### Fixed
+
+- Upgrade the DID resolver library (`ch.admin.swiyu:didresolver`) from 2.9.0 to 2.10.1 for its security fixes.
+  The `swiyu-did-resolver-adapter` stays on 1.8.4: no adapter release is built against 2.10.x, and the resolver
+  API it calls is unchanged
+
 ## 5.4.6
 
 ### Changed

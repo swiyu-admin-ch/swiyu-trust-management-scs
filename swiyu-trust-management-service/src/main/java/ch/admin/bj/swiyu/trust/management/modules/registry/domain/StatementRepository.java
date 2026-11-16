@@ -7,7 +7,13 @@
 package ch.admin.bj.swiyu.trust.management.modules.registry.domain;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
-public interface StatementRepository extends JpaRepository<Statement, UUID>, QuerydslPredicateExecutor<Statement> {}
+public interface StatementRepository extends JpaRepository<Statement, UUID>, QuerydslPredicateExecutor<Statement> {
+    Stream<Statement> findAllByIsActiveInStatuslistAndIsSoftDeleted(
+        boolean isActiveInStatuslist,
+        boolean isSoftDeleted
+    );
+}

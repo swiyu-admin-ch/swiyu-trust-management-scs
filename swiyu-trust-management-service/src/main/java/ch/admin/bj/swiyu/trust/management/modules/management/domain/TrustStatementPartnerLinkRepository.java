@@ -75,4 +75,6 @@ public interface TrustStatementPartnerLinkRepository
     );
 
     void deleteAllByPartnerId(UUID partnerId);
+
+    boolean existsByIdOrTrustRegistryEntryId(UUID id, UUID trustRegistryEntryId);
 }

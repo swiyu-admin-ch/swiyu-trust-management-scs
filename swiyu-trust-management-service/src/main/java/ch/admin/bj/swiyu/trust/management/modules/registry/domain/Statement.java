@@ -84,4 +84,8 @@ public class Statement {
     public void markAsInactiveInStatuslist() {
         this.isActiveInStatuslist = false;
     }
+
+    public void markAsSoftDeleted() {
+        this.isSoftDeleted = true;
+    }
 }

@@ -11,13 +11,13 @@
             from the dependencyManagement section
          -->
         <!-- see https://github.com/jeap-admin-ch/jeap-spring-boot-parent/blob/main/CHANGELOG.md -->
-        <version>41.36.0</version>
+        <version>41.37.0</version>
         <relativePath/>
     </parent>
 
     <groupId>ch.admin.bj.swiyu</groupId>
     <artifactId>swiyu-trust-management-scs</artifactId>
-    <version>5.4.6-SNAPSHOT</version>
+    <version>5.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -27,7 +27,7 @@
         <com-securosys-primus-jce.version>2.4.4</com-securosys-primus-jce.version>
         <!-- Keep didresolver and adapter in sync https://github.com/swiyu-admin-ch/swiyu-generic-java-lib/blob/main/swiyu-did-resolver-adapter/pom.xml -->
         <swiyu-did-resolver-adapter.version>1.8.4</swiyu-did-resolver-adapter.version>
-        <swiyu-did-resolver.version>2.9.0</swiyu-did-resolver.version>
+        <swiyu-did-resolver.version>2.10.1</swiyu-did-resolver.version>
 
         <archunit-junit5.version>1.5.0</archunit-junit5.version>
         <nimbus-jose-jwt.version>10.9.1</nimbus-jose-jwt.version>

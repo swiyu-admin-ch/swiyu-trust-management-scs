@@ -53,6 +53,26 @@ class TrustStatementPartnerLinkRepositoryIT {
         assertThat(repository.findAll()).extracting(TrustStatementPartnerLink::getPartnerId).containsOnly(partnerB);
     }
 
+    @Test
+    void existsByIdOrTrustRegistryEntryId_matchesEitherColumn() {
+        // given
+        var partnerLink = trustStatement(partnerA, "did:d");
+        partnerLink.persistReferencesAfterPublicationSucceeded(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            TrustStatementPartnerLinkStatus.ACTIVE
+        );
+        partnerLink = repository.saveAndFlush(partnerLink);
+        var unknownId = UUID.randomUUID();
+
+        // then
+        assertThat(repository.existsByIdOrTrustRegistryEntryId(partnerLink.getId(), unknownId)).isTrue();
+        assertThat(
+            repository.existsByIdOrTrustRegistryEntryId(unknownId, partnerLink.getTrustRegistryEntryId())
+        ).isTrue();
+        assertThat(repository.existsByIdOrTrustRegistryEntryId(unknownId, unknownId)).isFalse();
+    }
+
     private static TrustStatementPartnerLink trustStatement(UUID partnerId, String subject) {
         return createIdentityV1(
             partnerId,

@@ -8,6 +8,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
+import ch.admin.bj.swiyu.trust.management.modules.jobs.service.LostStatementsIdentificationStartupService;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ImportOption;
@@ -227,6 +228,8 @@ public class ArchitectureTest {
                 resideInAPackage("ch.admin.bj.swiyu.trust.management.modules.jobs.."),
                 resideInAPackage("ch.admin.bj.swiyu.trust.management.modules.management.[api|service]..")
             )
+            // LostStatementsIdentificationStartupService -> allow all
+            .ignoreDependency(type(LostStatementsIdentificationStartupService.class), alwaysTrue())
             // demodata -> allow all
             .ignoreDependency(resideInAPackage("..swiyu.trust.management.modules.dataimport.."), alwaysTrue());
 
