@@ -3,8 +3,6 @@ package ch.admin.bj.swiyu.trust.management.modules.jobs.service;
 import ch.admin.bj.swiyu.trust.management.modules.common.async.AsyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -15,7 +13,7 @@ public class LostStatementsIdentificationStartupJob {
     private final AsyncService async;
     private final LostStatementsIdentificationStartupService lostStatementsIdentificationStartupService;
 
-    @EventListener(ApplicationReadyEvent.class)
+    // disbabled, due to test wether this is too heavy memory usage: @EventListener(ApplicationReadyEvent.class)
     public void loadTestData() {
         async.run(() -> {
             try {
