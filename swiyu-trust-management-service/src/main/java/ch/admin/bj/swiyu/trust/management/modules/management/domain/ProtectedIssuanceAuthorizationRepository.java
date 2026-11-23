@@ -16,7 +16,7 @@ public interface ProtectedIssuanceAuthorizationRepository
 
     List<ProtectedIssuanceAuthorization> findAllByProtectedIssuanceEntryId(UUID protectedIssuanceEntryId);
 
-    void deleteByBusinessPartnerIdentityId(@NotNull UUID businessPartnerIdentityId);
+    long deleteByBusinessPartnerIdentityId(@NotNull UUID businessPartnerIdentityId);
 
     void deleteByProtectedIssuanceEntryId(UUID protectedIssuanceEntryId);
 

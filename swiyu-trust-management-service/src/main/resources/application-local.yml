@@ -166,7 +166,14 @@ app:
     automatic-approval-enabled: false
   offboarding:
     # Short on purpose so local e2e tests do not have to wait days for the deletion deadline.
-    hard-delete-delay: 5m
+    hard-delete-delay: 5m # Keep in mind to sync with hard-delete-business-partner-cron
+  jobs:
+    # Locally the startup jobs must not make the developer wait five minutes for their effect.
+    lost-statements-identification:
+      initial-delay: 5s
+    demo-data-import:
+      initial-delay: 5s
+    hard-delete-business-partner-cron: "1 */5 * * * *"
   issuer:
     jwt:
       trust-issuer:

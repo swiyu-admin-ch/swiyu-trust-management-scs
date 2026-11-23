@@ -653,7 +653,7 @@ class TrustOnboardingTaskServiceIT {
         trustOnboardingTaskService.createOrResubmitTask(submission, getCurrentUserName());
         trustOnboardingTaskService.requestMoreInformation(taskId, request, "Timo Truster");
         trustOnboardingTaskService.createOrResubmitTask(submission, getCurrentUserName());
-        var filter = new TaskFilterDto(null, null, null, null, null, null, null);
+        var filter = new TaskFilterDto(null, null, null, null, null, null, null, null);
         // when
         var page = taskService.getTasks(PageRequest.of(0, 50), filter, "test user");
 

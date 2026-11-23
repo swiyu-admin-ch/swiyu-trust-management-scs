@@ -1,11 +1,17 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
+import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.STATEMENT_TOMBSTONE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class TrustStatementMapperTest {
+
+    @Test
+    void toTrustStatementTypeDto_returnsNullForATombstone() {
+        assertThat(TrustStatementMapper.toTrustStatementTypeDto(STATEMENT_TOMBSTONE)).isNull();
+    }
 
     @Test
     void toIdentityV1LanguageMap_doesNotMapDefaultKey() {

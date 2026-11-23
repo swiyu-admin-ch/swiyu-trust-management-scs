@@ -7,8 +7,11 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Protect
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustAddDidTaskRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTaskRepository;
+import ch.admin.bj.swiyu.trust.management.modules.registry.domain.DatastoreEntityRepository;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.NonComplianceListRepository;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.StatementRepository;
+import ch.admin.bj.swiyu.trust.management.modules.registry.domain.VcEntityRepository;
+import ch.admin.bj.swiyu.trust.management.modules.registry.domain.VcSchemaRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.transaction.TestTransaction;
@@ -41,6 +44,12 @@ public class TestRepositories {
     public final StatusListMetadataRepository statusListMetadata;
     public final TrustAddDidTaskRepository trustAddDidTask;
     public final DeleteBusinessPartnerTaskRepository deleteBusinessPartnerTask;
+    public final VcSchemaPartnerLinkRepository vcSchemaPartnerLink;
+    public final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorization;
+    public final ProtectedIssuanceEntryRepository protectedIssuanceEntry;
+    public final VcSchemaRepository vcSchema;
+    public final VcEntityRepository vcEntity;
+    public final DatastoreEntityRepository datastoreEntity;
 
     /**
      * Opens a new Transaction. Might be useful if there are multiple transactions are needed within a test.

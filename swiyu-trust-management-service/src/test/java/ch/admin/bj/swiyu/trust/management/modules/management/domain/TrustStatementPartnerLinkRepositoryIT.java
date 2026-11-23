@@ -1,6 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink.createIdentityV1;
+import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.STATEMENT_TOMBSTONE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
@@ -71,6 +72,29 @@ class TrustStatementPartnerLinkRepositoryIT {
             repository.existsByIdOrTrustRegistryEntryId(unknownId, partnerLink.getTrustRegistryEntryId())
         ).isTrue();
         assertThat(repository.existsByIdOrTrustRegistryEntryId(unknownId, unknownId)).isFalse();
+    }
+
+    @Test
+    void findAllByPartnerIdOrSubjectIn_matchesByPartnerIdOrBySubject() {
+        // when
+        var result = repository.findAllByPartnerIdOrSubjectIn(partnerA, java.util.Set.of("did:c"));
+
+        // then
+        assertThat(result)
+            .extracting(TrustStatementPartnerLink::getSubject)
+            .containsExactlyInAnyOrder("did:a", "did:b", "did:c");
+    }
+
+    @Test
+    void countByTypeNot_ignoresTombstones() {
+        // given
+        var tombstone = trustStatement(partnerA, "did:tombstone");
+        tombstone.convertToTombstone();
+        repository.saveAndFlush(tombstone);
+
+        // then
+        assertThat(repository.count()).isEqualTo(4);
+        assertThat(repository.countByTypeNot(STATEMENT_TOMBSTONE)).isEqualTo(3);
     }
 
     private static TrustStatementPartnerLink trustStatement(UUID partnerId, String subject) {

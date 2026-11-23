@@ -31,12 +31,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = PostgreSQLContainerInitializer.class)
 @DataJpaTest
-@Import({ LostStatementsIdentificationStartupService.class, DataJpaTestConfiguration.class })
+@Import({ LostStatementsIdentificationService.class, DataJpaTestConfiguration.class })
 @ActiveProfiles("test")
-class LostStatementsIdentificationStartupServiceIT {
+class LostStatementsIdentificationServiceIT {
 
     @Autowired
-    private LostStatementsIdentificationStartupService lostStatementsIdentificationStartupService;
+    private LostStatementsIdentificationService lostStatementsIdentificationService;
 
     @Autowired
     private StatementRepository statementRepository;
@@ -100,7 +100,7 @@ class LostStatementsIdentificationStartupServiceIT {
         persistPartnerLinkReferencingTrustRegistryEntry(knownStatement.getId());
 
         // WHEN
-        var modifiedCount = lostStatementsIdentificationStartupService.resolveV2Statements();
+        var modifiedCount = lostStatementsIdentificationService.resolveV2Statements();
 
         // THEN
         assertThat(modifiedCount).isEqualTo(1);
@@ -115,7 +115,7 @@ class LostStatementsIdentificationStartupServiceIT {
         var softDeletedStatement = persistStatement(true, true);
 
         // WHEN
-        var modifiedCount = lostStatementsIdentificationStartupService.resolveV2Statements();
+        var modifiedCount = lostStatementsIdentificationService.resolveV2Statements();
 
         // THEN
         assertThat(modifiedCount).isZero();
@@ -131,7 +131,7 @@ class LostStatementsIdentificationStartupServiceIT {
         persistPartnerLinkReferencingTrustRegistryEntry(knownDatastoreEntity.getId());
 
         // WHEN
-        var modifiedCount = lostStatementsIdentificationStartupService.resolveV1Statements();
+        var modifiedCount = lostStatementsIdentificationService.resolveV1Statements();
 
         // THEN
         assertThat(modifiedCount).isEqualTo(1);
@@ -145,7 +145,7 @@ class LostStatementsIdentificationStartupServiceIT {
         var deactivatedDatastoreEntity = persistDatastoreEntity(DEACTIVATED);
 
         // WHEN
-        var modifiedCount = lostStatementsIdentificationStartupService.resolveV1Statements();
+        var modifiedCount = lostStatementsIdentificationService.resolveV1Statements();
 
         // THEN
         assertThat(modifiedCount).isZero();

@@ -156,6 +156,30 @@ public class AuditPublisher {
         publishAuditEvent(VC_SCHEMA_PUBLISHED, vcSchemaId, version, null, partnerId, vcSchemaJson, vcSchemaFile);
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void vcSchemaDeleted(
+        String vcSchemaId,
+        String partnerId,
+        Long version,
+        String vcSchemaJson,
+        String vcSchemaFile
+    ) {
+        publishAuditEvent(VC_SCHEMA_DELETED, vcSchemaId, version, null, partnerId, vcSchemaJson, vcSchemaFile);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void businessPartnerIdentityDeleted(String partnerId, Long identityVersion, String identityJson) {
+        publishAuditEvent(
+            BUSINESS_PARTNER_IDENTITY_DELETED,
+            partnerId,
+            identityVersion,
+            null,
+            partnerId,
+            identityJson,
+            null
+        );
+    }
+
     private void publishAuditEvent(AuditUseCase useCase, String objectId, Long version, String dataJson) {
         publishAuditEvent(useCase, objectId, version, null, null, dataJson, null);
     }

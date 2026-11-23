@@ -3,19 +3,25 @@ package ch.admin.bj.swiyu.trust.management.modules.management.service;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMapper;
 import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
+import ch.admin.bj.swiyu.trust.management.modules.common.security.SecurityContextSupport;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorFilterDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorRequestDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentityRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantActor;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantActorRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantReasonText;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.QNonCompliantActor;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent.DomainEventLogRepository;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.NonCompliantActorsDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.service.NonComplianceListService;
 import com.querydsl.core.BooleanBuilder;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -36,6 +42,8 @@ public class NonCompliantActorService {
     private final NonComplianceListService nonComplianceListService;
     private final AuditPublisher auditPublisher;
     private final NonCompliantActorDidsResolver nonCompliantActorDidsResolver;
+    private final BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
+    private final DomainEventLogRepository domainEventLogRepository;
 
     @Transactional(readOnly = true)
     public NonCompliantActorDto getNonCompliantActor(@Valid @NotNull UUID nonCompliantActorId) {
@@ -126,10 +134,41 @@ public class NonCompliantActorService {
         var nonCompliantActor = this.nonCompliantActorRepository.findById(nonCompliantActorId).orElseThrow(
             nonCompliantActorNotFound(nonCompliantActorId)
         );
-        this.nonCompliantActorRepository.deleteById(nonCompliantActorId);
-        this.domainEventService.nonCompliantActorRemoved(nonCompliantActorId, currentUserFullName);
+        delete(nonCompliantActor, currentUserFullName);
+    }
+
+    /**
+     * Deletes every non-compliant actor row of a hard-deleted business partner, matched by partner id and by the
+     * identity's DIDs (rows created before the partner reference was introduced carry none). The local event log rows
+     * of those actors are removed with them - they are partner data, unlike the audit records which already went to the
+     * WORM trail. The caller republishes the non-compliance list.
+     */
+    @Transactional
+    public int hardDeleteByPartnerId(UUID partnerId) {
+        var trustedIdentifiers = businessPartnerIdentityRepository
+            .findById(partnerId)
+            .map(BusinessPartnerIdentity::getTrustedIdentifier)
+            .orElseGet(Set::of);
+
+        var actors = new LinkedHashMap<UUID, NonCompliantActor>();
+        nonCompliantActorRepository.findAllByBusinessPartnerId(partnerId).forEach(a -> actors.put(a.getId(), a));
+        if (!trustedIdentifiers.isEmpty()) {
+            nonCompliantActorRepository.findAllByDidIn(trustedIdentifiers).forEach(a -> actors.put(a.getId(), a));
+        }
+
+        var triggeredBy = SecurityContextSupport.getCurrentUserFullName();
+        if (!actors.isEmpty()) {
+            domainEventLogRepository.deleteAllByNonCompliantActorIdIn(actors.keySet());
+        }
+        actors.values().forEach(actor -> delete(actor, triggeredBy));
+        return actors.size();
+    }
+
+    private void delete(NonCompliantActor nonCompliantActor, String triggeredBy) {
+        this.nonCompliantActorRepository.delete(nonCompliantActor);
+        this.domainEventService.nonCompliantActorRemoved(nonCompliantActor.getId(), triggeredBy);
         auditPublisher.nonCompliantActorDeleted(
-            nonCompliantActorId.toString(),
+            nonCompliantActor.getId().toString(),
             nonCompliantActor.getVersion(),
             AuditMapper.toAuditJson(nonCompliantActor)
         );

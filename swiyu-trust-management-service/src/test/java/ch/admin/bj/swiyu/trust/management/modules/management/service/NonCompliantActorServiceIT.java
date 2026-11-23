@@ -5,6 +5,7 @@ import static ch.admin.bj.swiyu.trust.management.modules.management.domain.domai
 import static ch.admin.bj.swiyu.trust.management.test.NonCompliantActorTestData.nonCompliantActorRequestDto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -17,6 +18,9 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantAct
 import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorFilterDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantActorRequestDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.NonCompliantReasonTextDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentity;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentityRepository;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerIdentityStatus;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantActor;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantActorRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.NonCompliantReasonText;
@@ -25,6 +29,9 @@ import ch.admin.bj.swiyu.trust.management.modules.registry.service.NonCompliance
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.MockAuditPublisherTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +76,9 @@ class NonCompliantActorServiceIT {
 
     @Autowired
     private DomainEventLogRepository domainEventLogRepository;
+
+    @Autowired
+    private BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
 
     @Autowired
     private AuditPublisher auditPublisher;
@@ -340,5 +350,77 @@ class NonCompliantActorServiceIT {
         service.deleteNonCompliantActor(saved.getId(), CURRENT_USER);
 
         verifyNonCompliantActorDeletedAudit(auditPublisher, saved.getId(), saved.getVersion(), expectedJson);
+    }
+
+    @Test
+    void hardDeleteByPartnerId_deletesActorsMatchedByPartnerIdAndByDid() {
+        var partnerId = UUID.randomUUID();
+        var did = "did:example:partner-did";
+        businessPartnerIdentityRepository.saveAndFlush(businessPartnerIdentity(partnerId, did));
+
+        var byPartnerId = nonCompliantActorRepository.saveAndFlush(
+            new NonCompliantActor(
+                UUID.randomUUID(),
+                "did:example:by-partner",
+                partnerId,
+                new NonCompliantReasonText(null, null, null, "Reason", null)
+            )
+        );
+        var byDid = nonCompliantActorRepository.saveAndFlush(
+            new NonCompliantActor(
+                UUID.randomUUID(),
+                did,
+                null,
+                new NonCompliantReasonText(null, null, null, "Reason", null)
+            )
+        );
+        var other = nonCompliantActorRepository.saveAndFlush(
+            new NonCompliantActor(
+                UUID.randomUUID(),
+                "did:example:other",
+                UUID.randomUUID(),
+                new NonCompliantReasonText(null, null, null, "Reason", null)
+            )
+        );
+
+        service.hardDeleteByPartnerId(partnerId);
+
+        assertThat(nonCompliantActorRepository.findAll()).containsExactly(other);
+        verify(auditPublisher).nonCompliantActorDeleted(
+            eq(byPartnerId.getId().toString()),
+            eq(byPartnerId.getVersion()),
+            anyString()
+        );
+        verify(auditPublisher).nonCompliantActorDeleted(
+            eq(byDid.getId().toString()),
+            eq(byDid.getVersion()),
+            anyString()
+        );
+        // The local event log of the deleted actors is partner data as well and is removed here (old events),
+        // unlike the audit records which live in the WORM audit trail. The deletion itself creates new
+        // NON_COMPLIANT_ACTOR_REMOVED events for the deleted actors.
+        var remainingEvents = domainEventLogRepository.findAll();
+        assertThat(remainingEvents).allMatch(
+            e ->
+                e.getEventType() == NON_COMPLIANT_ACTOR_REMOVED &&
+                (e.getNonCompliantActorId().equals(byPartnerId.getId()) ||
+                    e.getNonCompliantActorId().equals(byDid.getId()))
+        );
+    }
+
+    private static BusinessPartnerIdentity businessPartnerIdentity(UUID partnerId, String did) {
+        return new BusinessPartnerIdentity(
+            partnerId,
+            Map.of("default", "Acme AG"),
+            Instant.now(),
+            "CHE-123.456.789",
+            true,
+            "de",
+            BusinessPartnerIdentityStatus.ACTIVE,
+            false,
+            Instant.now().plusSeconds(3600),
+            null,
+            Set.of(did)
+        );
     }
 }

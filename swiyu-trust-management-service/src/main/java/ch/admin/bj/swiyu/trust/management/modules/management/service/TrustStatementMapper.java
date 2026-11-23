@@ -12,7 +12,6 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.*;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.IssuerVcStatus;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.DatastoreStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.StatementDto;
-import jakarta.validation.constraints.NotNull;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +133,7 @@ public class TrustStatementMapper {
             case TRUST_LIST_STATEMENT_PROTECTED_ISSUANCE_V2 -> TrustStatementTypeDto.PROTECTED_ISSUANCE_V2;
             case PUBLIC_STATEMENT_VERIFICATION_QUERY_V2 -> TrustStatementTypeDto.PUBLIC_STATEMENT_VERIFICATION_QUERY_V2;
             case TRUST_STATEMENT_IDENTITY_V2 -> TrustStatementTypeDto.IDENTITY_V2;
+            case STATEMENT_TOMBSTONE -> null;
         };
     }
 
@@ -300,9 +300,9 @@ public class TrustStatementMapper {
 
     private static Map<String, Object> toAdditionalPropertiesMap(
         ObjectMapper objectMapper,
-        @NotNull TrustStatementDetails data
+        TrustStatementDetails data
     ) {
-        return objectMapper.convertValue(data, new TypeReference<>() {});
+        return data == null ? null : objectMapper.convertValue(data, new TypeReference<>() {});
     }
 
     static IssuerVcStatusDto toVcStatusDto(IssuerVcStatus issuerVcStatus) {

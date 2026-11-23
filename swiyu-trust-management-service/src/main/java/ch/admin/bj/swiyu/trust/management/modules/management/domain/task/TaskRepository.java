@@ -4,4 +4,6 @@ import java.util.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.querydsl.*;
 
-public interface TaskRepository extends JpaRepository<Task, UUID>, QuerydslPredicateExecutor<Task> {}
+public interface TaskRepository extends JpaRepository<Task, UUID>, QuerydslPredicateExecutor<Task> {
+    List<Task> findAllByPartnerId(UUID partnerId);
+}

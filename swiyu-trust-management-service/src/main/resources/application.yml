@@ -15,6 +15,12 @@ spring:
   mvc:
     contentnegotiation:
       default-content-type: application/json
+  task:
+    scheduling:
+      pool:
+        # The delayed lost-statements job runs on a scheduler thread; the health checks and the statistics
+        # exporter must not wait for it.
+        size: 4
   jpa:
     open-in-view: false
     properties:
@@ -220,6 +226,17 @@ app:
     validity: P3Y # 3 years
 
   jobs:
+    lost-statements-identification:
+      # Runs once per instance after the initial delay and does not repeat during the lifetime of the instance.
+      # Another instance runs it again (ShedLock keeps it to one run at a time); the job is idempotent.
+      enabled: true
+      initial-delay: 5m
+      repeat-delay: 3650d
+    demo-data-import:
+      # Only active with the test-data-injection profile. Runs once per instance, delayed like the other
+      # startup jobs so the application is up before the database is rewritten.
+      initial-delay: 5m
+      repeat-delay: 3650d
     statement-renew-all-businesspartner-trust-statements-cron: "0 0 1 * * *" # once a day at 01:00
     # The interval MUST be a fraction of ${app.statement-defaults.statuslist.time-to-live}.
     statement-status-list-refresh-cron: "0 30 0,6,12,18 * * *"
@@ -230,6 +247,9 @@ app:
     statement-deactivate-expired-business-partner-cron: "0 0 1 * * *" # once a day at 01:00
     # The rejection-enforcement-check-cron MUST be a fraction of the app.trust-onboarding-task.rejection-enforcement-period.
     trust-onboarding-task-rejection-enforcement-check-cron: "0 0 1 * * *" # once a day at 01:00
+    # Approves the delete-business-partner tasks that are due. Hourly, so the configured offboarding delay is honoured
+    # within the hour and the waiting period is never cut short.
+    hard-delete-business-partner-cron: "0 0 * * * *" # every hour
     trust-statistics-metrics-exporter-cron: "0 */5 * * * *" # every 5 min
   issuer:
     trust-root:

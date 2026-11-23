@@ -6,10 +6,12 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditTestS
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditTestSupport.assertJsonObjectData;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditTestSupport.assertValueObjectData;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditTestSupport.clearDeferredMessages;
+import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.BUSINESS_PARTNER_IDENTITY_DELETED;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.NON_COMPLIANT_ACTOR_ADDED;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.NON_COMPLIANT_ACTOR_DELETED;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.TRUST_STATEMENT_DEACTIVATED;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.TRUST_STATEMENT_PUBLISHED;
+import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.VC_SCHEMA_DELETED;
 import static ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditUseCase.VC_SCHEMA_PUBLISHED;
 import static ch.admin.bj.swiyu.trust.management.modules.common.auth.UserRole.Names.EDITOR;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.TRUST_STATEMENT_IDENTITY_V2;
@@ -18,8 +20,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import ch.admin.bit.jeap.audit.record.create.AuditEventType;
 import ch.admin.bit.jeap.audit.record.create.AuditObjectDataJSON;
 import ch.admin.bit.jeap.audit.record.create.AuditObjectDataRole;
+import ch.admin.bit.jeap.audit.record.create.AuditObjectDataValue;
 import ch.admin.bit.jeap.audit.record.create.AuditUser;
 import ch.admin.bit.jeap.audit.record.create.CreateAuditRecordCommand;
 import ch.admin.bit.jeap.messaging.kafka.interceptor.JeapKafkaMessageCallback;
@@ -71,6 +75,7 @@ class AuditPublisherIT {
     private static final Long VC_SCHEMA_VERSION = 2L;
     private static final String VC_SCHEMA_FILE =
         "{\"vct\":\"https://trust-reg.trust-infra.swiyu.admin.ch/api/v1/vc-schema/mySchema\"}";
+    private static final Long BUSINESS_PARTNER_IDENTITY_VERSION = 3L;
 
     @Autowired
     AuditPublisher auditPublisher;
@@ -219,6 +224,44 @@ class AuditPublisherIT {
         assertAuditedObject(msg, VC_SCHEMA_ID, VC_SCHEMA_PUBLISHED.getAuditObjectType(), VC_SCHEMA_VERSION.toString());
         assertJsonObjectData(msg, VC_SCHEMA_PUBLISHED.getDataJsonFieldName(), vcSchemaJson);
         assertValueObjectData(msg, VC_SCHEMA_PUBLISHED.getDataValueFieldName(), VC_SCHEMA_FILE);
+    }
+
+    @Transactional
+    @Test
+    void deleteVcSchema() {
+        var vcSchemaJson = "{\"id\":\"" + VC_SCHEMA_ID + "\"}";
+
+        var traceId = executeWithTracing(() ->
+            auditPublisher.vcSchemaDeleted(VC_SCHEMA_ID, PARTNER_ID, VC_SCHEMA_VERSION, vcSchemaJson, VC_SCHEMA_FILE)
+        );
+
+        var msg = verifySingleAuditCommand(deferredMessageRepository, kafkaMsgCallback);
+        assertAuditEvent(msg, VC_SCHEMA_DELETED, traceId);
+        assertThat(msg.getPayload().getEvent().getType()).isEqualTo(AuditEventType.DELETED);
+        assertUseCaseCategory(msg, VC_SCHEMA_DELETED);
+        assertBusinessPartnerId(msg, PARTNER_ID);
+        assertAuditedObject(msg, VC_SCHEMA_ID, "VC_SCHEMA", VC_SCHEMA_VERSION.toString());
+        assertJsonObjectData(msg, "VC_SCHEMA_META", vcSchemaJson);
+        assertValueObjectData(msg, "VC_SCHEMA_FILE", VC_SCHEMA_FILE);
+    }
+
+    @Transactional
+    @Test
+    void deleteBusinessPartnerIdentity() {
+        var identityJson = "{\"businessPartnerId\":\"" + PARTNER_ID + "\"}";
+
+        var traceId = executeWithTracing(() ->
+            auditPublisher.businessPartnerIdentityDeleted(PARTNER_ID, BUSINESS_PARTNER_IDENTITY_VERSION, identityJson)
+        );
+
+        var msg = verifySingleAuditCommand(deferredMessageRepository, kafkaMsgCallback);
+        assertAuditEvent(msg, BUSINESS_PARTNER_IDENTITY_DELETED, traceId);
+        assertThat(msg.getPayload().getEvent().getType()).isEqualTo(AuditEventType.DELETED);
+        assertUseCaseCategory(msg, BUSINESS_PARTNER_IDENTITY_DELETED);
+        assertBusinessPartnerId(msg, PARTNER_ID);
+        assertAuditedObject(msg, PARTNER_ID, "BUSINESS_PARTNER_IDENTITY", BUSINESS_PARTNER_IDENTITY_VERSION.toString());
+        assertJsonObjectData(msg, "BUSINESS_PARTNER_IDENTITY_DATA", identityJson);
+        assertThat(msg.getPayload().getAuditedData().getObjectData()).noneMatch(AuditObjectDataValue.class::isInstance);
     }
 
     private static void setEiamRefGovernmentUserInSecurityContext() {

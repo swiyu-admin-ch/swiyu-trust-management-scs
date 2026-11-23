@@ -1,13 +1,23 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.service;
 
+import static ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData.BUSINESS_PARTNER_NAME;
 import static ch.admin.bj.swiyu.trust.management.test.TaskTestData.trustOnboardingTask;
 import static ch.admin.bj.swiyu.trust.management.test.TestTransactionSupport.commit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskFilterDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskListItemDto;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.DeleteBusinessPartnerTask;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.Task;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskStatus;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TaskType;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOnboardingTask;
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
 import ch.admin.bj.swiyu.trust.management.test.TestRepositories;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,10 +85,71 @@ class TaskServiceIT {
         repos.task.save(trustOnboardingTask());
         repos.task.save(trustOnboardingTask());
         commit();
-        var filter = new TaskFilterDto(null, null, null, null, null, null, null);
+        var filter = new TaskFilterDto(null, null, null, null, null, null, null, null);
         // when
         taskService.getTasks(Pageable.unpaged(), filter, "test user");
         // then
         assertThat(repos.task.count()).isEqualTo(2);
+    }
+
+    @Test
+    void getTasks_whenHardDeleteDueUntilIsSet_thenOnlyDueDeleteTasksAreReturned() {
+        var duePartnerId = UUID.randomUUID();
+        var dueTask = repos.task.saveAndFlush(deleteTask(duePartnerId, Instant.now().minusSeconds(3600)));
+        var notYetDueTask = repos.task.saveAndFlush(deleteTask(UUID.randomUUID(), Instant.now().plusSeconds(3600)));
+        var onboardingTask = repos.task.saveAndFlush(trustOnboardingTask());
+
+        var filter = new TaskFilterDto(
+            null,
+            null,
+            null,
+            null,
+            List.of(TaskStatus.OPENED.name()),
+            null,
+            List.of(TaskType.DELETE_BUSINESS_PARTNER.name()),
+            Instant.now()
+        );
+
+        var tasks = taskService.getTasks(Pageable.unpaged(), filter, "test user");
+
+        assertThat(tasks.getContent()).extracting(TaskListItemDto::id).containsExactly(dueTask.getId());
+        assertThat(tasks.getContent()).noneMatch(task -> task.id().equals(notYetDueTask.getId()));
+        assertThat(tasks.getContent()).noneMatch(task -> task.id().equals(onboardingTask.getId()));
+    }
+
+    private static DeleteBusinessPartnerTask deleteTask(UUID partnerId, Instant hardDeleteDueAt) {
+        return new DeleteBusinessPartnerTask(partnerId, "FilterTest Partner", Instant.now(), hardDeleteDueAt);
+    }
+
+    @Test
+    void hardDeleteByPartnerId_deletesAllTasksOfThatPartnerIncludingTheirSubtypeRows() {
+        var partnerId = UUID.randomUUID();
+        repos.task.saveAndFlush(
+            TrustOnboardingTask.createRegistrationTask(
+                UUID.randomUUID(),
+                partnerId,
+                BUSINESS_PARTNER_NAME,
+                UUID.randomUUID(),
+                Instant.now().plusSeconds(3600),
+                Instant.now()
+            )
+        );
+        var otherTask = repos.task.saveAndFlush(
+            TrustOnboardingTask.createRegistrationTask(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                BUSINESS_PARTNER_NAME,
+                UUID.randomUUID(),
+                Instant.now().plusSeconds(3600),
+                Instant.now()
+            )
+        );
+
+        taskService.hardDeleteByPartnerId(partnerId);
+
+        assertThat(repos.task.findAll()).extracting(Task::getPartnerId).containsOnly(otherTask.getPartnerId());
+        assertThat(repos.trustOnboardingTask.findAll())
+            .extracting(TrustOnboardingTask::getId)
+            .containsExactly(otherTask.getId());
     }
 }

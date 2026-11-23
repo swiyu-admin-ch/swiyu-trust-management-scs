@@ -94,7 +94,10 @@ app:
     # Shorter than PRD on purpose, so a test can assert the computed due date without waiting days.
     hard-delete-delay: 2d
   jobs:
+    lost-statements-identification:
+      enabled: false # the delayed scheduler would fire in long-lived, cached test contexts
     trust-statistics-metrics-exporter-cron: "-"
+    hard-delete-business-partner-cron: "-"
   issuer:
     trust-root:
       business-partner-id: 00000000-0000-0000-0000-000000000000

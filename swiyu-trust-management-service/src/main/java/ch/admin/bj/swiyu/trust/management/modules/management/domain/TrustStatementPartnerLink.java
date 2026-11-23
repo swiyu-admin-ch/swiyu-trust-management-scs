@@ -50,7 +50,6 @@ public class TrustStatementPartnerLink {
 
     @Column(columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
-    @NotNull
     private TrustStatementDetails details;
 
     @Column(name = "status_list_metadata_id")
@@ -294,6 +293,26 @@ public class TrustStatementPartnerLink {
             throw new IllegalStateException("A trust statement can only move to inactive from an active state.");
         }
         this.status = TrustStatementPartnerLinkStatus.INACTIVE;
+    }
+
+    /**
+     * Strips everything that belongs to the hard-deleted business partner from this statement. The row survives as a
+     * {@link TrustStatementPartnerLinkType#STATEMENT_TOMBSTONE} because the status list is generated from the
+     * {@code INACTIVE} rows of a status list - deleting the row would drop its revoke bit on the next publication.
+     * The partner id stays so a retried deletion still finds the row; the status list reference stays so the
+     * revocation keeps working.
+     */
+    public void convertToTombstone() {
+        if (this.type == TrustStatementPartnerLinkType.STATEMENT_TOMBSTONE) {
+            return;
+        }
+        this.type = TrustStatementPartnerLinkType.STATEMENT_TOMBSTONE;
+        this.status = TrustStatementPartnerLinkStatus.INACTIVE;
+        this.subject = null;
+        this.details = null;
+        this.trustRegistryEntryId = null;
+        this.trustIssuerCredentialId = null;
+        this.protectedIssuanceAuthorizationId = null;
     }
 
     public String getVct() {

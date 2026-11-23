@@ -8,6 +8,7 @@ package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,6 +70,14 @@ public interface TrustStatementPartnerLinkRepository
         TrustStatementPartnerLinkStatus trustStatementPartnerLinkStatus
     );
 
+    /**
+     * All statements of one business partner, matched by the partner id and by the DIDs of its identity. The second
+     * criterion exists because statements created before {@code partner_id} was introduced have no partner reference.
+     */
+    List<TrustStatementPartnerLink> findAllByPartnerIdOrSubjectIn(UUID partnerId, Collection<String> subjects);
+
+    long countByTypeNot(TrustStatementPartnerLinkType type);
+
     List<TrustStatementPartnerLink> findAllByProtectedIssuanceAuthorizationIdAndStatus(
         UUID protectedIssuanceAuthorizationId,
         TrustStatementPartnerLinkStatus status
@@ -77,4 +86,6 @@ public interface TrustStatementPartnerLinkRepository
     void deleteAllByPartnerId(UUID partnerId);
 
     boolean existsByIdOrTrustRegistryEntryId(UUID id, UUID trustRegistryEntryId);
+
+    List<TrustStatementPartnerLink> findAllByPartnerId(UUID partnerId);
 }

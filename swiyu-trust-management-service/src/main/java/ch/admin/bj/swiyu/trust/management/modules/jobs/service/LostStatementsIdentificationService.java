@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class LostStatementsIdentificationStartupService {
+public class LostStatementsIdentificationService {
 
     private final TrustStatementPartnerLinkRepository trustStatementPartnerLinkRepository;
     private final StatementRepository statementRepository;

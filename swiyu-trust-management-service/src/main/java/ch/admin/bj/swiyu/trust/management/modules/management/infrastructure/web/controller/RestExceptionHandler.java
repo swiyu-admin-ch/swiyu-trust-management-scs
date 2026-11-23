@@ -4,6 +4,7 @@ import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartn
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerNotDeletableException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ExternalSystemProxyException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
+import ch.admin.bj.swiyu.trust.management.modules.common.exception.TaskStatusTransitionException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.TrustStatementValidationFailedException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
@@ -56,7 +57,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<String> handleBusinessPartnerIdentityBadRequestException(
         BusinessPartnerIdentityNotActiveException e
     ) {
-        log.debug(e.getMessage());
+        log.debug("Cached Exception, noteworthy in DEBUG", e);
         return new ResponseEntity<>(e.getMessage(), HttpStatusCode.valueOf(400));
     }
 
@@ -67,7 +68,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BusinessPartnerNotDeletableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleBusinessPartnerNotDeletableException(BusinessPartnerNotDeletableException e) {
-        log.debug(e.getMessage());
+        log.debug("Cached Exception, noteworthy in DEBUG", e);
         return new ResponseEntity<>(e.getError().name(), HttpStatusCode.valueOf(400));
     }
 
@@ -75,6 +76,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public void handleUnauthorized(final Exception exception, HttpServletRequest request) {
         log.debug("Access to {} prevented since unauthorized", request.getRequestURL(), exception);
+    }
+
+    @ExceptionHandler(TaskStatusTransitionException.class)
+    public ResponseEntity<Object> handleTaskStatusTransition(TaskStatusTransitionException e) {
+        log.debug("Cached Exception, noteworthy in DEBUG", e);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

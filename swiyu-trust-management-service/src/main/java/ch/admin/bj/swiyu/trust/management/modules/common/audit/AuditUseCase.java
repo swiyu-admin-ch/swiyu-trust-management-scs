@@ -53,6 +53,22 @@ public enum AuditUseCase {
         AuditEventType.CREATED,
         true
     ),
+    VC_SCHEMA_DELETED(
+        Category.TRUST_REGISTRY,
+        ObjectType.VC_SCHEMA,
+        DataJsonFieldName.VC_SCHEMA_META,
+        DataValueFieldName.VC_SCHEMA_FILE,
+        AuditEventType.DELETED,
+        true
+    ),
+    BUSINESS_PARTNER_IDENTITY_DELETED(
+        Category.TRUST_REGISTRY,
+        ObjectType.BUSINESS_PARTNER_IDENTITY,
+        DataJsonFieldName.BUSINESS_PARTNER_IDENTITY_DATA,
+        null, // no non-json value sent
+        AuditEventType.DELETED,
+        true
+    ),
     TASK_CREATED(
         Category.TASK,
         null, // not hardcoded, this is the dynamic task type
@@ -118,6 +134,7 @@ public enum AuditUseCase {
 
         public static final String NON_COMPLIANT_ACTOR = "NON_COMPLIANT_ACTOR";
         public static final String VC_SCHEMA = "VC_SCHEMA";
+        public static final String BUSINESS_PARTNER_IDENTITY = "BUSINESS_PARTNER_IDENTITY";
     }
 
     @UtilityClass
@@ -125,6 +142,7 @@ public enum AuditUseCase {
 
         public static final String TRUST_STATEMENT_META = "TRUST_STATEMENT_META";
         public static final String VC_SCHEMA_META = "VC_SCHEMA_META";
+        public static final String BUSINESS_PARTNER_IDENTITY_DATA = "BUSINESS_PARTNER_IDENTITY_DATA";
         public static final String NON_COMPLIANT_ACTOR_DATA = "NON_COMPLIANT_ACTOR_DATA";
         public static final String TASK_DATA = "TASK_DATA";
     }

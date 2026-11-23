@@ -35,6 +35,8 @@ import ch.admin.bj.swiyu.trust.management.test.*;
 import java.time.Instant;
 import java.time.Period;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -541,5 +543,50 @@ class BusinessPartnerIdentityServiceIT {
         identityIdsToRenew.forEach(identityId -> businessPartnerIdentityService.renewTrustStatements(identityId));
 
         verify(outboxEventPublisher, never()).publishBusinessPartnerIdentityUpdatedEvent(any());
+    }
+
+    @Test
+    void hardDeleteByPartnerId_deletesTheIdentityAndItsVerificationAuthorizationsWithAudit() {
+        var partnerId = UUID.randomUUID();
+        var otherPartnerId = UUID.randomUUID();
+        repos.businessPartnerIdentity.saveAndFlush(identity(partnerId));
+        repos.businessPartnerIdentity.saveAndFlush(identity(otherPartnerId));
+        repos.protectedVerification.saveAndFlush(
+            new ProtectedVerificationAuthorization(UUID.randomUUID(), partnerId, ProtectedVerificationField.AHV_NUMBER)
+        );
+        var otherAuthorization = repos.protectedVerification.saveAndFlush(
+            new ProtectedVerificationAuthorization(
+                UUID.randomUUID(),
+                otherPartnerId,
+                ProtectedVerificationField.AHV_NUMBER
+            )
+        );
+
+        businessPartnerIdentityService.hardDeleteByPartnerId(partnerId);
+
+        assertThat(repos.businessPartnerIdentity.findById(partnerId)).isEmpty();
+        assertThat(repos.businessPartnerIdentity.findById(otherPartnerId)).isPresent();
+        assertThat(repos.protectedVerification.findAll()).containsExactly(otherAuthorization);
+        verify(auditPublisher).businessPartnerIdentityDeleted(eq(partnerId.toString()), anyLong(), anyString());
+
+        businessPartnerIdentityService.hardDeleteByPartnerId(partnerId);
+
+        verify(auditPublisher, times(1)).businessPartnerIdentityDeleted(anyString(), anyLong(), anyString());
+    }
+
+    private static BusinessPartnerIdentity identity(UUID partnerId) {
+        return new BusinessPartnerIdentity(
+            partnerId,
+            Map.of("default", "Acme AG"),
+            Instant.now(),
+            "CHE-123.456.789",
+            true,
+            "de",
+            BusinessPartnerIdentityStatus.ACTIVE,
+            false,
+            Instant.now().plusSeconds(3600),
+            null,
+            Set.of()
+        );
     }
 }

@@ -5,6 +5,7 @@ import static ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHel
 import static ch.admin.bj.swiyu.trust.management.modules.common.persistence.TransactionManagerNames.MANAGEMENT_TRANSACTION_MANAGER;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkStatus.ACTIVE;
+import static ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLinkStatus.CONFIRMED;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.*;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.IssuerClient.TrustStatementIssuanceResult;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.issuer.IssuerCredentialRequestFactory.createIssuerCredentialRequest;
@@ -31,6 +32,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +65,7 @@ public class TrustStatementService {
     private final NonCompliantActorDidsResolver nonCompliantActorDidsResolver;
     private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
     private final AuditPublisher auditPublisher;
+    private final BusinessPartnerIdentityRepository businessPartnerIdentityRepository;
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public Page<TrustStatementPartnerLinkListItemDto> getPartnerLinks(
@@ -71,6 +74,8 @@ public class TrustStatementService {
     ) {
         var q = QTrustStatementPartnerLink.trustStatementPartnerLink;
         var where = new BooleanBuilder();
+        // Tombstones are technical rows kept only so the status list retains the revoke bit of their index.
+        where.and(q.type.ne(STATEMENT_TOMBSTONE));
         if (filter.partnerId() != null) {
             where.and(q.partnerId.eq(filter.partnerId()));
         }
@@ -106,12 +111,15 @@ public class TrustStatementService {
         var partnerLink = trustStatementPartnerLinkRepository
             .findById(submissionId)
             .orElseThrow(partnerLinkNotFound(submissionId));
+        if (partnerLink.getType() == STATEMENT_TOMBSTONE) {
+            throw partnerLinkNotFound(submissionId).get();
+        }
         return toTrustStatementPartnerLinkDto(partnerLink);
     }
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public long count() {
-        return trustStatementPartnerLinkRepository.count();
+        return trustStatementPartnerLinkRepository.countByTypeNot(STATEMENT_TOMBSTONE);
     }
 
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
@@ -341,6 +349,64 @@ public class TrustStatementService {
         }
     }
 
+    /**
+     * Removes everything a hard-deleted business partner owns on its trust statements: statements are deactivated
+     * first, their public copies in the registry database are deleted, and the management rows become content-free
+     * {@code STATEMENT_TOMBSTONE}s. The tombstone keeps the status list position, so the next status list publication
+     * still revokes it. Statements are matched by partner id and by the identity's DIDs, because statements created
+     * before {@code partner_id} was introduced carry no partner reference. Idempotent: an already tombstoned row is
+     * skipped and a missing registry row is not an error.
+     */
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public void hardDeleteByPartnerId(UUID partnerId) {
+        for (var partnerLink : findStatementsOfPartner(partnerId)) {
+            if (partnerLink.getType() == STATEMENT_TOMBSTONE) {
+                continue;
+            }
+            if (partnerLink.getStatus() == ACTIVE && registryEntryExists(partnerLink)) {
+                deactivateTrustStatement(partnerLink, new DeactivationRequestDto("Business partner hard deleted"));
+            } else if (partnerLink.getStatus() == ACTIVE || partnerLink.getStatus() == CONFIRMED) {
+                // The public copy is already gone (a previous run deleted it but did not commit the tombstone), or the
+                // statement was never published. Either way its content is about to disappear, so it is audited here.
+                auditPublisher.deactivateTrustStatement(
+                    partnerLink.getId().toString(),
+                    auditBusinessPartnerId(partnerLink),
+                    partnerLink.getType().name(),
+                    0L,
+                    AuditMapper.toAuditJson(partnerLink),
+                    ""
+                );
+            }
+            if (partnerLink.isV2PartnerLink()) {
+                trustRegistryService.hardDeleteStatement(partnerLink.getId());
+            } else if (partnerLink.getTrustRegistryEntryId() != null) {
+                trustRegistryService.hardDeleteTrustStatementVc(partnerLink.getTrustRegistryEntryId());
+            }
+            partnerLink.convertToTombstone();
+            trustStatementPartnerLinkRepository.saveAndFlush(partnerLink);
+        }
+    }
+
+    private boolean registryEntryExists(TrustStatementPartnerLink partnerLink) {
+        if (partnerLink.getTrustRegistryEntryId() == null) {
+            return false;
+        }
+        return partnerLink.isV2PartnerLink()
+            ? trustRegistryService.statementExists(partnerLink.getId())
+            : trustRegistryService.datastoreEntityExists(partnerLink.getTrustRegistryEntryId());
+    }
+
+    private List<TrustStatementPartnerLink> findStatementsOfPartner(UUID partnerId) {
+        var trustedIdentifiers = businessPartnerIdentityRepository
+            .findById(partnerId)
+            .map(BusinessPartnerIdentity::getTrustedIdentifier)
+            .orElseGet(Set::of);
+        if (trustedIdentifiers.isEmpty()) {
+            return trustStatementPartnerLinkRepository.findAllByPartnerId(partnerId);
+        }
+        return trustStatementPartnerLinkRepository.findAllByPartnerIdOrSubjectIn(partnerId, trustedIdentifiers);
+    }
+
     private static Supplier<ResourceNotFoundException> partnerLinkNotFound(UUID id) {
         return () -> new ResourceNotFoundException("No partner link found for id %s".formatted(id));
     }
@@ -480,6 +546,7 @@ public class TrustStatementService {
                 TRUST_STATEMENT_IDENTITY_V1,
                 TRUST_STATEMENT_ISSUANCE_V1,
                 TRUST_STATEMENT_VERIFICATION_V1 -> issueAndPublishTrustStatementV1(statement);
+            case STATEMENT_TOMBSTONE -> throw new IllegalStateException("A statement tombstone is never issued");
         };
     }
 
@@ -504,8 +571,9 @@ public class TrustStatementService {
             case
                 TRUST_STATEMENT_IDENTITY_V1,
                 TRUST_STATEMENT_ISSUANCE_V1,
-                TRUST_STATEMENT_VERIFICATION_V1 -> throw new IllegalStateException(
-                "Trust Protocol V1 statements cannot be issued by V2 standards."
+                TRUST_STATEMENT_VERIFICATION_V1,
+                STATEMENT_TOMBSTONE -> throw new IllegalStateException(
+                "Trust Protocol V1 statements and tombstones cannot be issued by V2 standards."
             );
             case TRUST_STATEMENT_IDENTITY_V2 -> StatementTypeDto.TRUST_STATEMENT_IDENTITY_V2;
             case TRUST_STATEMENT_PROTECTED_VERIFICATION_AUTHORIZATION_V2 -> StatementTypeDto.TRUST_STATEMENT_VERIFICATION_AUTHORIZATION_V2;
@@ -566,6 +634,7 @@ public class TrustStatementService {
                     TRUST_STATEMENT_IDENTITY_V1,
                     TRUST_STATEMENT_ISSUANCE_V1,
                     TRUST_STATEMENT_VERIFICATION_V1 -> publishTrustStatementV1(issuanceResult, partnerLink);
+                case STATEMENT_TOMBSTONE -> throw new IllegalStateException("A statement tombstone is never published");
             };
 
             // 2/2: update the trust statement as issued and published
@@ -688,6 +757,7 @@ public class TrustStatementService {
                     yield lookupIssuerVcStatusOnRemoteIssuer(statement);
                 }
             }
+            case STATEMENT_TOMBSTONE -> IssuerVcStatus.INVALID;
         };
     }
 
@@ -726,6 +796,7 @@ public class TrustStatementService {
                 TRUST_STATEMENT_IDENTITY_V1,
                 TRUST_STATEMENT_ISSUANCE_V1,
                 TRUST_STATEMENT_VERIFICATION_V1 -> toTrustRegistryStatusDto(lookupTrustRegistryStatus(partnerLink));
+            case STATEMENT_TOMBSTONE -> null;
         };
 
         return TrustStatementMapper.toTrustStatementPartnerLinkDto(

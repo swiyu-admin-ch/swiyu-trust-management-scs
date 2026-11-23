@@ -96,6 +96,10 @@ export interface GetTasksRequestParams {
   state?: Array<string>;
   assignee?: string;
   taskType?: Array<string>;
+  /**
+   * Only delete-business-partner tasks whose hardDeleteDueAt is at or before this instant, i.e. that are due for auto-approval.
+   */
+  hardDeleteDueUntil?: string;
   /** Zero-based page index (0..N) */
   page?: number;
   /** The size of the page to be returned */
@@ -992,6 +996,7 @@ export class TaskApi extends BaseService {
     const state = requestParameters?.state;
     const assignee = requestParameters?.assignee;
     const taskType = requestParameters?.taskType;
+    const hardDeleteDueUntil = requestParameters?.hardDeleteDueUntil;
     const page = requestParameters?.page;
     const size = requestParameters?.size;
     const sort = requestParameters?.sort;
@@ -1050,6 +1055,14 @@ export class TaskApi extends BaseService {
       localVarQueryParameters,
       'taskType',
       <any>taskType,
+      QueryParamStyle.Form,
+      true
+    );
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'hardDeleteDueUntil',
+      <any>hardDeleteDueUntil,
       QueryParamStyle.Form,
       true
     );

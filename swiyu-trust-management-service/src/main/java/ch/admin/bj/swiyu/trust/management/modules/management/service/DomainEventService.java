@@ -262,6 +262,11 @@ public class DomainEventService {
     }
 
     @Transactional
+    public void businessPartnerDeleteAccepted(UUID taskId, String triggeredBy) {
+        saveAndLog(DomainEventLog.createTaskDomainEventLog(BUSINESS_PARTNER_DELETE_ACCEPTED, triggeredBy, taskId));
+    }
+
+    @Transactional
     public void businessPartnerDeleteRejected(UUID taskId, String triggeredBy, String internalNote) {
         saveAndLog(
             DomainEventLog.createTaskDomainEventLog(
@@ -327,5 +332,16 @@ public class DomainEventService {
         }
 
         return this.domainEventLogRepository.findAll(where, pageable).map(DomainEventMapper::toDomainEventLogDto);
+    }
+
+    /**
+     * Deletes the local event history of a hard-deleted business partner: events attached to one of its tasks and
+     * events that reference the partner directly. The audit trail in the WORM store is unaffected - this table is the
+     * local history only. Idempotent.
+     */
+    @Transactional
+    public void hardDeleteByPartnerId(UUID partnerId) {
+        this.domainEventLogRepository.deleteAllByTaskPartnerId(partnerId);
+        this.domainEventLogRepository.deleteAllByBusinessPartnerId(partnerId);
     }
 }

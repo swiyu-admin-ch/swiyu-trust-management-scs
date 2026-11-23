@@ -1,5 +1,6 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain.domainevent;
 
+import java.util.Collection;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,4 +14,8 @@ public interface DomainEventLogRepository
     @Modifying
     @Query("DELETE FROM DomainEventLog d WHERE d.taskId IN (SELECT t.id FROM Task t WHERE t.partnerId = :partnerId)")
     void deleteAllByTaskPartnerId(@Param("partnerId") UUID partnerId);
+
+    void deleteAllByBusinessPartnerId(UUID partnerId);
+
+    void deleteAllByNonCompliantActorIdIn(Collection<UUID> nonCompliantActorIds);
 }

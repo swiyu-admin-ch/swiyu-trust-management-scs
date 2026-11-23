@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.7.0
+
+### Added
+
+- Approve due delete-business-partner tasks with a job and order the deletion in the core business service: `HardDeleteBusinessPartnerJob` runs hourly and approves every `OPENED` task whose `hardDeleteDueAt` has passed, so the waiting period is never cut short
+- `DeleteBusinessPartnerTaskService.approve` transitions the task to `ACCEPTED`, writes the `BUSINESS_PARTNER_DELETE_ACCEPTED` domain event, publishes `TASK_APPROVED` and queues the `TiHardDeleteBusinessPartnerCommand` in the transactional outbox - all in one transaction, so a failed approval leaves the task open
+- The command names the person who requested the deletion as its audit trigger (audit user id from the task, identity provider from the configured authorization server), not the job that runs it
+- Before approving, the partner is checked against the local projection: if it is gone or its `hardDeleteAllowed` was revoked, the task stays `OPENED` and is retried on the next run instead of ordering a deletion the core business service would refuse
+- `TaskFilterDto.hardDeleteDueUntil` lets `TaskService` select delete-business-partner tasks that are due for auto-approval; an instant instead of a date so tasks due later the same day are not approved early
+- Devops endpoint `POST api/v2/devops/business-partners/{partnerId}/approve-deletion` approves the partner's latest delete request immediately, so end-to-end tests and ops do not have to wait out the configured hard-delete delay. Only the waiting period is skipped: a partner not cleared for deletion in the local projection is still refused (`400 PARTNER_NOT_CLEARED_FOR_DELETION`), the endpoint is gated by `EIDARTFE_1571` like the rest of the offboarding flow, and requires the existing `EDITOR` role
+- Conflicting task status transitions now answer `409 Conflict` instead of `500`, for every task type: approving an already accepted or rejected task, or rejecting a closed one, no longer looks like a server error (`TaskStatusTransitionException`)
+
+## 5.6.0
+
+### Added
+
+- Consume `TiBusinessPartnerHardDeletedEvent`: after the core business service has deleted a business partner, TMS removes all of its data across the management and the registry database. The projection is synchronised first (a 404 removes it) and the offboarding aborts if the partner still exists, so an out-of-order event cannot delete a live partner's data
+- Delete the partner's trust statements via `TrustStatementService.hardDeleteByPartnerId`: statements are deactivated (issuer revoke for V1, registry and status list for V2), their public copies are removed from the registry database, and the management rows become `STATEMENT_TOMBSTONE` rows without subject and details. Keeping the row preserves the status list position, so the next status list publication still revokes it
+- Delete the partner's VC schemas, non-compliant actor rows, protected issuance and verification authorizations, tasks and local event log, and the business partner identity last. Every aggregate is deleted in its own transaction and idempotently, so a redelivered event finishes a partial run
+- Publish the `VC_SCHEMA_DELETED` and `BUSINESS_PARTNER_IDENTITY_DELETED` audit records before the corresponding rows are removed; statements keep using `TRUST_STATEMENT_DEACTIVATED`
+- Republish the non-compliance list asynchronously after the partner's actors are deleted
+
+### Changed
+
+- `trust_statement.details` is nullable now, because a tombstone carries no partner data
+- Add indices on the partner columns used by the hard delete (`trust_statement`, `task`, `domain_event_log`, `vc_schema_partner_link`, `non_compliant_actor`)
+
+## 5.5.2
+
+### Changed
+
+- Run the two startup jobs as delayed, ShedLock-protected scheduled jobs instead of `ApplicationReadyEvent` listeners
+- Raise the scheduler pool to 4 and remove the unused `AsyncService`
+
 ## 5.5.1
 
 ### Changed

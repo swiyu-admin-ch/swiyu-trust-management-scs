@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
         TiBusinessPartnerIdentityDeactivatedEvent.TypeRef.class,
         TiBusinessPartnerIdentityUpdatedEvent.TypeRef.class,
         TiBusinessPartnerUpdatedEvent.TypeRef.class,
+        TiBusinessPartnerHardDeletedEvent.TypeRef.class,
         TiProtectedVerificationSubmissionAcceptedEvent.TypeRef.class,
     }
 )
@@ -34,6 +35,7 @@ import org.springframework.context.annotation.Configuration;
         TiBusinessPartnerIdentityUpdatedEvent.TypeRef.class,
         TiProtectedVerificationSubmissionApprovedEvent.TypeRef.class,
         TiProtectedVerificationSubmissionRejectedEvent.TypeRef.class,
+        TiHardDeleteBusinessPartnerCommand.TypeRef.class,
     }
 )
 public class MessageContractsConfig {}

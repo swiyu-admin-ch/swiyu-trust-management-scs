@@ -8,6 +8,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskFilter
 import ch.admin.bj.swiyu.trust.management.modules.management.api.task.TaskListItemDto;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.*;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -74,6 +75,17 @@ public class TaskService {
             List<TaskType> taskTypeEnums = filter.taskType().stream().map(TaskType::valueOf).toList();
             where.and(q.taskType.in(taskTypeEnums));
         }
+        if (filter.hardDeleteDueUntil() != null) {
+            // hardDeleteDueAt lives on the JOINED subtype, so the generic query reaches it through an exists subquery.
+            // This selects delete-business-partner tasks only, which is what the auto-approval job asks for.
+            var deleteTask = QDeleteBusinessPartnerTask.deleteBusinessPartnerTask;
+            where.and(
+                JPAExpressions.selectOne()
+                    .from(deleteTask)
+                    .where(deleteTask.id.eq(q.id), deleteTask.hardDeleteDueAt.loe(filter.hardDeleteDueUntil()))
+                    .exists()
+            );
+        }
         return this.taskRepository.findAll(where, pageable).map(task ->
             toTaskListItemDto(task, resolvePossibleActions(task, currentUserFullName))
         );
@@ -97,5 +109,16 @@ public class TaskService {
         return taskRepository
             .findById(taskId)
             .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
+    }
+
+    /**
+     * Deletes all tasks of a hard-deleted business partner. The entities are loaded so Hibernate also removes the rows
+     * of the JOINED subtype tables; a bulk delete on the base table would violate their foreign keys.
+     */
+    @Transactional
+    public void hardDeleteByPartnerId(UUID partnerId) {
+        var tasks = taskRepository.findAllByPartnerId(partnerId);
+        taskRepository.deleteAll(tasks);
+        log.info("Removed tasks of hard-deleted business partner '{}' ({})", partnerId, tasks.size());
     }
 }

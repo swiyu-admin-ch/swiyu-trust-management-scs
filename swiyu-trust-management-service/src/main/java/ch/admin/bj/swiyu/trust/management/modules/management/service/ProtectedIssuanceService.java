@@ -104,6 +104,20 @@ public class ProtectedIssuanceService {
         this.domainEventService.protectedIssuanceEntryRemoved(id, currentUserFullName);
     }
 
+    /**
+     * Deletes the protected issuance authorizations of a hard-deleted business partner. The protected issuance entries
+     * themselves are product data and stay. Idempotent: deleting nothing is not an error.
+     */
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public void hardDeleteByPartnerId(UUID partnerId) {
+        var deleted = protectedIssuanceAuthorizationRepository.deleteByBusinessPartnerIdentityId(partnerId);
+        log.info(
+            "Removed protected issuance authorizations of hard-deleted business partner '{}' ({})",
+            partnerId,
+            deleted
+        );
+    }
+
     @Transactional(readOnly = true, transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
     public Page<ProtectedIssuanceAuthorizationDto> getProtectedIssuanceAuthorizationsPaged(
         ProtectedIssuanceAuthorizationFilterDto filters,

@@ -26,6 +26,10 @@ class TrustStatementPartnerLinkDetailsTest {
 
         // 1. check all enum values are within configuredSubTypeNames
         for (TrustStatementPartnerLinkType type : TrustStatementPartnerLinkType.values()) {
+            // A statement tombstone is a content-free row kept only for status list revocations; it has no details.
+            if (type == TrustStatementPartnerLinkType.STATEMENT_TOMBSTONE) {
+                continue;
+            }
             assertTrue(
                 configuredSubTypeNames.contains(type.name()),
                 "Missing Annotation @JsonSubTypes.Type for type: " +

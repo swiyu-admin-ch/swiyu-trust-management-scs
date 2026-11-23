@@ -213,6 +213,24 @@ public class OutboxEventPublisher {
         );
     }
 
+    /**
+     * Orders the core business service to hard delete the partner. Keyed by the partner, not by the task: the command
+     * is the partner's deletion, and a redelivery after a partial run has to resume that same deletion.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void publishHardDeleteBusinessPartnerCommand(@NonNull TiHardDeleteBusinessPartnerCommand command) {
+        var topicName = TiHardDeleteBusinessPartnerCommand.TypeRef.DEFAULT_TOPIC;
+        sendEvent(
+            topicName,
+            BeanReferenceMessageKey.newBuilder()
+                .setNamespace(TiHardDeleteBusinessPartnerCommand.TypeRef.SYSTEM_NAME)
+                .setName(topicName)
+                .setId(command.getPayload().getBusinessPartnerId().toString())
+                .build(),
+            command
+        );
+    }
+
     private void sendEvent(final String topicName, Object key, final AvroMessage event) {
         log.info("Publishing to topic {}", kv(TOPIC_LOGGING_KEY, topicName));
         outbox.sendMessage(event, key, topicName);

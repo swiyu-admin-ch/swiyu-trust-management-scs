@@ -14,6 +14,7 @@ import ch.admin.bj.swiyu.trust.management.modules.management.api.task.CreateDele
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartner;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerRepository;
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.BusinessPartnerType;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.publisher.OutboxEventPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.management.service.DeleteBusinessPartnerTaskService;
 import ch.admin.bj.swiyu.trust.management.test.MockAuditPublisherTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -44,6 +46,8 @@ class DeleteBusinessPartnerTaskControllerIT {
     private static final String CREATE_ENDPOINT = "/ui-api/tasks/delete-business-partner";
     private static final String DETAIL_ENDPOINT = "/ui-api/tasks/{id}/delete-business-partner";
     private static final String REJECT_ENDPOINT = "/ui-api/tasks/{id}/delete-business-partner/reject";
+    private static final String DEVOPS_APPROVE_ENDPOINT =
+        "/api/v2/devops/business-partners/{partnerId}/approve-deletion";
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,6 +57,9 @@ class DeleteBusinessPartnerTaskControllerIT {
 
     @Autowired
     private DeleteBusinessPartnerTaskService service;
+
+    @MockitoBean
+    private OutboxEventPublisher outboxEventPublisher;
 
     @Test
     @WithJeapAuthenticationToken(userRoles = { READER })
@@ -161,6 +168,39 @@ class DeleteBusinessPartnerTaskControllerIT {
                     .content("{\"internalNote\":\" \"}")
             )
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
+    void runsTheDeletionFromTheDevopsEndpointBeforeItsDueDate() throws Exception {
+        var partnerId = partner();
+        var taskId = service.createTask(
+            new CreateDeleteBusinessPartnerTaskRequestDto(partnerId, "reason", true),
+            "tester"
+        );
+
+        mockMvc.perform(post(DEVOPS_APPROVE_ENDPOINT, partnerId)).andExpect(status().isOk());
+        mockMvc
+            .perform(get(DETAIL_ENDPOINT, taskId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.state").value("ACCEPTED"));
+        // The request is closed now, so approving it again is a conflict rather than a second deletion.
+        mockMvc.perform(post(DEVOPS_APPROVE_ENDPOINT, partnerId)).andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithJeapAuthenticationToken(userRoles = { EDITOR })
+    void devopsApproveAnswersNotFoundWhenThereIsNoDeletionRequest() throws Exception {
+        mockMvc.perform(post(DEVOPS_APPROVE_ENDPOINT, UUID.randomUUID())).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithJeapAuthenticationToken(userRoles = { READER })
+    void readerCannotApproveADeletionViaDevops() throws Exception {
+        var partnerId = partner();
+        service.createTask(new CreateDeleteBusinessPartnerTaskRequestDto(partnerId, "reason", true), "tester");
+
+        mockMvc.perform(post(DEVOPS_APPROVE_ENDPOINT, partnerId)).andExpect(status().isUnauthorized());
     }
 
     private UUID partner() {

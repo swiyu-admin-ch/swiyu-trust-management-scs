@@ -1,10 +1,13 @@
 package ch.admin.bj.swiyu.trust.management.modules.registry.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.VcSchemaPublicationFailedException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.VcSchemaUrlValidationFailedException;
 import ch.admin.bj.swiyu.trust.management.modules.common.registry.VcSchemaUrlValidator;
+import ch.admin.bj.swiyu.trust.management.modules.registry.api.VcSchemaDto;
+import ch.admin.bj.swiyu.trust.management.modules.registry.domain.VcSchema;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.VcSchemaRepository;
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
@@ -38,6 +41,20 @@ public class VcSchemaServiceIT {
     @BeforeEach
     void setUp() {
         vcSchemaRepository.deleteAllInBatch();
+    }
+
+    @Test
+    void findVcSchema_returnsTheDtoAndEmptyAfterHardDelete() {
+        var vcSchema = vcSchemaRepository.saveAndFlush(new VcSchema("mySchema", "{\"vct\":\"https://x/y\"}"));
+
+        assertThat(vcSchemaService.findVcSchema(vcSchema.getId()))
+            .get()
+            .extracting(VcSchemaDto::file)
+            .isEqualTo("{\"vct\":\"https://x/y\"}");
+
+        vcSchemaService.hardDeleteVcSchema(vcSchema.getId());
+
+        assertThat(vcSchemaService.findVcSchema(vcSchema.getId())).isEmpty();
     }
 
     @Test

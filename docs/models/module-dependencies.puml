@@ -10,6 +10,7 @@ skinparam defaultFontName Arial
 component "Common" as common
 component "Registry"  as registry
 component "Management"  as management
+component "Offboarding"  as offboarding
 component "DataImport"  as dataimport
 component "Jobs"  as jobs
 component "UI"  as ui
@@ -19,6 +20,8 @@ management --> common
 management --> registry
 jobs --> common
 jobs --> management
+offboarding --> common
+offboarding --> management
 dataimport --> common
 dataimport --> management
 ui --> common

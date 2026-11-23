@@ -18,7 +18,14 @@ public enum TrustStatementPartnerLinkType {
     TRUST_STATEMENT_PROTECTED_ISSUANCE_AUTHORIZATION_V2("TrustStatementIssuanceV2", null),
     TRUST_LIST_STATEMENT_NON_COMPLIANCE_V2("TrustListStatementNonComplianceV2", null),
     TRUST_LIST_STATEMENT_PROTECTED_ISSUANCE_V2("TrustListStatementProtectedIssuanceV2", null),
-    PUBLIC_STATEMENT_VERIFICATION_QUERY_V2("PublicStatementVerificationQueryV2", null);
+    PUBLIC_STATEMENT_VERIFICATION_QUERY_V2("PublicStatementVerificationQueryV2", null),
+
+    /**
+     * Technical row left behind when the owning business partner is hard deleted. It carries no partner data any more
+     * (no subject, no details) and is only kept so that the status list keeps the revoke bit of its index. Never
+     * issued, published or deactivated, and never shown in the API.
+     */
+    STATEMENT_TOMBSTONE(null, null);
 
     /**
      * The type id of trust statement for this type as described in spec, e.g.

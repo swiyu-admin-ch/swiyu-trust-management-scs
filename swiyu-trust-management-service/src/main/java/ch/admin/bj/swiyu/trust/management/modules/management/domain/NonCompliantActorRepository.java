@@ -1,5 +1,7 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +17,8 @@ public interface NonCompliantActorRepository
     Optional<NonCompliantActor> findNonCompliantActorByDid(String did);
 
     Optional<NonCompliantActor> findNonCompliantActorByBusinessPartnerId(UUID businessPartnerId);
+
+    List<NonCompliantActor> findAllByBusinessPartnerId(UUID businessPartnerId);
+
+    List<NonCompliantActor> findAllByDidIn(Collection<String> dids);
 }

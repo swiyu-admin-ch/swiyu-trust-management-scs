@@ -13,6 +13,8 @@ import ch.admin.bj.swiyu.trust.management.modules.management.domain.task.TrustOn
 import ch.admin.bj.swiyu.trust.management.test.BusinessPartnerIdentityTestData;
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
+import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,5 +166,28 @@ class DomainEventServiceIT {
         assertThat(events.getContent().getFirst().eventType()).isEqualTo(TRUST_ADD_DID_REJECTED);
         assertThat(events.getContent().getFirst().triggeredBy()).isEqualTo("test-user");
         assertThat(events.getContent().getFirst().internalNote()).isEqualTo("reject reason");
+    }
+
+    @Test
+    void hardDeleteByPartnerId_deletesTaskScopedAndPartnerScopedEventsOfThatPartner() {
+        var partnerId = task.getPartnerId();
+        var otherTask = trustOnboardingTaskRepository.save(
+            TrustOnboardingTask.createRegistrationTask(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                BusinessPartnerIdentityTestData.BUSINESS_PARTNER_NAME,
+                UUID.randomUUID(),
+                Instant.now().plusSeconds(3600),
+                Instant.now()
+            )
+        );
+        domainEventService.trustOnboardingSubmissionReceived(task.getId(), "user");
+        domainEventService.trustOnboardingSubmissionReceived(otherTask.getId(), "user");
+        domainEventService.protectedIssuanceAuthorizationRemoved(UUID.randomUUID(), partnerId, "user");
+        domainEventService.protectedIssuanceAuthorizationRemoved(UUID.randomUUID(), otherTask.getPartnerId(), "user");
+
+        domainEventService.hardDeleteByPartnerId(partnerId);
+
+        assertThat(domainEventLogRepository.findAll().size()).isEqualTo(2);
     }
 }

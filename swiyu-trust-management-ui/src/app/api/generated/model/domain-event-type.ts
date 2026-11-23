@@ -31,6 +31,7 @@ export const DomainEventType = {
   ProtectedVerificationRequestApproved: 'PROTECTED_VERIFICATION_REQUEST_APPROVED',
   ProtectedVerificationRequestRejected: 'PROTECTED_VERIFICATION_REQUEST_REJECTED',
   BusinessPartnerDeleteRequested: 'BUSINESS_PARTNER_DELETE_REQUESTED',
+  BusinessPartnerDeleteAccepted: 'BUSINESS_PARTNER_DELETE_ACCEPTED',
   BusinessPartnerDeleteRejected: 'BUSINESS_PARTNER_DELETE_REJECTED'
 } as const;
 export type DomainEventType = (typeof DomainEventType)[keyof typeof DomainEventType];

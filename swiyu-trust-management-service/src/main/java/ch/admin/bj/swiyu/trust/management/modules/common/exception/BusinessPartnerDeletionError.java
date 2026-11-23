@@ -11,4 +11,6 @@ public enum BusinessPartnerDeletionError {
     PARTNER_NOT_CLEARED_FOR_DELETION,
     /** A deletion request for this partner is already pending. */
     OPEN_DELETION_REQUEST_EXISTS,
+    /** The partner still exists locally, so the hard-deleted event arrived prematurely or out of order. */
+    PARTNER_STILL_EXISTS,
 }

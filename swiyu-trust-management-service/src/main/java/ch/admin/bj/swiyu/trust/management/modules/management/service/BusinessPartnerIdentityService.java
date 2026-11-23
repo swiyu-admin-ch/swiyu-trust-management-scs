@@ -7,6 +7,8 @@ import static ch.admin.bj.swiyu.trust.management.modules.management.service.Busi
 import static ch.admin.bj.swiyu.trust.management.modules.management.service.ProtectedVerificationAuthorizationMapper.mapPageableWithValidSortProperties;
 
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
+import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditMapper;
+import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityNotActiveException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
 import ch.admin.bj.swiyu.trust.management.modules.management.api.*;
@@ -48,6 +50,7 @@ public class BusinessPartnerIdentityService {
     private final TrustStatementService trustStatementService;
     private final ProtectedIssuanceAuthorizationRepository protectedIssuanceAuthorizationRepository;
     private final ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
+    private final AuditPublisher auditPublisher;
 
     /**
      * Whether a {@link BusinessPartnerIdentity} exists for the partner at all, regardless of its status - an
@@ -520,5 +523,26 @@ public class BusinessPartnerIdentityService {
                 );
             }
         }
+    }
+
+    /**
+     * Deletes the identity of a hard-deleted business partner and everything that points at it: its protected
+     * verification authorizations and then the identity itself, the last aggregate of the offboarding. The audit
+     * record carrying the identity data is written in the same transaction before the row disappears; the WORM audit
+     * trail is what keeps the data. Idempotent.
+     */
+    @Transactional(transactionManager = MANAGEMENT_TRANSACTION_MANAGER)
+    public void hardDeleteByPartnerId(UUID partnerId) {
+        protectedVerificationAuthorizationRepository.deleteByBusinessPartnerIdentityId(partnerId);
+        businessPartnerIdentityRepository
+            .findById(partnerId)
+            .ifPresent(businessPartnerIdentity -> {
+                auditPublisher.businessPartnerIdentityDeleted(
+                    partnerId.toString(),
+                    businessPartnerIdentity.getVersion(),
+                    AuditMapper.toAuditJson(businessPartnerIdentity)
+                );
+                businessPartnerIdentityRepository.delete(businessPartnerIdentity);
+            });
     }
 }

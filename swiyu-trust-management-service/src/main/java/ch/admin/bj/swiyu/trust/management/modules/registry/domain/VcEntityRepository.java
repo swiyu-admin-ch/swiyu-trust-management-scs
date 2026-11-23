@@ -12,4 +12,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface VcEntityRepository extends JpaRepository<VcEntity, Long> {
     Optional<VcEntity> findByDatastoreEntityId(UUID baseId);
+
+    void deleteByDatastoreEntityId(UUID baseId);
 }

@@ -10,6 +10,8 @@ import ch.admin.bj.swiyu.trust.management.modules.registry.api.VcSchemaDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.api.VcSchemaStatusDto;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.VcSchema;
 import ch.admin.bj.swiyu.trust.management.modules.registry.domain.VcSchemaRepository;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,11 +40,29 @@ public class VcSchemaService {
         }
         log.info("Creating new VC Schema with path {}", uniquePathSegment);
         var newSchema = vcSchemaRepository.save(new VcSchema(uniquePathSegment, file));
+        return toDto(newSchema);
+    }
+
+    @Transactional(readOnly = true, transactionManager = REGISTRY_TRANSACTION_MANAGER)
+    public Optional<VcSchemaDto> findVcSchema(UUID id) {
+        return vcSchemaRepository.findById(id).map(VcSchemaService::toDto);
+    }
+
+    /**
+     * Deletes a published VC schema of a hard-deleted business partner. Idempotent: an already deleted schema is not
+     * an error, so a retried deletion can finish a partial run.
+     */
+    @Transactional(transactionManager = REGISTRY_TRANSACTION_MANAGER)
+    public void hardDeleteVcSchema(UUID id) {
+        vcSchemaRepository.deleteById(id);
+    }
+
+    private static VcSchemaDto toDto(VcSchema vcSchema) {
         return new VcSchemaDto(
-            newSchema.getId(),
-            newSchema.getFile(),
-            newSchema.getPath(),
-            VcSchemaStatusDto.valueOf(newSchema.getStatus().name())
+            vcSchema.getId(),
+            vcSchema.getFile(),
+            vcSchema.getPath(),
+            VcSchemaStatusDto.valueOf(vcSchema.getStatus().name())
         );
     }
 

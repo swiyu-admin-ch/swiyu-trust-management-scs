@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
-class LostStatementsIdentificationStartupServiceTest {
+class LostStatementsIdentificationServiceTest {
 
     @Mock
     private TrustStatementPartnerLinkRepository trustStatementPartnerLinkRepository;
@@ -34,7 +34,7 @@ class LostStatementsIdentificationStartupServiceTest {
     private DatastoreEntityRepository datastoreEntityRepository;
 
     @InjectMocks
-    private LostStatementsIdentificationStartupService service;
+    private LostStatementsIdentificationService service;
 
     private static Statement statement(UUID id, boolean isActiveInStatuslist, boolean isSoftDeleted) {
         return new Statement(

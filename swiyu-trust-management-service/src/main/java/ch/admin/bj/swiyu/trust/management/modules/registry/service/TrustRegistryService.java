@@ -74,6 +74,34 @@ public class TrustRegistryService {
         statementRepository.save(statement);
     }
 
+    @Transactional(readOnly = true, transactionManager = REGISTRY_TRANSACTION_MANAGER)
+    public boolean statementExists(UUID statementId) {
+        return statementRepository.existsById(statementId);
+    }
+
+    @Transactional(readOnly = true, transactionManager = REGISTRY_TRANSACTION_MANAGER)
+    public boolean datastoreEntityExists(UUID datastoreEntityId) {
+        return datastoreEntityRepository.existsById(datastoreEntityId);
+    }
+
+    /**
+     * Deletes the published statement of a hard-deleted business partner. Idempotent: a statement that is already gone
+     * is not an error, so a retried deletion can finish a partial run.
+     */
+    @Transactional(transactionManager = REGISTRY_TRANSACTION_MANAGER)
+    public void hardDeleteStatement(UUID statementId) {
+        statementRepository.deleteById(statementId);
+    }
+
+    /**
+     * Deletes a trust statement published by the Trust Protocol V1 path (datastore entity plus its VC). Idempotent.
+     */
+    @Transactional(transactionManager = REGISTRY_TRANSACTION_MANAGER)
+    public void hardDeleteTrustStatementVc(UUID datastoreEntityId) {
+        vcEntityRepository.deleteByDatastoreEntityId(datastoreEntityId);
+        datastoreEntityRepository.deleteById(datastoreEntityId);
+    }
+
     @Transactional(transactionManager = REGISTRY_TRANSACTION_MANAGER)
     public void deactivate(UUID datastoreEntityId) {
         var entity = getDatastoreEntity(datastoreEntityId);

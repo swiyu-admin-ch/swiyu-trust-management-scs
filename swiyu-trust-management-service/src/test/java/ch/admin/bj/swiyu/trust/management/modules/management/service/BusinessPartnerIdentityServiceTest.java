@@ -11,6 +11,7 @@ import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityActivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityDeactivatedEvent;
 import ch.admin.bj.swiyu.messagetype.ti.TiBusinessPartnerIdentityUpdatedEvent;
 import ch.admin.bj.swiyu.trust.client.core.business.internal.model.TrustOnboardingSubmissionDto;
+import ch.admin.bj.swiyu.trust.management.modules.common.audit.AuditPublisher;
 import ch.admin.bj.swiyu.trust.management.modules.common.date.DateTimeHelper;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.BusinessPartnerIdentityNotActiveException;
 import ch.admin.bj.swiyu.trust.management.modules.common.exception.ResourceNotFoundException;
@@ -67,6 +68,9 @@ class BusinessPartnerIdentityServiceTest {
     @Mock
     private ProtectedIssuanceEntryRepository protectedIssuanceEntryRepository;
 
+    @Mock
+    private AuditPublisher auditPublisher;
+
     private BusinessPartnerIdentityService businessPartnerIdentityService;
 
     @BeforeEach
@@ -81,7 +85,8 @@ class BusinessPartnerIdentityServiceTest {
             trustStatementPartnerLinkRepository,
             trustStatementService,
             protectedIssuanceAuthorizationRepository,
-            protectedIssuanceEntryRepository
+            protectedIssuanceEntryRepository,
+            auditPublisher
         );
     }
 
