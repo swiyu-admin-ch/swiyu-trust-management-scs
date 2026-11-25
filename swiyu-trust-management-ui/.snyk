@@ -4,18 +4,6 @@ version: v1.25.1
 # --file=swiyu-trust-management-ui/package.json, and Snyk then reads this copy instead of the root one.
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-JS-BRACES-19963945:
-    - '*':
-        reason: >-
-          Still no fixed version: re-checked npm on 2026-11-10, 3.0.3 is the latest braces release and
-          micromatch 4.0.8 requires ^3.0.3. Reached only through the Angular build tooling
-          (@angular-devkit/build-angular > http-proxy-middleware > micromatch), never shipped in the
-          bundle. Snyk proposes webpack-dev-server 6.0.0, which does not fix braces but replaces the
-          path: that is a major upgrade of a transitive dev dependency we already pin to ^5.2.7 in
-          package.json overrides, so it is deferred to the Angular CLI upgrade (EID-6533).
-          Tracked in EID-6915.
-        expires: 2026-11-23T09:00:00.000Z
-        created: 2026-09-21T12:10:03.000Z
   SNYK-JS-FLAT-22148819:
     - '*':
         reason: >-
@@ -24,6 +12,6 @@ ignore:
           webpack-merge. Reached only through the Angular build tooling
           (@angular-devkit/build-angular > webpack-merge), never shipped in the bundle.
           Track the upstream fix.
-        expires: 2026-11-25T09:00:00.000Z
+        expires: 2026-12-01T09:00:00.000Z
         created: 2026-11-03T09:00:00.000Z
 patch: { }
