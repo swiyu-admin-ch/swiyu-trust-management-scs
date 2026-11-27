@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
 public interface TrustStatementPartnerLinkRepository
@@ -48,8 +49,22 @@ public interface TrustStatementPartnerLinkRepository
         TrustStatementPartnerLinkStatus status
     );
 
-    List<TrustStatementPartnerLink> findAllByStatusListMetadataIdAndStatus(
-        UUID statuslistMetadataId,
+    /**
+     * The status list index of every statement on the given status list having the given status. Only the index is
+     * selected: the statement rows carry their details as jsonb, and a publication needs nothing but the index, so
+     * loading the entities would read and deserialize every statement of the list for one integer.
+     */
+    @Query(
+        """
+        SELECT statement.statusListIndex
+        FROM TrustStatementPartnerLink statement
+        WHERE statement.statusListMetadataId = :statusListMetadataId
+          AND statement.status = :status
+          AND statement.statusListIndex IS NOT NULL
+        """
+    )
+    List<Integer> findStatusListIndicesByStatusListMetadataIdAndStatus(
+        UUID statusListMetadataId,
         TrustStatementPartnerLinkStatus status
     );
 

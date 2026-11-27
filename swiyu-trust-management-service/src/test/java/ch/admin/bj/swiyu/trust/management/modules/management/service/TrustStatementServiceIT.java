@@ -340,7 +340,7 @@ class TrustStatementServiceIT {
         var statusList = statusListMetadataRepository
             .findById(publishedV2Entity.getStatusListMetadataId())
             .orElseThrow();
-        var revoked = trustStatementPartnerLinkRepository.findAllByStatusListMetadataIdAndStatus(
+        var revoked = trustStatementPartnerLinkRepository.findStatusListIndicesByStatusListMetadataIdAndStatus(
             statusList.getId(),
             INACTIVE
         );

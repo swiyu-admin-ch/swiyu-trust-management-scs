@@ -57,7 +57,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<String> handleBusinessPartnerIdentityBadRequestException(
         BusinessPartnerIdentityNotActiveException e
     ) {
-        log.debug("Cached Exception, noteworthy in DEBUG", e);
+        log.debug("Failed to complete operation since business partner is not active (not provisioned)", e);
         return new ResponseEntity<>(e.getMessage(), HttpStatusCode.valueOf(400));
     }
 
@@ -68,7 +68,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BusinessPartnerNotDeletableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleBusinessPartnerNotDeletableException(BusinessPartnerNotDeletableException e) {
-        log.debug("Cached Exception, noteworthy in DEBUG", e);
+        log.debug("business partner could not be deleted", e);
         return new ResponseEntity<>(e.getError().name(), HttpStatusCode.valueOf(400));
     }
 
@@ -80,7 +80,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(TaskStatusTransitionException.class)
     public ResponseEntity<Object> handleTaskStatusTransition(TaskStatusTransitionException e) {
-        log.debug("Cached Exception, noteworthy in DEBUG", e);
+        log.debug("Invalid task transition", e);
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 

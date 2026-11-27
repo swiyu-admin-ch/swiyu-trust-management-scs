@@ -257,7 +257,7 @@ public class JwtStatementDomainService {
 
     public SignedJWT generateTokenStatusList(
         StatusListMetadata statusListMetadata,
-        List<TrustStatementPartnerLink> revokedStatusListEntries
+        List<Integer> revokedStatusListIndices
     ) {
         var header = this.trustIssuerHeaderBuilder();
         header.type(new JOSEObjectType("statuslist+jwt"));
@@ -268,11 +268,8 @@ public class JwtStatementDomainService {
             .subject(statusListMetadata.getStatusRegistryUrl());
 
         var token = new TokenStatusListToken(TokenStatusListBit.MAX.getValue(), statusListMetadata.getMaxSize());
-        for (var statusListEntry : revokedStatusListEntries) {
-            if (statusListEntry.getStatus() != TrustStatementPartnerLinkStatus.INACTIVE) {
-                throw new IllegalArgumentException("Entries send to generateTokenStatusList must be INACTIVE.");
-            }
-            token.setStatus(statusListEntry.getStatusListIndex(), TokenStatusListBit.REVOKE.getValue());
+        for (var statusListIndex : revokedStatusListIndices) {
+            token.setStatus(statusListIndex, TokenStatusListBit.REVOKE.getValue());
         }
         payload.claim("status_list", token.getStatusListClaims());
 

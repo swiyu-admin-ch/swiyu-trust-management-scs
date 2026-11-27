@@ -102,13 +102,14 @@ public class StatusListDomainService {
     private void issueAndPublishStatusList(StatusListMetadata statusListMetadata) {
         log.info("Publishing status list {}", statusListMetadata.getStatusRegistryUrl());
         log.debug("Generating status list {} token", statusListMetadata.getStatusRegistryUrl());
-        var revokedStatusListEntries = trustStatementPartnerLinkRepository.findAllByStatusListMetadataIdAndStatus(
-            statusListMetadata.getId(),
-            TrustStatementPartnerLinkStatus.INACTIVE
-        );
+        var revokedStatusListIndices =
+            trustStatementPartnerLinkRepository.findStatusListIndicesByStatusListMetadataIdAndStatus(
+                statusListMetadata.getId(),
+                TrustStatementPartnerLinkStatus.INACTIVE
+            );
         var tokenStatusList = jwtStatementDomainService.generateTokenStatusList(
             statusListMetadata,
-            revokedStatusListEntries
+            revokedStatusListIndices
         );
         log.debug("Publishing status list {} to api", statusListMetadata.getStatusRegistryUrl());
         try {

@@ -1,10 +1,12 @@
 package ch.admin.bj.swiyu.trust.management.modules.management.domain;
 
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink.createIdentityV1;
+import static ch.admin.bj.swiyu.trust.management.modules.management.domain.TrustStatementPartnerLink.createIdentityV2;
 import static ch.admin.bj.swiyu.trust.management.modules.management.domain.details.TrustStatementPartnerLinkType.STATEMENT_TOMBSTONE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV1Details;
+import ch.admin.bj.swiyu.trust.management.modules.management.domain.details.IdentityV2Details;
 import ch.admin.bj.swiyu.trust.management.test.DataJpaTestConfiguration;
 import ch.admin.bj.swiyu.trust.management.test.PostgreSQLContainerInitializer;
 import java.time.Instant;
@@ -32,12 +34,16 @@ class TrustStatementPartnerLinkRepositoryIT {
     @Autowired
     private TrustStatementPartnerLinkRepository repository;
 
+    @Autowired
+    private StatusListMetadataRepository statusListMetadataRepository;
+
     private UUID partnerA;
     private UUID partnerB;
 
     @BeforeEach
     void setUp() {
         repository.deleteAllInBatch();
+        statusListMetadataRepository.deleteAllInBatch();
         partnerA = UUID.randomUUID();
         partnerB = UUID.randomUUID();
         repository.saveAndFlush(trustStatement(partnerA, "did:a"));
@@ -95,6 +101,93 @@ class TrustStatementPartnerLinkRepositoryIT {
         // then
         assertThat(repository.count()).isEqualTo(4);
         assertThat(repository.countByTypeNot(STATEMENT_TOMBSTONE)).isEqualTo(3);
+    }
+
+    @Test
+    void findStatusListIndicesByStatusListMetadataIdAndStatus_selectsOnlyTheIndicesOfTheMatchingEntries() {
+        // given one status list with a revoked and an active entry, one status list with a revoked entry only
+        var statusListId = createStatusList();
+        var otherStatusListId = createStatusList();
+        repository.saveAndFlush(revokedStatement(statusListId, 3));
+        repository.saveAndFlush(revokedStatement(statusListId, 7));
+        repository.saveAndFlush(activeStatement(statusListId, 5));
+        repository.saveAndFlush(revokedStatement(otherStatusListId, 9));
+
+        // when
+        var revokedIndices = repository.findStatusListIndicesByStatusListMetadataIdAndStatus(
+            statusListId,
+            TrustStatementPartnerLinkStatus.INACTIVE
+        );
+
+        // then only the revoked entries of that status list are returned
+        assertThat(revokedIndices).containsExactlyInAnyOrder(3, 7);
+        assertThat(
+            repository.findStatusListIndicesByStatusListMetadataIdAndStatus(
+                statusListId,
+                TrustStatementPartnerLinkStatus.ACTIVE
+            )
+        ).containsExactly(5);
+    }
+
+    @Test
+    void findStatusListIndicesByStatusListMetadataIdAndStatus_ignoresEntriesWithoutStatusListIndex() {
+        // given a revoked statement that was never put on a status list
+        var statusListId = createStatusList();
+        repository.saveAndFlush(revokedStatement(statusListId, 1));
+        var withoutIndex = trustStatement(partnerA, "did:no-status-list");
+        withoutIndex.persistReferencesAfterPublicationSucceeded(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            TrustStatementPartnerLinkStatus.INACTIVE
+        );
+        repository.saveAndFlush(withoutIndex);
+
+        // when
+        var revokedIndices = repository.findStatusListIndicesByStatusListMetadataIdAndStatus(
+            statusListId,
+            TrustStatementPartnerLinkStatus.INACTIVE
+        );
+
+        // then
+        assertThat(revokedIndices).containsExactly(1);
+    }
+
+    private UUID createStatusList() {
+        var statusListId = UUID.randomUUID();
+        statusListMetadataRepository.saveAndFlush(
+            new StatusListMetadata(statusListId, "https://example.com/statuslist-" + statusListId + ".jwt", 100)
+        );
+        return statusListId;
+    }
+
+    private TrustStatementPartnerLink revokedStatement(UUID statusListId, int statusListIndex) {
+        var statement = statementOnStatusList(statusListId, statusListIndex);
+        statement.markAsInactive();
+        return statement;
+    }
+
+    private TrustStatementPartnerLink activeStatement(UUID statusListId, int statusListIndex) {
+        return statementOnStatusList(statusListId, statusListIndex);
+    }
+
+    private static TrustStatementPartnerLink statementOnStatusList(UUID statusListId, int statusListIndex) {
+        var statement = createIdentityV2(
+            UUID.randomUUID(),
+            "did:status-list:" + statusListIndex,
+            Instant.parse("2025-01-01T00:00:00Z"),
+            Instant.parse("2026-01-01T00:00:00Z"),
+            Map.of("en", "Name EN"),
+            List.of(new IdentityV2Details.RegistryId("registryType1", "registryValue1")),
+            false,
+            new StatusListEntry(statusListId, statusListIndex)
+        );
+        // statements are created CONFIRMED and become active once they are published to the registry
+        statement.persistReferencesAfterPublicationSucceeded(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            TrustStatementPartnerLinkStatus.ACTIVE
+        );
+        return statement;
     }
 
     private static TrustStatementPartnerLink trustStatement(UUID partnerId, String subject) {
